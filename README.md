@@ -11,11 +11,20 @@ npm install
 # Set your Anthropic API key
 npx wrangler secret put ANTHROPIC_API_KEY
 
+# Set a gateway token (required for remote access)
+npx wrangler secret put CLAWDBOT_GATEWAY_TOKEN
+
 # Deploy
 npm run deploy
 ```
 
-Open the deployed Worker URL in your browser to access the Clawdbot Control UI.
+After deploying, open the Control UI with your token:
+
+```
+https://your-worker.workers.dev/?token=YOUR_TOKEN
+```
+
+Replace `your-worker` with your actual worker subdomain and `YOUR_TOKEN` with the token you set.
 
 ## Authentication
 
@@ -30,22 +39,16 @@ By default, clawdbot uses **device pairing** for authentication. When a new devi
 
 This is the most secure option as it requires explicit approval for each device.
 
-### Token Authentication (Optional)
+### Gateway Token (Required)
 
-For automated access (e.g., CLI tools, scripts), you can set a gateway token:
-
-```bash
-npx wrangler secret put CLAWDBOT_GATEWAY_TOKEN
-```
-
-When a token is set, clients can authenticate by passing the token as a query parameter:
+A gateway token is required to access the Control UI when hosted remotely. Pass it as a query parameter:
 
 ```
 https://your-worker.workers.dev/?token=YOUR_TOKEN
 wss://your-worker.workers.dev/ws?token=YOUR_TOKEN
 ```
 
-**Important:** Even with a token, device pairing is still required in production. The token allows connections to proceed, but the Control UI will still require device approval unless you're in local dev mode.
+**Note:** Even with a valid token, new devices still require approval via the admin UI at `/_admin/` (see Device Pairing above).
 
 For local development only, set `DEV_MODE=true` in `.dev.vars` to skip Cloudflare Access authentication and enable `allowInsecureAuth` (bypasses device pairing entirely).
 
@@ -194,7 +197,7 @@ npm run deploy
 | `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `CF_ACCESS_TEAM_DOMAIN` | Yes* | Cloudflare Access team domain (required for admin UI) |
 | `CF_ACCESS_AUD` | Yes* | Cloudflare Access application audience (required for admin UI) |
-| `CLAWDBOT_GATEWAY_TOKEN` | No | Gateway token for authentication (pass via `?token=` query param) |
+| `CLAWDBOT_GATEWAY_TOKEN` | Yes | Gateway token for authentication (pass via `?token=` query param) |
 | `DEV_MODE` | No | Set to `true` to skip CF Access auth + device pairing (local dev only) |
 | `DEBUG_ROUTES` | No | Set to `true` to enable `/debug/*` routes |
 | `AWS_ACCESS_KEY_ID` | No | R2 access key for persistent storage |
