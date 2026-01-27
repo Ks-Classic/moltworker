@@ -32,6 +32,8 @@ Replace `your-worker` with your actual worker subdomain and `YOUR_TOKEN` with th
 > 1. [Set up Cloudflare Access](#setting-up-the-admin-ui) to protect the admin UI
 > 2. [Pair your device](#device-pairing) via the admin UI at `/_admin/`
 
+You'll also likely want to [enable R2 storage](#persistent-storage-r2) so your paired devices and conversation history persist across container restarts (optional but recommended).
+
 ## Setting Up the Admin UI
 
 To use the admin UI at `/_admin/` for device management, you need to:
