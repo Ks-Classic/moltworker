@@ -122,32 +122,77 @@ fi
 # ONBOARD (only if no config exists yet)
 # ============================================================
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo "No existing config found, running openclaw onboard..."
+    echo "No existing config found..."
 
-    AUTH_ARGS=""
-    if [ -n "$CLOUDFLARE_AI_GATEWAY_API_KEY" ] && [ -n "$CF_AI_GATEWAY_ACCOUNT_ID" ] && [ -n "$CF_AI_GATEWAY_GATEWAY_ID" ]; then
-        AUTH_ARGS="--auth-choice cloudflare-ai-gateway-api-key \
-            --cloudflare-ai-gateway-account-id $CF_AI_GATEWAY_ACCOUNT_ID \
-            --cloudflare-ai-gateway-gateway-id $CF_AI_GATEWAY_GATEWAY_ID \
-            --cloudflare-ai-gateway-api-key $CLOUDFLARE_AI_GATEWAY_API_KEY"
-    elif [ -n "$ANTHROPIC_API_KEY" ]; then
-        AUTH_ARGS="--auth-choice apiKey --anthropic-api-key $ANTHROPIC_API_KEY"
-    elif [ -n "$OPENAI_API_KEY" ]; then
-        AUTH_ARGS="--auth-choice openai-api-key --openai-api-key $OPENAI_API_KEY"
-    elif [ -n "$GEMINI_API_KEY" ]; then
-        AUTH_ARGS="--auth-choice gemini-api-key --gemini-api-key $GEMINI_API_KEY"
+    # For Gemini, generate config directly (openclaw onboard hangs with gemini-api-key)
+    if [ -n "$GEMINI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENAI_API_KEY" ] && [ -z "$CLOUDFLARE_AI_GATEWAY_API_KEY" ]; then
+        echo "Generating config directly for Gemini provider..."
+        cat > "$CONFIG_FILE" << EOFCONFIG
+{
+  "meta": {
+    "lastTouchedVersion": "2026.2.3",
+    "lastTouchedAt": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+  },
+  "auth": {
+    "profiles": {
+      "gemini": {
+        "provider": "gemini",
+        "mode": "api-key",
+        "apiKey": "$GEMINI_API_KEY"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "gemini/gemini-2.5-flash"
+      },
+      "workspace": "/root/clawd",
+      "compaction": { "mode": "safeguard" },
+      "maxConcurrent": 4,
+      "sandbox": { "mode": "off" }
+    },
+    "list": [
+      { "id": "main", "default": true }
+    ]
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  }
+}
+EOFCONFIG
+        echo "Config generated for Gemini"
+    else
+        echo "Running openclaw onboard..."
+
+        AUTH_ARGS=""
+        if [ -n "$CLOUDFLARE_AI_GATEWAY_API_KEY" ] && [ -n "$CF_AI_GATEWAY_ACCOUNT_ID" ] && [ -n "$CF_AI_GATEWAY_GATEWAY_ID" ]; then
+            AUTH_ARGS="--auth-choice cloudflare-ai-gateway-api-key \
+                --cloudflare-ai-gateway-account-id $CF_AI_GATEWAY_ACCOUNT_ID \
+                --cloudflare-ai-gateway-gateway-id $CF_AI_GATEWAY_GATEWAY_ID \
+                --cloudflare-ai-gateway-api-key $CLOUDFLARE_AI_GATEWAY_API_KEY"
+        elif [ -n "$ANTHROPIC_API_KEY" ]; then
+            AUTH_ARGS="--auth-choice apiKey --anthropic-api-key $ANTHROPIC_API_KEY"
+        elif [ -n "$OPENAI_API_KEY" ]; then
+            AUTH_ARGS="--auth-choice openai-api-key --openai-api-key $OPENAI_API_KEY"
+        fi
+
+        openclaw onboard --non-interactive --accept-risk \
+            --mode local \
+            $AUTH_ARGS \
+            --gateway-port 18789 \
+            --gateway-bind lan \
+            --skip-channels \
+            --skip-skills \
+            --skip-health
+
+        echo "Onboard completed"
     fi
-
-    openclaw onboard --non-interactive --accept-risk \
-        --mode local \
-        $AUTH_ARGS \
-        --gateway-port 18789 \
-        --gateway-bind lan \
-        --skip-channels \
-        --skip-skills \
-        --skip-health
-
-    echo "Onboard completed"
 else
     echo "Using existing config"
 fi
