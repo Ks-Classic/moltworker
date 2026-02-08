@@ -198,6 +198,43 @@ else
 fi
 
 # ============================================================
+# ENSURE GEMINI AUTH (even if config already existed)
+# ============================================================
+if [ -n "$GEMINI_API_KEY" ] && [ -f "$CONFIG_FILE" ]; then
+    echo "Ensuring Gemini auth profile is configured..."
+    node << 'EOFGEMINI'
+const fs = require('fs');
+const configPath = '/root/.openclaw/openclaw.json';
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+// Ensure auth profiles has Gemini
+config.auth = config.auth || {};
+config.auth.profiles = config.auth.profiles || {};
+if (!config.auth.profiles.gemini) {
+    config.auth.profiles.gemini = {
+        provider: 'gemini',
+        mode: 'api-key',
+        apiKey: process.env.GEMINI_API_KEY
+    };
+    console.log('Added Gemini auth profile');
+}
+
+// Set default model to Gemini if no working provider is configured
+config.agents = config.agents || {};
+config.agents.defaults = config.agents.defaults || {};
+const currentModel = (config.agents.defaults.model || {}).primary || '';
+// If current model uses a provider that has no key, switch to Gemini
+if (!currentModel.startsWith('gemini/') && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+    config.agents.defaults.model = { primary: 'gemini/gemini-2.5-flash' };
+    console.log('Switched default model to gemini/gemini-2.5-flash');
+}
+
+fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+console.log('Gemini auth ensured');
+EOFGEMINI
+fi
+
+# ============================================================
 # PATCH CONFIG (channels, gateway auth, trusted proxies)
 # ============================================================
 # openclaw onboard handles provider/model config, but we need to patch in:
