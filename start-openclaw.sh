@@ -127,20 +127,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # For Gemini, generate config directly (openclaw onboard hangs with gemini-api-key)
     if [ -n "$GEMINI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENAI_API_KEY" ] && [ -z "$CLOUDFLARE_AI_GATEWAY_API_KEY" ]; then
         echo "Generating config directly for Gemini provider..."
-        cat > "$CONFIG_FILE" << EOFCONFIG
+
+        # Create the main config (NO auth block - that goes in auth-profiles.json)
+        cat > "$CONFIG_FILE" << 'EOFCONFIG'
 {
   "meta": {
-    "lastTouchedVersion": "2026.2.3",
-    "lastTouchedAt": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-  },
-  "auth": {
-    "profiles": {
-      "gemini": {
-        "provider": "gemini",
-        "mode": "api-key",
-        "apiKey": "$GEMINI_API_KEY"
-      }
-    }
+    "lastTouchedVersion": "2026.2.3"
   },
   "agents": {
     "defaults": {
@@ -166,7 +158,26 @@ if [ ! -f "$CONFIG_FILE" ]; then
   }
 }
 EOFCONFIG
-        echo "Config generated for Gemini"
+
+        # Create auth-profiles.json in the agent directory
+        AGENT_DIR="$CONFIG_DIR/agents/main/agent"
+        mkdir -p "$AGENT_DIR"
+        cat > "$AGENT_DIR/auth-profiles.json" << EOFAUTH
+{
+  "version": 1,
+  "profiles": {
+    "gemini:manual": {
+      "type": "api_key",
+      "provider": "gemini",
+      "key": "$GEMINI_API_KEY"
+    }
+  },
+  "lastGood": {
+    "gemini": "gemini:manual"
+  }
+}
+EOFAUTH
+        echo "Config + auth-profiles generated for Gemini"
     else
         echo "Running openclaw onboard..."
 
@@ -202,36 +213,56 @@ fi
 # ============================================================
 if [ -n "$GEMINI_API_KEY" ] && [ -f "$CONFIG_FILE" ]; then
     echo "Ensuring Gemini auth profile is configured..."
+
+    # Fix openclaw.json: remove any invalid auth block, set model to Gemini
     node << 'EOFGEMINI'
 const fs = require('fs');
 const configPath = '/root/.openclaw/openclaw.json';
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-// Ensure auth profiles has Gemini
-config.auth = config.auth || {};
-config.auth.profiles = config.auth.profiles || {};
-if (!config.auth.profiles.gemini) {
-    config.auth.profiles.gemini = {
-        provider: 'gemini',
-        mode: 'api-key',
-        apiKey: process.env.GEMINI_API_KEY
-    };
-    console.log('Added Gemini auth profile');
+// Remove invalid auth section from openclaw.json (credentials belong in auth-profiles.json)
+if (config.auth && config.auth.profiles) {
+    delete config.auth;
+    console.log('Removed invalid auth block from openclaw.json');
 }
 
 // Set default model to Gemini if no working provider is configured
 config.agents = config.agents || {};
 config.agents.defaults = config.agents.defaults || {};
 const currentModel = (config.agents.defaults.model || {}).primary || '';
-// If current model uses a provider that has no key, switch to Gemini
 if (!currentModel.startsWith('gemini/') && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
     config.agents.defaults.model = { primary: 'gemini/gemini-2.5-flash' };
     console.log('Switched default model to gemini/gemini-2.5-flash');
 }
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-console.log('Gemini auth ensured');
+console.log('openclaw.json patched');
 EOFGEMINI
+
+    # Write auth-profiles.json for the agent
+    AGENT_DIR="$CONFIG_DIR/agents/main/agent"
+    mkdir -p "$AGENT_DIR"
+    AUTH_FILE="$AGENT_DIR/auth-profiles.json"
+    if [ ! -f "$AUTH_FILE" ] || ! grep -q "gemini" "$AUTH_FILE" 2>/dev/null; then
+        cat > "$AUTH_FILE" << EOFAUTH
+{
+  "version": 1,
+  "profiles": {
+    "gemini:manual": {
+      "type": "api_key",
+      "provider": "gemini",
+      "key": "$GEMINI_API_KEY"
+    }
+  },
+  "lastGood": {
+    "gemini": "gemini:manual"
+  }
+}
+EOFAUTH
+        echo "Auth profile written to $AUTH_FILE"
+    else
+        echo "Auth profile already contains Gemini"
+    fi
 fi
 
 # ============================================================
