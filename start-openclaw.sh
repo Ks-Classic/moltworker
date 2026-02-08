@@ -137,7 +137,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "agents": {
     "defaults": {
       "model": {
-        "primary": "gemini/gemini-2.5-flash"
+        "primary": "gemini/gemini-3-flash-preview"
       },
       "workspace": "/root/clawd",
       "compaction": { "mode": "safeguard" },
@@ -231,8 +231,8 @@ config.agents = config.agents || {};
 config.agents.defaults = config.agents.defaults || {};
 const currentModel = (config.agents.defaults.model || {}).primary || '';
 if (!currentModel.startsWith('gemini/') && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
-    config.agents.defaults.model = { primary: 'gemini/gemini-2.5-flash' };
-    console.log('Switched default model to gemini/gemini-2.5-flash');
+    config.agents.defaults.model = { primary: 'gemini/gemini-3-flash-preview' };
+    console.log('Switched default model to gemini/gemini-3-flash-preview');
 }
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
