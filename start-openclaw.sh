@@ -137,7 +137,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "agents": {
     "defaults": {
       "model": {
-        "primary": "gemini/gemini-3-flash-preview"
+        "primary": "google/gemini-3-flash-preview"
       },
       "workspace": "/root/clawd",
       "compaction": { "mode": "safeguard" },
@@ -166,14 +166,14 @@ EOFCONFIG
 {
   "version": 1,
   "profiles": {
-    "gemini:manual": {
+    "google:default": {
       "type": "api_key",
-      "provider": "gemini",
+      "provider": "google",
       "key": "$GEMINI_API_KEY"
     }
   },
   "lastGood": {
-    "gemini": "gemini:manual"
+    "google": "google:default"
   }
 }
 EOFAUTH
@@ -230,9 +230,9 @@ if (config.auth && config.auth.profiles) {
 config.agents = config.agents || {};
 config.agents.defaults = config.agents.defaults || {};
 const currentModel = (config.agents.defaults.model || {}).primary || '';
-if (!currentModel.startsWith('gemini/') && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
-    config.agents.defaults.model = { primary: 'gemini/gemini-3-flash-preview' };
-    console.log('Switched default model to gemini/gemini-3-flash-preview');
+if (!currentModel.startsWith('google/') && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+    config.agents.defaults.model = { primary: 'google/gemini-3-flash-preview' };
+    console.log('Switched default model to google/gemini-3-flash-preview');
 }
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
@@ -243,19 +243,19 @@ EOFGEMINI
     AGENT_DIR="$CONFIG_DIR/agents/main/agent"
     mkdir -p "$AGENT_DIR"
     AUTH_FILE="$AGENT_DIR/auth-profiles.json"
-    if [ ! -f "$AUTH_FILE" ] || ! grep -q "gemini" "$AUTH_FILE" 2>/dev/null; then
+    if [ ! -f "$AUTH_FILE" ] || ! grep -q "google:default" "$AUTH_FILE" 2>/dev/null; then
         cat > "$AUTH_FILE" << EOFAUTH
 {
   "version": 1,
   "profiles": {
-    "gemini:manual": {
+    "google:default": {
       "type": "api_key",
-      "provider": "gemini",
+      "provider": "google",
       "key": "$GEMINI_API_KEY"
     }
   },
   "lastGood": {
-    "gemini": "gemini:manual"
+    "google": "google:default"
   }
 }
 EOFAUTH
