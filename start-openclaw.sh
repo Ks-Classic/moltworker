@@ -309,49 +309,24 @@ if (process.env.OPENCLAW_DEV_MODE === 'true') {
 // so we don't need to patch the provider config. Writing a provider
 // entry without a models array breaks OpenClaw's config validation.
 
-// AI Gateway model override (CF_AI_GATEWAY_MODEL=provider/model-id)
-// Adds a provider entry for any AI Gateway provider and sets it as default model.
-// Examples:
-//   workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast
-//   openai/gpt-4o
-//   anthropic/claude-sonnet-4-5
-if (process.env.CF_AI_GATEWAY_MODEL) {
-    const raw = process.env.CF_AI_GATEWAY_MODEL;
-    const slashIdx = raw.indexOf('/');
-    const gwProvider = raw.substring(0, slashIdx);
-    const modelId = raw.substring(slashIdx + 1);
-
+// AI Gateway proxy: override the google provider's baseUrl to route through
+// Cloudflare AI Gateway, bypassing regional Gemini API restrictions.
+// The GEMINI_API_KEY is used as the API key (AI Gateway forwards it to Google).
+if (process.env.CF_AI_GATEWAY_ACCOUNT_ID && process.env.CF_AI_GATEWAY_GATEWAY_ID) {
     const accountId = process.env.CF_AI_GATEWAY_ACCOUNT_ID;
     const gatewayId = process.env.CF_AI_GATEWAY_GATEWAY_ID;
-    const apiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
+    // Google AI Studio OpenAI-compatible endpoint via AI Gateway
+    const baseUrl = 'https://gateway.ai.cloudflare.com/v1/' + accountId + '/' + gatewayId + '/google-ai-studio/v1beta/openai';
 
-    let baseUrl;
-    if (accountId && gatewayId) {
-        baseUrl = 'https://gateway.ai.cloudflare.com/v1/' + accountId + '/' + gatewayId + '/' + gwProvider;
-        if (gwProvider === 'workers-ai') baseUrl += '/v1';
-    } else if (gwProvider === 'workers-ai' && process.env.CF_ACCOUNT_ID) {
-        baseUrl = 'https://api.cloudflare.com/client/v4/accounts/' + process.env.CF_ACCOUNT_ID + '/ai/v1';
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+    config.models.providers['google'] = config.models.providers['google'] || {};
+    config.models.providers['google'].baseUrl = baseUrl;
+    // Use GEMINI_API_KEY as the API key for the AI Gateway (it forwards to Google)
+    if (process.env.GEMINI_API_KEY) {
+        config.models.providers['google'].apiKey = process.env.GEMINI_API_KEY;
     }
-
-    if (baseUrl && apiKey) {
-        const api = gwProvider === 'anthropic' ? 'anthropic-messages' : 'openai-completions';
-        const providerName = 'cf-ai-gw-' + gwProvider;
-
-        config.models = config.models || {};
-        config.models.providers = config.models.providers || {};
-        config.models.providers[providerName] = {
-            baseUrl: baseUrl,
-            apiKey: apiKey,
-            api: api,
-            models: [{ id: modelId, name: modelId, contextWindow: 131072, maxTokens: 8192 }],
-        };
-        config.agents = config.agents || {};
-        config.agents.defaults = config.agents.defaults || {};
-        config.agents.defaults.model = { primary: providerName + '/' + modelId };
-        console.log('AI Gateway model override: provider=' + providerName + ' model=' + modelId + ' via ' + baseUrl);
-    } else {
-        console.warn('CF_AI_GATEWAY_MODEL set but missing required config (account ID, gateway ID, or API key)');
-    }
+    console.log('AI Gateway proxy: google provider baseUrl overridden to ' + baseUrl);
 }
 
 // Telegram configuration
