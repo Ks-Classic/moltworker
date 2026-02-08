@@ -383,6 +383,9 @@ if (process.env.DISCORD_BOT_TOKEN) {
         token: process.env.DISCORD_BOT_TOKEN,
         enabled: true,
         dm: dm,
+        groupPolicy: 'open',
+        groupChannels: ['*'],
+        requireMention: false,
     };
 }
 
