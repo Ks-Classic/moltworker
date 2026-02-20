@@ -6,16 +6,20 @@ FROM docker.io/cloudflare/sandbox:0.7.0
 ENV NODE_VERSION=22.13.1
 RUN ARCH="$(dpkg --print-architecture)" \
     && case "${ARCH}" in \
-         amd64) NODE_ARCH="x64" ;; \
-         arm64) NODE_ARCH="arm64" ;; \
-         *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;; \
-       esac \
+    amd64) NODE_ARCH="x64" ;; \
+    arm64) NODE_ARCH="arm64" ;; \
+    *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;; \
+    esac \
+    && rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg \
+    && rm -f /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg \
+    && apt-get -o Acquire::AllowInsecureRepositories=true update \
+    && apt-get -o APT::Get::AllowUnauthenticated=true install -y --no-install-recommends gnupg ca-certificates \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C \
     && apt-get update && apt-get install -y xz-utils ca-certificates rclone \
     && curl -fsSLk https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz \
     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
     && rm /tmp/node.tar.xz \
-    && node --version \
-    && npm --version
+    && node --version
 
 # Install pnpm globally
 RUN npm install -g pnpm
