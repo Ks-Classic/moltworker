@@ -33,7 +33,7 @@ r2_configured() {
     [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$R2_SECRET_ACCESS_KEY" ] && [ -n "$CF_ACCOUNT_ID" ]
 }
 
-R2_BUCKET="${R2_BUCKET_NAME:-moltbot-data}"
+R2_BUCKET="${R2_BUCKET_NAME:-openclaw-data}"
 
 setup_rclone() {
     mkdir -p "$(dirname "$RCLONE_CONF")"
@@ -217,6 +217,30 @@ if (process.env.CF_AI_GATEWAY_MODEL) {
     } else {
         console.warn('CF_AI_GATEWAY_MODEL set but missing required config (account ID, gateway ID, or API key)');
     }
+}
+
+// Google AI Studio direct connection (GEMINI_API_KEY)
+// Takes priority over CF AI Gateway if set
+if (process.env.GEMINI_API_KEY) {
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+    config.models.providers['google-ai-studio'] = {
+        baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+        apiKey: process.env.GEMINI_API_KEY,
+        api: 'openai-completions',
+        models: [
+            { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', reasoning: false,
+              input: ['text', 'image'], contextWindow: 1048576, maxTokens: 65536,
+              cost: { input: 0.15, output: 0.6, cacheRead: 0.0375, cacheWrite: 0.15 } },
+            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', reasoning: true,
+              input: ['text', 'image'], contextWindow: 1048576, maxTokens: 65536,
+              cost: { input: 0.15, output: 0.6, cacheRead: 0.0375, cacheWrite: 0.15 } },
+        ],
+    };
+    config.agents = config.agents || {};
+    config.agents.defaults = config.agents.defaults || {};
+    config.agents.defaults.model = { primary: 'google-ai-studio/gemini-3-flash-preview' };
+    console.log('Google AI Studio direct connection configured (model: gemini-3-flash-preview)');
 }
 
 // Telegram configuration
