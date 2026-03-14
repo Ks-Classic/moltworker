@@ -9,6 +9,9 @@
 
 set -e
 
+# Log all output to file for debugging
+exec > >(tee -a /tmp/openclaw-startup.log) 2>&1
+
 if pgrep -f "openclaw gateway" > /dev/null 2>&1; then
     echo "OpenClaw gateway is already running, exiting."
     exit 0
@@ -22,6 +25,9 @@ RCLONE_CONF="/root/.config/rclone/rclone.conf"
 LAST_SYNC_FILE="/tmp/.last-sync"
 
 echo "Config directory: $CONFIG_DIR"
+echo "DEBUG: R2_ACCESS_KEY_ID set: $([ -n "$R2_ACCESS_KEY_ID" ] && echo 'yes' || echo 'no')"
+echo "DEBUG: R2_SECRET_ACCESS_KEY set: $([ -n "$R2_SECRET_ACCESS_KEY" ] && echo 'yes' || echo 'no')"
+echo "DEBUG: CF_ACCOUNT_ID set: $([ -n "$CF_ACCOUNT_ID" ] && echo 'yes' || echo 'no')"
 
 mkdir -p "$CONFIG_DIR"
 
@@ -359,6 +365,23 @@ echo "Gateway will be available on port 18789"
 
 rm -f /tmp/openclaw-gateway.lock 2>/dev/null || true
 rm -f "$CONFIG_DIR/gateway.lock" 2>/dev/null || true
+
+# Auto-fix config validation errors (remove unrecognized keys)
+echo "Running config validation fix..."
+node -e "
+const fs = require('fs');
+const p = '$CONFIG_FILE';
+try {
+  const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+  let fixed = false;
+  // Known invalid keys from older OpenClaw versions
+  if (c.commands && c.commands.ownerDisplay !== undefined) { delete c.commands.ownerDisplay; fixed = true; }
+  if (c.channels && c.channels.discord && c.channels.discord.streaming !== undefined) { delete c.channels.discord.streaming; fixed = true; }
+  if (c.gateway && c.gateway.auth && c.gateway.auth.rateLimit !== undefined) { delete c.gateway.auth.rateLimit; fixed = true; }
+  if (fixed) { fs.writeFileSync(p, JSON.stringify(c, null, 2)); console.log('Fixed invalid config keys'); }
+  else { console.log('No invalid keys found'); }
+} catch(e) { console.log('Config fix skipped:', e.message); }
+"
 
 echo "Dev mode: ${OPENCLAW_DEV_MODE:-false}"
 
