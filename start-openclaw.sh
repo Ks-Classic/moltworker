@@ -272,7 +272,23 @@ if (process.env.DISCORD_BOT_TOKEN) {
         token: process.env.DISCORD_BOT_TOKEN,
         enabled: true,
         dm: dm,
+        groupPolicy: 'allowlist',
+        streaming: 'off',
     };
+    // DISCORD_GUILD_IDS: comma-separated guild IDs to allow (all channels via wildcard)
+    // e.g. "1455869574355619934,1075560600878448680"
+    if (process.env.DISCORD_GUILD_IDS) {
+        config.channels.discord.guilds = {};
+        process.env.DISCORD_GUILD_IDS.split(',').forEach(function(id) {
+            id = id.trim();
+            if (id) {
+                config.channels.discord.guilds[id] = {
+                    requireMention: false,
+                    channels: { '*': { allow: true } },
+                };
+            }
+        });
+    }
 }
 
 // Slack configuration

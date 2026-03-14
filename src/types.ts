@@ -29,6 +29,7 @@ export interface MoltbotEnv {
   TELEGRAM_DM_POLICY?: string;
   DISCORD_BOT_TOKEN?: string;
   DISCORD_DM_POLICY?: string;
+  DISCORD_GUILD_IDS?: string; // Comma-separated guild IDs to allow in Discord allowlist
   SLACK_BOT_TOKEN?: string;
   SLACK_APP_TOKEN?: string;
   // Cloudflare Access configuration for admin routes
