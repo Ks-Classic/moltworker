@@ -165,6 +165,7 @@ config.channels = config.channels || {};
 // Gateway configuration
 config.gateway.port = 18789;
 config.gateway.mode = 'local';
+config.gateway.bind = 'lan';
 config.gateway.trustedProxies = ['10.1.0.0'];
 
 if (process.env.OPENCLAW_GATEWAY_TOKEN) {
