@@ -3,7 +3,7 @@ FROM docker.io/cloudflare/sandbox:0.7.0
 # Install Node.js 22 (required by OpenClaw) and rclone (for R2 persistence)
 # The base image has Node 20, we need to replace it with Node 22
 # Using direct binary download for reliability
-ENV NODE_VERSION=22.13.1
+ENV NODE_VERSION=22.16.0
 RUN ARCH="$(dpkg --print-architecture)" \
     && case "${ARCH}" in \
          amd64) NODE_ARCH="x64" ;; \
@@ -22,7 +22,7 @@ RUN npm install -g pnpm
 
 # Install OpenClaw (formerly clawdbot/moltbot)
 # Pin to specific version for reproducible builds
-RUN npm install -g openclaw@2026.2.3 \
+RUN npm install -g openclaw@2026.3.13 \
     && openclaw --version
 
 # Create OpenClaw directories
@@ -31,10 +31,12 @@ RUN mkdir -p /root/.openclaw \
     && mkdir -p /root/clawd \
     && mkdir -p /root/clawd/skills
 
-# Copy startup script
-# Build cache bust: 2026-02-11-v30-rclone
+# Copy startup scripts
+# Build cache bust: 2026-03-17-v31-split-scripts
 COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
-RUN chmod +x /usr/local/bin/start-openclaw.sh
+COPY scripts/ /usr/local/lib/openclaw/
+RUN chmod +x /usr/local/bin/start-openclaw.sh \
+    && chmod +x /usr/local/lib/openclaw/*.sh
 
 # Copy custom skills
 COPY skills/ /root/clawd/skills/

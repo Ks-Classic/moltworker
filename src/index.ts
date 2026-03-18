@@ -126,7 +126,6 @@ app.use('*', async (c, next) => {
   const url = new URL(c.req.url);
   const redactedSearch = redactSensitiveParams(url);
   console.log(`[REQ] ${c.req.method} ${url.pathname}${redactedSearch}`);
-  console.log(`[REQ] Has ANTHROPIC_API_KEY: ${!!c.env.ANTHROPIC_API_KEY}`);
   console.log(`[REQ] DEV_MODE: ${c.env.DEV_MODE}`);
   console.log(`[REQ] DEBUG_ROUTES: ${c.env.DEBUG_ROUTES}`);
   await next();
@@ -263,10 +262,26 @@ app.all('*', async (c) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     let hint = 'Check worker logs with: wrangler tail';
-    if (!c.env.ANTHROPIC_API_KEY) {
-      hint = 'ANTHROPIC_API_KEY is not set. Run: wrangler secret put ANTHROPIC_API_KEY';
+
+    // Provide provider-specific hints based on what's actually configured
+    const hasCloudflareGateway = !!(
+      c.env.CLOUDFLARE_AI_GATEWAY_API_KEY &&
+      c.env.CF_AI_GATEWAY_ACCOUNT_ID &&
+      c.env.CF_AI_GATEWAY_GATEWAY_ID
+    );
+    const hasAnyProvider =
+      hasCloudflareGateway || !!c.env.ANTHROPIC_API_KEY || !!c.env.OPENAI_API_KEY;
+
+    if (!hasAnyProvider) {
+      hint =
+        'No AI provider configured. Set one of: CLOUDFLARE_AI_GATEWAY_API_KEY (+ account/gateway IDs), ANTHROPIC_API_KEY, or OPENAI_API_KEY';
     } else if (errorMessage.includes('heap out of memory') || errorMessage.includes('OOM')) {
       hint = 'Gateway ran out of memory. Try again or check for memory leaks.';
+    } else if (errorMessage.includes('Config invalid') || errorMessage.includes('config')) {
+      hint =
+        'OpenClaw config validation failed. Check /debug/logs for stderr details, or run: openclaw doctor --fix';
+    } else {
+      hint = 'Check /debug/logs (stderr) for the actual error. Do NOT guess — read the logs first.';
     }
 
     return c.json(
@@ -446,4 +461,66 @@ app.all('*', async (c) => {
 
 export default {
   fetch: app.fetch,
+
+  /**
+   * Scheduled handler — runs on cron trigger (every 5 minutes).
+   *
+   * Checks if the OpenClaw gateway process is alive and listening on its port.
+   * If the process is missing or unresponsive, it starts a new one.
+   * This is critical for Discord bot uptime: without this, a crashed gateway
+   * process would only restart when an HTTP request arrives.
+   */
+  async scheduled(
+    _event: ScheduledEvent,
+    env: MoltbotEnv,
+    ctx: ExecutionContext,
+  ) {
+    const options = buildSandboxOptions(env);
+    const sandbox = getSandbox(env.Sandbox, 'moltbot', options);
+
+    // Check for an existing gateway process
+    const existingProcess = await findExistingMoltbotProcess(sandbox);
+
+    if (!existingProcess) {
+      console.log('[CRON] No gateway process found, starting new one...');
+      ctx.waitUntil(
+        ensureMoltbotGateway(sandbox, env)
+          .then(() => console.log('[CRON] Gateway started successfully'))
+          .catch((err: Error) =>
+            console.error('[CRON] Failed to start gateway:', err.message),
+          ),
+      );
+      return;
+    }
+
+    // Process exists — verify it's actually responding on the port
+    try {
+      await existingProcess.waitForPort(MOLTBOT_PORT, {
+        mode: 'tcp',
+        timeout: 10_000,
+      });
+      console.log(
+        '[CRON] Health check passed — gateway is running',
+        existingProcess.id,
+      );
+    } catch {
+      console.log(
+        '[CRON] Gateway not responding, killing process',
+        existingProcess.id,
+      );
+      try {
+        await existingProcess.kill();
+      } catch (killErr) {
+        console.error('[CRON] Failed to kill process:', killErr);
+      }
+
+      ctx.waitUntil(
+        ensureMoltbotGateway(sandbox, env)
+          .then(() => console.log('[CRON] Gateway restarted successfully'))
+          .catch((err: Error) =>
+            console.error('[CRON] Failed to restart gateway:', err.message),
+          ),
+      );
+    }
+  },
 };

@@ -59,13 +59,18 @@
   "r2_buckets": [
     {
       "binding": "MOLTBOT_BUCKET",
-      "bucket_name": "moltbot-data",
+      "bucket_name": "openclaw-data",
     },
   ],
 
   // Browser Rendering binding for CDP shim
   "browser": {
     "binding": "BROWSER",
+  },
+  // Cron trigger: health-check the gateway every 5 minutes and auto-restart if crashed.
+  // Pairs with the scheduled() handler in src/index.ts.
+  "triggers": {
+    "crons": ["*/5 * * * *"],
   },
   // Note: CF_ACCOUNT_ID should be set via `wrangler secret put CF_ACCOUNT_ID`
   // Secrets to configure via `wrangler secret put`:
