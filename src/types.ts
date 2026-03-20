@@ -28,6 +28,7 @@ export interface MoltbotEnv {
   TELEGRAM_DM_POLICY?: string;
   DISCORD_BOT_TOKEN?: string;
   DISCORD_DM_POLICY?: string;
+  DISCORD_GUILD_IDS?: string; // Comma-separated Discord guild/server IDs
   SLACK_BOT_TOKEN?: string;
   SLACK_APP_TOKEN?: string;
   // Cloudflare Access configuration for admin routes
@@ -42,6 +43,9 @@ export interface MoltbotEnv {
   BROWSER?: Fetcher;
   CDP_SECRET?: string; // Shared secret for CDP endpoint authentication
   WORKER_URL?: string; // Public URL of the worker (for CDP endpoint)
+  // Google Workspace integration (gog CLI)
+  GOG_KEYRING_PASSWORD?: string; // Passphrase to unlock gog keyring (encrypted OAuth tokens)
+  GOG_ACCOUNT?: string; // Google account email for gog commands
 }
 
 /**

@@ -198,11 +198,14 @@ curl -s -X POST "https://moltbot-sandbox.yasuhiko-kohata.workers.dev/debug/resta
 | `R2_SECRET_ACCESS_KEY` | R2 シークレットキー | ✅ |
 | `DEV_MODE` | `true` で CF Access 認証スキップ | 任意 |
 | `DEBUG_ROUTES` | `true` で `/debug/*` 有効化 | 任意 |
+| `GOG_KEYRING_PASSWORD` | gog keyring 復号パスフレーズ | Google連携時 |
+| `GOG_ACCOUNT` | Google アカウントメール | Google連携時 |
 
 ## 参考: バケット・パス対応表
 
 | R2 パス | コンテナ内パス |
 |---|---|
 | `openclaw-data/openclaw/` | `/root/.openclaw/` |
+| `openclaw-data/openclaw/gog-config/` | `/root/.config/gogcli/`（起動時にコピー） |
 | `openclaw-data/workspace/` | `/root/clawd/` |
 | `openclaw-data/skills/` | `/root/clawd/skills/` |

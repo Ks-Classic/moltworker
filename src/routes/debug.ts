@@ -337,6 +337,55 @@ debug.get('/ws-test', async (c) => {
   return c.html(html);
 });
 
+// GET /debug/security - Security monitor alerts and status
+debug.get('/security', async (c) => {
+  const sandbox = c.get('sandbox');
+  try {
+    // Read pending security alerts
+    const alertProc = await sandbox.startProcess(
+      'cat /tmp/security-alerts-pending.log 2>/dev/null || echo "NO_ALERTS"',
+    );
+    await waitForProcess(alertProc, 5000);
+    const alertLogs = await alertProc.getLogs();
+    const alertContent = (alertLogs.stdout || '').trim();
+
+    // Read monitor status
+    const statusProc = await sandbox.startProcess(
+      'pgrep -f security-monitor.sh > /dev/null 2>&1 && echo "RUNNING" || echo "STOPPED"',
+    );
+    await waitForProcess(statusProc, 3000);
+    const statusLogs = await statusProc.getLogs();
+    const monitorStatus = (statusLogs.stdout || '').trim();
+
+    // Read recent monitor log (last 50 lines)
+    const logProc = await sandbox.startProcess(
+      'tail -50 /tmp/security-monitor.log 2>/dev/null || echo "NO_LOG"',
+    );
+    await waitForProcess(logProc, 5000);
+    const logLogs = await logProc.getLogs();
+    const monitorLog = (logLogs.stdout || '').trim();
+
+    const hasAlerts = alertContent !== 'NO_ALERTS' && alertContent.length > 0;
+    const alerts = hasAlerts ? alertContent.split('\n').filter((l: string) => l.trim()) : [];
+
+    // Clear pending alerts after reading (add ?clear=true)
+    if (c.req.query('clear') === 'true' && hasAlerts) {
+      await sandbox.startProcess('rm -f /tmp/security-alerts-pending.log');
+    }
+
+    return c.json({
+      status: monitorStatus,
+      alert_count: alerts.length,
+      alerts,
+      has_critical: alerts.some((a: string) => a.includes('CRITICAL')),
+      recent_log: monitorLog,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ status: 'error', error: errorMessage }, 500);
+  }
+});
+
 // GET /debug/env - Show environment configuration (sanitized)
 debug.get('/env', async (c) => {
   return c.json({

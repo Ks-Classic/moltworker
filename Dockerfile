@@ -1,3 +1,9 @@
+# ── Stage 1: Build gog CLI ────────────────────────────────
+FROM golang:1.25-bookworm AS gog-builder
+RUN git clone --depth 1 --branch v0.12.0 https://github.com/steipete/gogcli.git /build \
+    && cd /build && make
+
+# ── Stage 2: Main container ──────────────────────────────
 FROM docker.io/cloudflare/sandbox:0.7.0
 
 # Install Node.js 22 (required by OpenClaw) and rclone (for R2 persistence)
@@ -25,14 +31,18 @@ RUN npm install -g pnpm
 RUN npm install -g openclaw@2026.3.13 \
     && openclaw --version
 
+# Install gog CLI (Google Workspace integration)
+COPY --from=gog-builder /build/bin/gog /usr/local/bin/gog
+
 # Create OpenClaw directories
 # Legacy .clawdbot paths are kept for R2 backup migration
 RUN mkdir -p /root/.openclaw \
     && mkdir -p /root/clawd \
-    && mkdir -p /root/clawd/skills
+    && mkdir -p /root/clawd/skills \
+    && mkdir -p /root/.config/gogcli/keyring
 
 # Copy startup scripts
-# Build cache bust: 2026-03-17-v31-split-scripts
+# Build cache bust: 2026-03-20-v32-gog-security
 COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
 COPY scripts/ /usr/local/lib/openclaw/
 RUN chmod +x /usr/local/bin/start-openclaw.sh \
