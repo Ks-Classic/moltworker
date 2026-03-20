@@ -471,14 +471,35 @@ export default {
    * process would only restart when an HTTP request arrives.
    */
   async scheduled(
-    _event: ScheduledEvent,
+    event: ScheduledEvent,
     env: MoltbotEnv,
     ctx: ExecutionContext,
   ) {
     const options = buildSandboxOptions(env);
     const sandbox = getSandbox(env.Sandbox, 'moltbot', options);
 
-    // Check for an existing gateway process
+    // If it's the daily Heartbeat cron (08:00 JST = 23:00 UTC)
+    if (event.cron === "0 23 * * *") {
+      console.log('[CRON] Triggering Daily Heartbeat');
+      const userId = env.DISCORD_DM_ALLOW_FROM || '1076754229294796834';
+      const prompt = "HEARTBEAT.mdの指示通りにセキュリティチェックとデイリーブリーフィング（gog calendarの情報のみ）を実行し、その結果を報告してください。";
+      // We pass the token to the URL so OpenClaw CLI can authenticate with the gateway
+      const tokenArg = env.MOLTBOT_GATEWAY_TOKEN ? `?token=${env.MOLTBOT_GATEWAY_TOKEN}` : '';
+      const cmd = `openclaw agent --agent main --message "${prompt}" --deliver --reply-channel discord --reply-to "${userId}" --url "ws://localhost:18789${tokenArg}"`;
+      
+      ctx.waitUntil(
+        sandbox.startProcess(cmd)
+          .then(async (proc) => {
+             await new Promise(r => setTimeout(r, 5000)); // Give it time to start
+             const logs = await proc.getLogs();
+             console.log('[CRON] Heartbeat initialized:', logs.stdout || logs.stderr);
+          })
+          .catch((err: Error) => console.error('[CRON] Heartbeat trigger failed:', err))
+      );
+      return;
+    }
+
+    // Check for an existing gateway process (every 5 mins)
     const existingProcess = await findExistingMoltbotProcess(sandbox);
 
     if (!existingProcess) {

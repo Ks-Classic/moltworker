@@ -70,7 +70,7 @@
   // Cron trigger: health-check the gateway every 5 minutes and auto-restart if crashed.
   // Pairs with the scheduled() handler in src/index.ts.
   "triggers": {
-    "crons": ["*/5 * * * *"],
+    "crons": ["*/5 * * * *", "0 23 * * *"],
   },
   // Note: CF_ACCOUNT_ID should be set via `wrangler secret put CF_ACCOUNT_ID`
   // Secrets to configure via `wrangler secret put`:
