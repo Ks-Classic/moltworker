@@ -7,7 +7,7 @@
  */
 const fs = require('fs');
 
-const CONFIG_PATH = '/root/.openclaw/openclaw.json';
+const CONFIG_PATH = process.env.CONFIG_PATH || '/root/.openclaw/openclaw.json';
 
 function main() {
   console.log('Patching config at:', CONFIG_PATH);
@@ -27,8 +27,8 @@ function main() {
   patchChannels(config);
 
   // ── Security Model ──────────────────────────────────────────
-  // Layer 1 (HARD): e-spiral agent has shell/network allowlists = []
-  //                  → physically impossible to exec or call external APIs
+  // Layer 1 (HARD): e-spiral agent runs in sandbox mode "all"
+  //                  → all sessions are sandboxed
   // Layer 2 (HARD): commands.native = true required because Discord
   //                  has no approval UI ("auto" causes timeout)
   //                  → mitigated by Layer 1 for e-spiral,
@@ -218,13 +218,19 @@ function patchAgentSecurity(config) {
   // Find e-spiral agent and enforce hard restrictions
   const espiral = config.agents.list.find(a => a.id === 'e-spiral');
   if (espiral) {
-    // Sandbox: all sessions are sandboxed
+    // Sandbox: all sessions are sandboxed (supported by OpenClaw)
     espiral.sandbox = { mode: 'all' };
-    // Shell: empty allowlist = no shell commands can be executed
-    espiral.shell = { allowlist: [] };
-    // Network: empty allowlist = no outbound network access
-    espiral.network = { allowlist: [] };
-    console.log('Security: e-spiral agent hardened (sandbox=all, shell=[], network=[])');
+    // Clean up unsupported keys that may exist from previous versions
+    // (shell/network are NOT supported at agent level in OpenClaw 2026.3.13+)
+    delete espiral.shell;
+    delete espiral.network;
+    console.log('Security: e-spiral agent hardened (sandbox=all)');
+  }
+
+  // Clean up unsupported keys from other agents too
+  for (const agent of config.agents.list) {
+    if (agent.shell) { delete agent.shell; console.log(`Cleaned unsupported 'shell' key from agent: ${agent.id}`); }
+    if (agent.network) { delete agent.network; console.log(`Cleaned unsupported 'network' key from agent: ${agent.id}`); }
   }
 }
 

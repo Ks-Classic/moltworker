@@ -53,22 +53,48 @@ cd /home/ykoha/moltworker && echo "--- wrangler.jsonc ---" && grep bucket_name w
 ```
 全て `openclaw-data` であることを確認。
 
-### 1-3. start-openclaw.sh パッチスクリプトの検証
+### 1-3. patch-config.cjs シミュレーション実行 + config バリデーション
+
+> **背景**: 2026-03-20 に patch-config.cjs が未サポートの `shell`/`network` キーを追加し、
+> ゲートウェイが16時間起動不能になったインシデントを受けて追加。
+
 // turbo
 ```bash
-cd /home/ykoha/moltworker && node -e "
-// start-openclaw.sh 内の Node パッチをシミュレート実行
-// DMXスクリプト内の Discord allowFrom ロジック確認
-const script = require('fs').readFileSync('start-openclaw.sh', 'utf8');
-const hasAllowFrom = script.includes(\"config.channels.discord.allowFrom = ['*']\");
-const hasDmPolicyCheck = script.includes(\"dmPolicy === 'open'\");
-if (!hasAllowFrom || !hasDmPolicyCheck) {
-  console.error('❌ start-openclaw.sh: Discord allowFrom logic missing');
-  process.exit(1);
-}
-console.log('✅ start-openclaw.sh patch logic validated');
-"
+cd /home/ykoha/moltworker && cp /home/ykoha/.openclaw/openclaw.json /tmp/config-predeploy-test.json && CONFIG_PATH=/tmp/config-predeploy-test.json node scripts/patch-config.cjs 2>&1
 ```
+
+パッチが正常に完了することを確認。次にパッチ後のconfigにOpenClawが認識しないキーが含まれないかチェック：
+
+// turbo
+```bash
+cd /home/ykoha/moltworker && node -e '
+const fs = require("fs");
+const config = JSON.parse(fs.readFileSync("/tmp/config-predeploy-test.json", "utf8"));
+const KNOWN_AGENT_KEYS = ["id","name","default","workspace","compaction","maxConcurrent","subagents","sandbox","model"];
+const errors = [];
+for (const agent of (config.agents?.list || [])) {
+  for (const key of Object.keys(agent)) {
+    if (!KNOWN_AGENT_KEYS.includes(key)) {
+      errors.push(`agents.list[${agent.id}]: unknown key "${key}" (OpenClaw will reject this)`);
+    }
+  }
+}
+if (errors.length > 0) {
+  console.error("❌ Config validation FAILED (unknown agent keys):");
+  errors.forEach(e => console.error("  - " + e));
+  process.exit(1);
+} else {
+  console.log("✅ Config agent keys validation passed");
+}
+'
+```
+
+### 1-4. ユニットテスト実行
+// turbo
+```bash
+cd /home/ykoha/moltworker && npm test 2>&1
+```
+全テストが pass することを確認。
 
 ---
 
@@ -96,6 +122,9 @@ cd /home/ykoha/moltworker && npx wrangler deploy --name moltbot-sandbox 2>&1
 ---
 
 ## 3. デプロイ後の動作確認
+
+> ⛔ **ゲート**: 以下の全ステップが完了するまで、次のコミット・デプロイを絶対に行わないこと。
+> 2026-03-20 インシデントでは、確認を待たず10分で次のデプロイが実行され、障害を16時間放置した。
 
 ### 3-1. コンテナ起動待ち（60秒）
 // turbo

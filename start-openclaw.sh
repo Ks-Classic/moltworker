@@ -74,7 +74,13 @@ else
 fi
 
 # ── Phase 4: Patch config ─────────────────────────────────
-node "$SCRIPTS_DIR/patch-config.js"
+node "$SCRIPTS_DIR/patch-config.cjs"
+
+# ── Phase 4.5: Auto-fix config (safety net) ──────────────
+# Remove any unrecognized keys that would cause validation errors.
+# This prevents gateway crashes from stale R2 data or patch-config bugs.
+echo "Running openclaw doctor --fix..."
+openclaw doctor --fix 2>&1 || echo "Warning: openclaw doctor --fix failed (non-fatal)"
 
 # ── Phase 5: Background sync ─────────────────────────────
 if [ -f /tmp/.rclone-configured ]; then
