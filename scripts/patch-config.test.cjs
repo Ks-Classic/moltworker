@@ -132,10 +132,20 @@ test('cleans up pre-existing shell/network keys from agents', () => {
   }
 });
 
-test('e-spiral agent has sandbox mode "off"', () => {
+test('e-spiral agent should NOT have sandbox key (managed at defaults level)', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
   const espiral = result.agents.list.find(a => a.id === 'e-spiral');
-  assert(espiral.sandbox?.mode === 'off', `Expected sandbox.mode="off", got "${espiral.sandbox?.mode}"`);
+  assert(!espiral.sandbox, 'e-spiral should not have per-agent sandbox (use defaults)');
+});
+
+test('agents.defaults.sandbox.mode is "off"', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
+  assert(result.agents?.defaults?.sandbox?.mode === 'off', `Expected defaults.sandbox.mode="off", got "${result.agents?.defaults?.sandbox?.mode}"`);
+});
+
+test('tools.exec.ask is "on-miss"', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
+  assert(result.tools?.exec?.ask === 'on-miss', `Expected tools.exec.ask="on-miss", got "${result.tools?.exec?.ask}"`);
 });
 
 // -------------------------------------------------------------------
@@ -161,15 +171,7 @@ test('Discord allowFrom is set from DISCORD_DM_ALLOW_FROM', () => {
   );
 });
 
-test('Discord execApprovals is enabled with approvers from DISCORD_DM_ALLOW_FROM', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
-  assert(result.channels?.discord?.execApprovals?.enabled === true, 'execApprovals should be enabled');
-  assert(
-    result.channels.discord.execApprovals.approvers?.includes('1076754229294796834'),
-    'approvers should contain the owner ID'
-  );
-  assert(result.channels.discord.execApprovals.target === 'dm', 'target should be "dm"');
-});
+
 
 // -------------------------------------------------------------------
 console.log('\nGateway config:');

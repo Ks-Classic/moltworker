@@ -27,18 +27,26 @@ function main() {
   patchChannels(config);
 
   // ── Security Model ──────────────────────────────────────────
-  // Layer 1 (HARD): e-spiral agent runs in sandbox mode "all"
-  //                  → all sessions are sandboxed
-  // Layer 2 (HARD): commands.native = true required because Discord
-  //                  has no approval UI ("auto" causes timeout)
-  //                  → mitigated by Layer 1 for e-spiral,
-  //                    and by AGENTS.md owner-check for main
-  // Layer 3 (SOFT): AGENTS.md instructs AI to only allow system
+  // Layer 1 (HARD): Cloudflare Container IS the sandbox (no host access)
+  // Layer 2 (HARD): sandbox.mode = "off" — Docker not available in CF Containers
+  //                  Sandbox isolation provided by CF Container itself
+  // Layer 3 (HARD): tools.exec.ask = "on-miss" — unknown commands require
+  //                  approval via Web UI or terminal UI
+  // Layer 4 (HARD): commands.native = true — Discord has no approval UI
+  // Layer 5 (SOFT): AGENTS.md instructs AI to only allow system
   //                  operations from owner Discord ID
+  config.agents = config.agents || {};
+  config.agents.defaults = config.agents.defaults || {};
+  config.agents.defaults.sandbox = { mode: 'off' };
+
+  config.tools = config.tools || {};
+  config.tools.exec = config.tools.exec || {};
+  config.tools.exec.ask = 'on-miss';
+
   config.commands = config.commands || {};
   config.commands.native = true;
 
-  // Enforce hard restrictions on e-spiral agent (external community)
+  // Clean up unsupported keys from agents
   patchAgentSecurity(config);
 
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
@@ -196,18 +204,6 @@ function patchChannels(config) {
       }
     }
 
-    // Enable exec approvals via Discord DM
-    // When the agent wants to run a shell command, the bot sends a DM
-    // to the approver with "Allow once" / "Always allow" / "Deny" buttons
-    if (process.env.DISCORD_DM_ALLOW_FROM) {
-      const approvers = process.env.DISCORD_DM_ALLOW_FROM.split(',').map(s => s.trim());
-      config.channels.discord.execApprovals = {
-        enabled: true,
-        approvers,
-        target: 'dm',
-      };
-      console.log('Discord exec approvals enabled for:', approvers);
-    }
   }
 
   // Slack
@@ -228,24 +224,15 @@ function patchAgentSecurity(config) {
   config.agents = config.agents || {};
   config.agents.list = config.agents.list || [];
 
-  // Find e-spiral agent and enforce restrictions
-  const espiral = config.agents.list.find(a => a.id === 'e-spiral');
-  if (espiral) {
-    // Sandbox: off — Docker is not available in Cloudflare Containers
-    // Security enforced via: execApprovals (owner-only) + AGENTS.md owner check
-    espiral.sandbox = { mode: 'off' };
-    // Clean up unsupported keys that may exist from previous versions
-    // (shell/network are NOT supported at agent level in OpenClaw 2026.3.13+)
-    delete espiral.shell;
-    delete espiral.network;
-    console.log('Security: e-spiral agent configured (sandbox=off, exec approvals enforced)');
-  }
-
-  // Clean up unsupported keys from other agents too
+  // Clean up unsupported keys from all agents
+  // (shell/network are NOT supported at agent level in OpenClaw 2026.3.13+)
   for (const agent of config.agents.list) {
+    // Remove per-agent sandbox — use defaults.sandbox instead
+    if (agent.sandbox) { delete agent.sandbox; }
     if (agent.shell) { delete agent.shell; console.log(`Cleaned unsupported 'shell' key from agent: ${agent.id}`); }
     if (agent.network) { delete agent.network; console.log(`Cleaned unsupported 'network' key from agent: ${agent.id}`); }
   }
+  console.log('Security: agents cleaned, sandbox.mode=off (CF Container is sandbox)');
 }
 
 main();
