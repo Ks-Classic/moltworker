@@ -161,6 +161,16 @@ test('Discord allowFrom is set from DISCORD_DM_ALLOW_FROM', () => {
   );
 });
 
+test('Discord execApprovals is enabled with approvers from DISCORD_DM_ALLOW_FROM', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
+  assert(result.channels?.discord?.execApprovals?.enabled === true, 'execApprovals should be enabled');
+  assert(
+    result.channels.discord.execApprovals.approvers?.includes('1076754229294796834'),
+    'approvers should contain the owner ID'
+  );
+  assert(result.channels.discord.execApprovals.target === 'dm', 'target should be "dm"');
+});
+
 // -------------------------------------------------------------------
 console.log('\nGateway config:');
 

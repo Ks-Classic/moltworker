@@ -195,6 +195,19 @@ function patchChannels(config) {
         }
       }
     }
+
+    // Enable exec approvals via Discord DM
+    // When the agent wants to run a shell command, the bot sends a DM
+    // to the approver with "Allow once" / "Always allow" / "Deny" buttons
+    if (process.env.DISCORD_DM_ALLOW_FROM) {
+      const approvers = process.env.DISCORD_DM_ALLOW_FROM.split(',').map(s => s.trim());
+      config.channels.discord.execApprovals = {
+        enabled: true,
+        approvers,
+        target: 'dm',
+      };
+      console.log('Discord exec approvals enabled for:', approvers);
+    }
   }
 
   // Slack
