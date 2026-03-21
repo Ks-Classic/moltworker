@@ -228,16 +228,17 @@ function patchAgentSecurity(config) {
   config.agents = config.agents || {};
   config.agents.list = config.agents.list || [];
 
-  // Find e-spiral agent and enforce hard restrictions
+  // Find e-spiral agent and enforce restrictions
   const espiral = config.agents.list.find(a => a.id === 'e-spiral');
   if (espiral) {
-    // Sandbox: all sessions are sandboxed (supported by OpenClaw)
-    espiral.sandbox = { mode: 'all' };
+    // Sandbox: off — Docker is not available in Cloudflare Containers
+    // Security enforced via: execApprovals (owner-only) + AGENTS.md owner check
+    espiral.sandbox = { mode: 'off' };
     // Clean up unsupported keys that may exist from previous versions
     // (shell/network are NOT supported at agent level in OpenClaw 2026.3.13+)
     delete espiral.shell;
     delete espiral.network;
-    console.log('Security: e-spiral agent hardened (sandbox=all)');
+    console.log('Security: e-spiral agent configured (sandbox=off, exec approvals enforced)');
   }
 
   // Clean up unsupported keys from other agents too

@@ -132,10 +132,10 @@ test('cleans up pre-existing shell/network keys from agents', () => {
   }
 });
 
-test('e-spiral agent has sandbox mode "all"', () => {
+test('e-spiral agent has sandbox mode "off"', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
   const espiral = result.agents.list.find(a => a.id === 'e-spiral');
-  assert(espiral.sandbox?.mode === 'all', `Expected sandbox.mode="all", got "${espiral.sandbox?.mode}"`);
+  assert(espiral.sandbox?.mode === 'off', `Expected sandbox.mode="off", got "${espiral.sandbox?.mode}"`);
 });
 
 // -------------------------------------------------------------------
