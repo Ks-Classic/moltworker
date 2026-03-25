@@ -41,6 +41,77 @@ adminApi.get('/config/diff', async (c) => {
   }
 });
 
+// GET /api/admin/config/snapshots - List stored config snapshots
+adminApi.get('/config/snapshots', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    const proc = await sandbox.startProcess(
+      'node "/usr/local/lib/openclaw/config-snapshots.cjs" --list-json',
+    );
+    await waitForProcess(proc, CLI_TIMEOUT_MS);
+    const logs = await proc.getLogs();
+
+    if (proc.exitCode !== 0) {
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to list config snapshots',
+          stdout: logs.stdout || '',
+          stderr: logs.stderr || '',
+        },
+        500,
+      );
+    }
+
+    return c.json(JSON.parse(logs.stdout || '{"snapshots":[]}'));
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ error: errorMessage }, 500);
+  }
+});
+
+// POST /api/admin/config/rollback - Restore a saved config snapshot
+adminApi.post('/config/rollback', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    const body = await c.req.json<{ snapshotId?: string }>();
+    if (body.snapshotId && !/^[A-Za-z0-9-]+$/.test(body.snapshotId)) {
+      return c.json({ error: 'snapshotId contains invalid characters' }, 400);
+    }
+
+    const args = ['node', '/usr/local/lib/openclaw/config-snapshots.cjs', '--restore'];
+    if (body.snapshotId) {
+      args.push(body.snapshotId);
+    }
+
+    const proc = await sandbox.startProcess(args.map((part) => JSON.stringify(part)).join(' '));
+    await waitForProcess(proc, CLI_TIMEOUT_MS);
+    const logs = await proc.getLogs();
+
+    if (proc.exitCode !== 0) {
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to rollback config snapshot',
+          stdout: logs.stdout || '',
+          stderr: logs.stderr || '',
+        },
+        500,
+      );
+    }
+
+    return c.json({
+      success: true,
+      ...JSON.parse(logs.stdout || '{}'),
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ error: errorMessage }, 500);
+  }
+});
+
 // GET /api/admin/devices - List pending and paired devices
 adminApi.get('/devices', async (c) => {
   const sandbox = c.get('sandbox');

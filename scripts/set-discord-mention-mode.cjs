@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync, execFileSync } = require('child_process');
 const { buildConfig, maybeLoadJsonFile } = require('./build-openclaw-config.cjs');
+const { saveSnapshot } = require('./config-snapshots.cjs');
 
 const CONFIG_DIR = process.env.OPENCLAW_CONFIG_DIR || '/root/.openclaw';
 const SOURCE_PATH = process.env.OPENCLAW_SOURCE_PATH || path.join(CONFIG_DIR, 'openclaw.source.json');
@@ -151,6 +152,7 @@ function run(args) {
   }
 
   ensureSourceFile();
+  saveSnapshot({ reason: 'mention-mode' });
   updateOverrides(args);
   buildConfig({
     sourcePath: SOURCE_PATH,
