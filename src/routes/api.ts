@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
 import { createAccessMiddleware } from '../auth';
+import { buildConfigDiffSummary } from '../config/diff';
 import {
   ensureMoltbotGateway,
   findExistingMoltbotProcess,
@@ -26,6 +27,19 @@ const adminApi = new Hono<AppEnv>();
 
 // Middleware: Verify Cloudflare Access JWT for all admin routes
 adminApi.use('*', createAccessMiddleware({ type: 'json' }));
+
+// GET /api/admin/config/diff - Show source/override/generated config drift
+adminApi.get('/config/diff', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    const summary = await buildConfigDiffSummary(sandbox);
+    return c.json(summary);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ error: errorMessage }, 500);
+  }
+});
 
 // GET /api/admin/devices - List pending and paired devices
 adminApi.get('/devices', async (c) => {
