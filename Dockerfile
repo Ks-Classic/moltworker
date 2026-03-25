@@ -28,7 +28,7 @@ RUN npm install -g pnpm
 
 # Install OpenClaw (formerly clawdbot/moltbot)
 # Pin to specific version for reproducible builds
-RUN npm install -g openclaw@2026.3.13 \
+RUN npm install -g openclaw@2026.3.23 \
     && openclaw --version
 
 # Install gog CLI (Google Workspace integration)
@@ -42,7 +42,7 @@ RUN mkdir -p /root/.openclaw \
     && mkdir -p /root/.config/gogcli/keyring
 
 # Copy startup scripts
-# Build cache bust: 2026-03-20-v32-gog-security
+# Build cache bust: 2026-03-25-v33-openclaw-update
 COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
 COPY scripts/ /usr/local/lib/openclaw/
 RUN chmod +x /usr/local/bin/start-openclaw.sh \
