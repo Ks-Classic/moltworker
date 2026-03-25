@@ -28,6 +28,11 @@ const adminApi = new Hono<AppEnv>();
 // Middleware: Verify Cloudflare Access JWT for all admin routes
 adminApi.use('*', createAccessMiddleware({ type: 'json' }));
 
+async function processFailed(proc: { status: string; getStatus?: () => Promise<string> }) {
+  const status = proc.getStatus ? await proc.getStatus() : proc.status;
+  return status === 'failed';
+}
+
 // GET /api/admin/config/diff - Show source/override/generated config drift
 adminApi.get('/config/diff', async (c) => {
   const sandbox = c.get('sandbox');
@@ -52,7 +57,7 @@ adminApi.get('/config/snapshots', async (c) => {
     await waitForProcess(proc, CLI_TIMEOUT_MS);
     const logs = await proc.getLogs();
 
-    if (proc.exitCode !== 0) {
+    if (await processFailed(proc)) {
       return c.json(
         {
           success: false,
@@ -90,7 +95,7 @@ adminApi.post('/config/rollback', async (c) => {
     await waitForProcess(proc, CLI_TIMEOUT_MS);
     const logs = await proc.getLogs();
 
-    if (proc.exitCode !== 0) {
+    if (await processFailed(proc)) {
       return c.json(
         {
           success: false,
@@ -382,7 +387,7 @@ adminApi.post('/config/discord/mention-mode', async (c) => {
     await waitForProcess(proc, CLI_TIMEOUT_MS);
     const logs = await proc.getLogs();
 
-    if (proc.exitCode !== 0) {
+    if (await processFailed(proc)) {
       return c.json(
         {
           success: false,
