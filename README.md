@@ -221,8 +221,32 @@ R2 storage uses a backup/restore approach for simplicity:
 - OpenClaw uses its default paths (no special configuration needed)
 
 **During operation:**
-- A cron job runs every 5 minutes to sync the moltbot config to R2
+- A background sync loop persists runtime state (sessions, workspace, skills) to R2
 - You can also trigger a manual backup from the admin UI at `/_admin/`
+
+## Config Workflow
+
+`config/openclaw.source.json` is the canonical declarative config in this repo.
+`openclaw/openclaw.json` is generated from it and uploaded during deploy.
+
+Use:
+
+```bash
+npm run config:build
+npm run config:check
+```
+
+The runtime sync loop does **not** push `openclaw.json` back to R2. This avoids stale containers overwriting the canonical config while still allowing runtime state (sessions, workspace, skills) to persist.
+
+## Deploy Note for ARM Hosts
+
+The container base image `cloudflare/sandbox:0.7.0` is currently `linux/amd64` only.
+If you deploy from an ARM machine, local `wrangler deploy` / `docker build` may fail with `exec format error`.
+
+For reliable production deploys, use an x64 builder such as:
+
+- GitHub Actions on `ubuntu-latest`
+- a local x64 machine or VM
 
 **In the admin UI:**
 - When R2 is configured, you'll see "Last backup: [timestamp]"

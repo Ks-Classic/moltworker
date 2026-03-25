@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build canonical OpenClaw config
+        run: npm run config:build
+
       # Step 1: 設定ファイルを R2 にアップロード
       - name: Upload configs to R2
         run: |

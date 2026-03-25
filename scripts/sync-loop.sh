@@ -32,6 +32,7 @@ while true; do
         echo "[sync] Uploading changes ($COUNT files) at $(date)" >> "$LOGFILE"
         rclone sync "$CONFIG_DIR/" "r2:${R2_BUCKET}/openclaw/" \
             $RCLONE_FLAGS --exclude='*.lock' --exclude='*.log' --exclude='*.tmp' --exclude='.git/**' \
+            --exclude='openclaw.json' --exclude='openclaw.json.bak' \
             --exclude='agents/main/agent/auth-profiles.json' --exclude='agents/main/agent/models.json' 2>> "$LOGFILE"
         if [ -d "$WORKSPACE_DIR" ]; then
             rclone sync "$WORKSPACE_DIR/" "r2:${R2_BUCKET}/workspace/" \

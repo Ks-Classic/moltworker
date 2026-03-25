@@ -98,11 +98,17 @@ Browser / Discord
 | `openclaw-data/workspace/` | `/root/clawd/` |
 | `openclaw-data/skills/` | `/root/clawd/skills/` |
 
-**注意**: R2 の同期ループがパッチ済み config を R2 に書き戻すため、R2 のファイルが古い場合はパッチの効果が打ち消される可能性がある。R2 上のファイルを直接修正する場合は `wrangler r2 object put` を使う。
+**重要**:
+- `config/openclaw.source.json` が宣言的設定の正本
+- `openclaw/openclaw.json` は生成物。手で直接編集しない
+- `npm run config:build` で source から生成し、deploy workflow も同じ生成物を R2 へ反映する
+- `scripts/sync-loop.sh` は `openclaw.json` を R2 へ書き戻さない。セッションや state だけが sync 対象
 
 ## Commands
 
 ```bash
+npm run config:build  # Build openclaw/openclaw.json from config/openclaw.source.json
+npm run config:check  # Verify generated config is up to date
 npm test              # Run tests (vitest)
 npm run test:watch    # Run tests in watch mode
 npm run build         # Build worker + client

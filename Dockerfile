@@ -1,10 +1,10 @@
 # ── Stage 1: Build gog CLI ────────────────────────────────
-FROM golang:1.25-bookworm AS gog-builder
+FROM --platform=linux/amd64 golang:1.25-bookworm AS gog-builder
 RUN git clone --depth 1 --branch v0.12.0 https://github.com/steipete/gogcli.git /build \
     && cd /build && make
 
 # ── Stage 2: Main container ──────────────────────────────
-FROM docker.io/cloudflare/sandbox:0.7.0
+FROM --platform=linux/amd64 docker.io/cloudflare/sandbox:0.7.0
 
 # Install Node.js 22 (required by OpenClaw) and rclone (for R2 persistence)
 # The base image has Node 20, we need to replace it with Node 22

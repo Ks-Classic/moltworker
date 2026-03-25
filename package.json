@@ -6,6 +6,8 @@
   "description": "Run Moltbot personal AI assistant in a Cloudflare Sandbox",
   "scripts": {
     "build": "vite build",
+    "config:build": "node scripts/build-openclaw-config.cjs",
+    "config:check": "node scripts/check-openclaw-config.cjs",
     "deploy": "npm run build && wrangler deploy",
     "dev": "vite dev",
     "start": "wrangler dev",

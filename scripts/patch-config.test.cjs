@@ -171,6 +171,47 @@ test('Discord allowFrom is set from DISCORD_DM_ALLOW_FROM', () => {
   );
 });
 
+test('Legacy binding match.channelId is converted to match.peer.kind=channel', () => {
+  const dirty = JSON.parse(JSON.stringify(BASE_CONFIG));
+  dirty.bindings = [
+    {
+      agentId: 'e-spiral-dev',
+      match: {
+        channel: 'discord',
+        guildId: '1075560600878448680',
+        channelId: '1483087564973015105',
+      },
+    },
+  ];
+
+  const result = runPatchConfig(dirty);
+  const match = result.bindings?.[0]?.match;
+  assert(!('channelId' in match), 'Legacy match.channelId should be removed');
+  assert(match?.peer?.kind === 'channel', `Expected peer.kind="channel", got ${match?.peer?.kind}`);
+  assert(match?.peer?.id === '1483087564973015105', `Expected peer.id to preserve channelId, got ${match?.peer?.id}`);
+  assert(match?.guildId === '1075560600878448680', 'Existing guildId should be preserved');
+});
+
+test('Existing guild requireMention setting is preserved when env guilds are applied', () => {
+  const dirty = JSON.parse(JSON.stringify(BASE_CONFIG));
+  dirty.channels = {
+    discord: {
+      guilds: {
+        '1455869574355619934': {
+          channels: { '*': {} },
+          requireMention: false,
+        },
+      },
+    },
+  };
+
+  const result = runPatchConfig(dirty);
+  assert(
+    result.channels?.discord?.guilds?.['1455869574355619934']?.requireMention === false,
+    'Guild-specific requireMention should be preserved'
+  );
+});
+
 
 
 // -------------------------------------------------------------------

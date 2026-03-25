@@ -25,6 +25,7 @@ function main() {
   patchGateway(config);
   patchAIGatewayModel(config);
   patchChannels(config);
+  normalizeBindings(config);
 
   // ── Security Model ──────────────────────────────────────────
   // Layer 1 (HARD): Cloudflare Container IS the sandbox (no host access)
@@ -177,7 +178,14 @@ function patchChannels(config) {
   //         — groupPolicy=open allows responding in all guild channels
   if (process.env.DISCORD_BOT_TOKEN) {
     const dmPolicy = process.env.DISCORD_DM_POLICY || 'pairing';
+    const existingDiscord = config.channels.discord && typeof config.channels.discord === 'object'
+      ? config.channels.discord
+      : {};
+    const existingGuilds = existingDiscord.guilds && typeof existingDiscord.guilds === 'object'
+      ? existingDiscord.guilds
+      : {};
     config.channels.discord = {
+      ...existingDiscord,
       token: process.env.DISCORD_BOT_TOKEN,
       enabled: true,
       dmPolicy,
@@ -197,8 +205,18 @@ function patchChannels(config) {
       if (guildIds.length > 0) {
         config.channels.discord.guilds = {};
         for (const id of guildIds) {
+          const existingGuildConfig = existingGuilds[id] && typeof existingGuilds[id] === 'object'
+            ? existingGuilds[id]
+            : {};
+          const existingChannels = existingGuildConfig.channels && typeof existingGuildConfig.channels === 'object'
+            ? existingGuildConfig.channels
+            : {};
           config.channels.discord.guilds[id] = {
-            channels: { '*': {} },
+            ...existingGuildConfig,
+            channels: {
+              ...existingChannels,
+              '*': existingChannels['*'] || {},
+            },
           };
         }
       }
@@ -213,6 +231,35 @@ function patchChannels(config) {
       appToken: process.env.SLACK_APP_TOKEN,
       enabled: true,
     };
+  }
+}
+
+// ============================================================
+// LEGACY CONFIG NORMALIZATION
+// ============================================================
+
+function normalizeBindings(config) {
+  if (!Array.isArray(config.bindings)) {
+    return;
+  }
+
+  for (const binding of config.bindings) {
+    const match = binding && typeof binding === 'object' ? binding.match : null;
+    if (!match || typeof match !== 'object') {
+      continue;
+    }
+
+    // OpenClaw route bindings no longer accept match.channelId directly.
+    // Convert legacy Discord channel targeting into the current peer matcher.
+    if (typeof match.channelId === 'string' && match.channelId.trim()) {
+      if (!match.peer || typeof match.peer !== 'object') {
+        match.peer = {
+          kind: 'channel',
+          id: match.channelId.trim(),
+        };
+      }
+      delete match.channelId;
+    }
   }
 }
 
