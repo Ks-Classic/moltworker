@@ -45,6 +45,7 @@ RUN mkdir -p /root/.openclaw \
 # Build cache bust: 2026-03-25-v33-openclaw-update
 COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
 COPY scripts/ /usr/local/lib/openclaw/
+COPY config/openclaw.source.json /usr/local/lib/openclaw/openclaw.source.json
 RUN chmod +x /usr/local/bin/start-openclaw.sh \
     && chmod +x /usr/local/lib/openclaw/*.sh
 

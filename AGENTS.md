@@ -99,10 +99,11 @@ Browser / Discord
 | `openclaw-data/skills/` | `/root/clawd/skills/` |
 
 **重要**:
-- `config/openclaw.source.json` が宣言的設定の正本
-- `openclaw/openclaw.json` は生成物。手で直接編集しない
-- `npm run config:build` で source から生成し、deploy workflow も同じ生成物を R2 へ反映する
-- `scripts/sync-loop.sh` は `openclaw.json` を R2 へ書き戻さない。セッションや state だけが sync 対象
+- `config/openclaw.source.json` が baseline の宣言的設定
+- `/root/.openclaw/openclaw.overrides.json` が runtime override の正本
+- `openclaw/openclaw.json` は source + overrides から生成される生成物。手で直接編集しない
+- `npm run config:build` で baseline source から生成し、deploy workflow は `openclaw.json` と `openclaw.source.json` を R2 へ反映する
+- `scripts/sync-loop.sh` と `/api/admin/storage/sync` は `openclaw.json` を R2 へ書き戻さない。source / overrides / state だけが sync 対象
 
 ## Commands
 

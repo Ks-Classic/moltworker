@@ -257,6 +257,72 @@ adminApi.post('/storage/sync', async (c) => {
   }
 });
 
+// POST /api/admin/config/discord/mention-mode - Persist guild/channel mention policy
+adminApi.post('/config/discord/mention-mode', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    const body = await c.req.json<{
+      guildId?: string;
+      channelId?: string;
+      requireMention?: boolean;
+    }>();
+
+    if (!body.guildId || typeof body.requireMention !== 'boolean') {
+      return c.json({ error: 'guildId and requireMention are required' }, 400);
+    }
+
+    if (!/^\d+$/.test(body.guildId)) {
+      return c.json({ error: 'guildId must be a Discord snowflake' }, 400);
+    }
+
+    if (body.channelId && !/^\d+$/.test(body.channelId)) {
+      return c.json({ error: 'channelId must be a Discord snowflake' }, 400);
+    }
+
+    const args = [
+      'node',
+      '/usr/local/lib/openclaw/set-discord-mention-mode.cjs',
+      '--guild',
+      body.guildId,
+      '--require-mention',
+      String(body.requireMention),
+    ];
+
+    if (body.channelId) {
+      args.push('--channel', body.channelId);
+    }
+
+    const proc = await sandbox.startProcess(args.map((part) => JSON.stringify(part)).join(' '));
+    await waitForProcess(proc, CLI_TIMEOUT_MS);
+    const logs = await proc.getLogs();
+
+    if (proc.exitCode !== 0) {
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to update Discord mention policy',
+          stdout: logs.stdout || '',
+          stderr: logs.stderr || '',
+        },
+        500,
+      );
+    }
+
+    return c.json({
+      success: true,
+      guildId: body.guildId,
+      channelId: body.channelId,
+      requireMention: body.requireMention,
+      stdout: logs.stdout || '',
+      stderr: logs.stderr || '',
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ error: errorMessage }, 500);
+  }
+});
+
 // POST /api/admin/gateway/restart - Kill the current gateway and start a new one
 adminApi.post('/gateway/restart', async (c) => {
   const sandbox = c.get('sandbox');

@@ -8,6 +8,7 @@
     "build": "vite build",
     "config:build": "node scripts/build-openclaw-config.cjs",
     "config:check": "node scripts/check-openclaw-config.cjs",
+    "config:mention:test": "node scripts/set-discord-mention-mode.test.cjs",
     "deploy": "npm run build && wrangler deploy",
     "dev": "vite dev",
     "start": "wrangler dev",

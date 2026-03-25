@@ -15,6 +15,8 @@ fi
 
 CONFIG_DIR="/root/.openclaw"
 CONFIG_FILE="$CONFIG_DIR/openclaw.json"
+CONFIG_SOURCE_FILE="$CONFIG_DIR/openclaw.source.json"
+CONFIG_OVERRIDES_FILE="$CONFIG_DIR/openclaw.overrides.json"
 AGENT_STATE_DIR="$CONFIG_DIR/agents/main/agent"
 
 echo "Config directory: $CONFIG_DIR"
@@ -43,8 +45,19 @@ else
     echo "No gog config found in R2, skipping"
 fi
 
-# ── Phase 3: Onboard (first run only) ────────────────────
-if [ ! -f "$CONFIG_FILE" ]; then
+# ── Phase 3: Seed/build config source ─────────────────────
+if [ ! -f "$CONFIG_SOURCE_FILE" ]; then
+    if [ -f "$SCRIPTS_DIR/openclaw.source.json" ]; then
+        echo "Seeding source config from bundled default..."
+        cp "$SCRIPTS_DIR/openclaw.source.json" "$CONFIG_SOURCE_FILE"
+    elif [ -f "$CONFIG_FILE" ]; then
+        echo "Seeding source config from existing openclaw.json..."
+        cp "$CONFIG_FILE" "$CONFIG_SOURCE_FILE"
+    fi
+fi
+
+# ── Phase 3.5: Onboard (first run only) ──────────────────
+if [ ! -f "$CONFIG_FILE" ] && [ ! -f "$CONFIG_SOURCE_FILE" ]; then
     echo "No existing config found, running openclaw onboard..."
 
     AUTH_ARGS=""
@@ -73,30 +86,39 @@ else
     echo "Using existing config"
 fi
 
-# ── Phase 4: Patch config ─────────────────────────────────
+# ── Phase 4: Build config from source + overrides ─────────
+if [ -f "$CONFIG_SOURCE_FILE" ]; then
+    echo "Building effective config from source + overrides..."
+    OPENCLAW_SOURCE_PATH="$CONFIG_SOURCE_FILE" \
+    OPENCLAW_OVERRIDES_PATH="$CONFIG_OVERRIDES_FILE" \
+    OPENCLAW_OUTPUT_PATH="$CONFIG_FILE" \
+    node "$SCRIPTS_DIR/build-openclaw-config.cjs"
+fi
+
+# ── Phase 4.5: Patch config ───────────────────────────────
 node "$SCRIPTS_DIR/patch-config.cjs"
 
-# ── Phase 4.5: Auto-fix config (safety net) ──────────────
+# ── Phase 5: Auto-fix config (safety net) ────────────────
 # Remove any unrecognized keys that would cause validation errors.
 # This prevents gateway crashes from stale R2 data or patch-config bugs.
 echo "Running openclaw doctor --fix..."
 openclaw doctor --fix 2>&1 || echo "Warning: openclaw doctor --fix failed (non-fatal)"
 
-# ── Phase 5: Background sync ─────────────────────────────
+# ── Phase 6: Background sync ─────────────────────────────
 if [ -f /tmp/.rclone-configured ]; then
     echo "Starting background R2 sync loop..."
     "$SCRIPTS_DIR/sync-loop.sh" &
     echo "Background sync loop started (PID: $!)"
 fi
 
-# ── Phase 5.5: Security monitoring daemon ─────────────────
+# ── Phase 6.5: Security monitoring daemon ─────────────────
 if [ -f "$SCRIPTS_DIR/security-monitor.sh" ]; then
     echo "Starting security monitor daemon..."
     bash "$SCRIPTS_DIR/security-monitor.sh" &
     echo "Security monitor started (PID: $!)"
 fi
 
-# ── Phase 6: Start gateway ────────────────────────────────
+# ── Phase 7: Start gateway ────────────────────────────────
 echo "Starting OpenClaw Gateway..."
 echo "Gateway will be available on port 18789"
 

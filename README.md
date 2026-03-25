@@ -226,8 +226,9 @@ R2 storage uses a backup/restore approach for simplicity:
 
 ## Config Workflow
 
-`config/openclaw.source.json` is the canonical declarative config in this repo.
-`openclaw/openclaw.json` is generated from it and uploaded during deploy.
+`config/openclaw.source.json` is the baseline declarative config in this repo.
+At runtime, OpenClaw also reads `/root/.openclaw/openclaw.overrides.json` for mutable overrides such as Discord mention policy changes triggered by the owner.
+`openclaw/openclaw.json` is generated from source + overrides and uploaded during deploy.
 
 Use:
 
@@ -236,7 +237,21 @@ npm run config:build
 npm run config:check
 ```
 
-The runtime sync loop does **not** push `openclaw.json` back to R2. This avoids stale containers overwriting the canonical config while still allowing runtime state (sessions, workspace, skills) to persist.
+The runtime sync loop does **not** push `openclaw.json` back to R2. This avoids stale containers overwriting the generated config while still allowing baseline source, runtime overrides, and state (sessions, workspace, skills) to persist.
+
+### Discord-driven Mention Policy
+
+Owner-triggered mention policy changes are stored as runtime overrides, not direct edits to `openclaw.json`.
+
+- Guild-level toggle: set `requireMention` on `channels.discord.guilds[guildId]`
+- Channel-level toggle: set `requireMention` on `channels.discord.guilds[guildId].channels[channelId]`
+
+The supported mutation path is:
+
+1. Update `openclaw.overrides.json`
+2. Rebuild `openclaw.json` from source + overrides
+3. Sync source / overrides / generated config to R2
+4. Reload the gateway
 
 ## Deploy Note for ARM Hosts
 

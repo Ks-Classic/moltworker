@@ -29,6 +29,10 @@ jobs:
           npx wrangler r2 object put "openclaw-data/openclaw/openclaw.json" \
             --file openclaw/openclaw.json --remote
 
+          # Upload canonical source config
+          npx wrangler r2 object put "openclaw-data/openclaw/openclaw.source.json" \
+            --file config/openclaw.source.json --remote
+
           # Upload all agent config files
           for agent_dir in openclaw/agents/*/agent; do
             agent_name=$(basename $(dirname "$agent_dir"))
