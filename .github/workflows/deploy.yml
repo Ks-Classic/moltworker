@@ -3,7 +3,7 @@ name: Deploy OpenClaw
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # 手動トリガーも可能
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -16,10 +16,14 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install dependencies
+        run: npm ci
+
       # Step 1: 設定ファイルを R2 にアップロード
       - name: Upload configs to R2
         run: |
-          npx wrangler@latest r2 object put "openclaw-data/openclaw/openclaw.json" \
+          # Upload openclaw.json
+          npx wrangler r2 object put "openclaw-data/openclaw/openclaw.json" \
             --file openclaw/openclaw.json
 
           # Upload all agent config files
@@ -29,7 +33,7 @@ jobs:
               [ -f "$f" ] || continue
               fname=$(basename "$f")
               echo "Uploading $agent_name/$fname..."
-              npx wrangler@latest r2 object put \
+              npx wrangler r2 object put \
                 "openclaw-data/openclaw/agents/$agent_name/agent/$fname" \
                 --file "$f"
             done
@@ -40,10 +44,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # Step 2: コンテナ再ビルド＆デプロイ
+      # Step 2: ビルド＆デプロイ
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+          packageManager: npm
