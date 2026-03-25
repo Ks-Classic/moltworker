@@ -1,0 +1,75 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "/root/clawd",
+      "compaction": { "mode": "safeguard" },
+      "maxConcurrent": 4,
+      "subagents": { "maxConcurrent": 8 },
+      "sandbox": { "mode": "off" }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "subagents": {
+          "allowAgents": ["*"]
+        }
+      },
+      {
+        "id": "e-spiral",
+        "name": "E-SPIRAL"
+      },
+      {
+        "id": "e-spiral-dev",
+        "name": "E-SPIRAL Dev",
+        "workspace": "/root/clawd/projects/e-spiral"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "e-spiral-dev",
+      "match": {
+        "channel": "discord",
+        "guildId": "1075560600878448680",
+        "channelId": "1483087564973015105"
+      }
+    },
+    {
+      "agentId": "e-spiral",
+      "match": {
+        "channel": "discord",
+        "guildId": "1075560600878448680"
+      }
+    }
+  ],
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": true,
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": { "enabled": true },
+        "command-logger": { "enabled": true },
+        "bootstrap-extra-files": { "enabled": true },
+        "session-memory": { "enabled": true }
+      }
+    }
+  },
+  "skills": {
+    "install": { "nodeManager": "pnpm" },
+    "entries": {}
+  },
+  "plugins": {
+    "entries": {
+      "discord": { "enabled": true }
+    }
+  }
+}

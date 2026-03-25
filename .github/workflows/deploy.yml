@@ -1,29 +1,49 @@
-name: Deploy
+name: Deploy OpenClaw
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
+  workflow_dispatch:  # 手動トリガーも可能
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: '22'
 
-      - run: npm ci
+      # Step 1: 設定ファイルを R2 にアップロード
+      - name: Upload configs to R2
+        run: |
+          npx wrangler@latest r2 object put "openclaw-data/openclaw/openclaw.json" \
+            --file openclaw/openclaw.json
 
-      - name: Build
-        run: npm run build
+          # Upload all agent config files
+          for agent_dir in openclaw/agents/*/agent; do
+            agent_name=$(basename $(dirname "$agent_dir"))
+            for f in "$agent_dir"/*.md; do
+              [ -f "$f" ] || continue
+              fname=$(basename "$f")
+              echo "Uploading $agent_name/$fname..."
+              npx wrangler@latest r2 object put \
+                "openclaw-data/openclaw/agents/$agent_name/agent/$fname" \
+                --file "$f"
+            done
+          done
 
-      - name: Deploy to Cloudflare
-        run: npx wrangler deploy --name moltbot-sandbox
+          echo "✅ Config upload complete"
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
+      # Step 2: コンテナ再ビルド＆デプロイ
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: deploy

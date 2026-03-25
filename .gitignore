@@ -61,3 +61,6 @@ test/e2e/.dev.vars
 
 # npm config
 .npmrc
+# OpenClaw runtime-generated files
+openclaw/agents/*/agent/models.json
+openclaw/agents/*/agent/auth-profiles.json
