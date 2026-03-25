@@ -16,6 +16,11 @@
         }
       },
       {
+        "id": "koh",
+        "name": "Koh",
+        "workspace": "/root/clawd"
+      },
+      {
         "id": "e-spiral",
         "name": "E-SPIRAL"
       },
@@ -27,6 +32,13 @@
     ]
   },
   "bindings": [
+    {
+      "agentId": "koh",
+      "match": {
+        "channel": "discord",
+        "guildId": "1455869574355619934"
+      }
+    },
     {
       "agentId": "e-spiral-dev",
       "match": {
