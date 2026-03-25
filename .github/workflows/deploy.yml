@@ -24,7 +24,7 @@ jobs:
         run: |
           # Upload openclaw.json
           npx wrangler r2 object put "openclaw-data/openclaw/openclaw.json" \
-            --file openclaw/openclaw.json
+            --file openclaw/openclaw.json --remote
 
           # Upload all agent config files
           for agent_dir in openclaw/agents/*/agent; do
@@ -35,7 +35,7 @@ jobs:
               echo "Uploading $agent_name/$fname..."
               npx wrangler r2 object put \
                 "openclaw-data/openclaw/agents/$agent_name/agent/$fname" \
-                --file "$f"
+                --file "$f" --remote
             done
           done
 
