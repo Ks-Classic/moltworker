@@ -46,11 +46,14 @@ else
 fi
 
 # ── Phase 3: Seed/build config source ─────────────────────
-if [ ! -f "$CONFIG_SOURCE_FILE" ]; then
-    if [ -f "$SCRIPTS_DIR/openclaw.source.json" ]; then
-        echo "Seeding source config from bundled default..."
-        cp "$SCRIPTS_DIR/openclaw.source.json" "$CONFIG_SOURCE_FILE"
-    elif [ -f "$CONFIG_FILE" ]; then
+# Always prefer the bundled (deploy-time) source config over the R2 backup.
+# This ensures model/config changes made in the repo take effect on deploy,
+# instead of being overridden by stale R2 data.
+if [ -f "$SCRIPTS_DIR/openclaw.source.json" ]; then
+    echo "Applying bundled source config (deploy-time)..."
+    cp "$SCRIPTS_DIR/openclaw.source.json" "$CONFIG_SOURCE_FILE"
+elif [ ! -f "$CONFIG_SOURCE_FILE" ]; then
+    if [ -f "$CONFIG_FILE" ]; then
         echo "Seeding source config from existing openclaw.json..."
         cp "$CONFIG_FILE" "$CONFIG_SOURCE_FILE"
     fi
