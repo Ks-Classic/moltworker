@@ -23,6 +23,7 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   // Direct provider keys
   if (env.ANTHROPIC_API_KEY) envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
   if (env.OPENAI_API_KEY) envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
+  if (env.OPENROUTER_API_KEY) envVars.OPENROUTER_API_KEY = env.OPENROUTER_API_KEY;
 
   // Legacy AI Gateway support: AI_GATEWAY_BASE_URL + AI_GATEWAY_API_KEY
   // When set, these override direct keys for backward compatibility
@@ -59,6 +60,12 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   // Google Workspace (gog CLI) credentials
   if (env.GOG_KEYRING_PASSWORD) envVars.GOG_KEYRING_PASSWORD = env.GOG_KEYRING_PASSWORD;
   if (env.GOG_ACCOUNT) envVars.GOG_ACCOUNT = env.GOG_ACCOUNT;
+
+  // Lark (Feishu) API credentials
+  if (env.LARK_APP_ID) envVars.LARK_APP_ID = env.LARK_APP_ID;
+  if (env.LARK_APP_SECRET) envVars.LARK_APP_SECRET = env.LARK_APP_SECRET;
+  if (env.LARK_BASE_TOKEN) envVars.LARK_BASE_TOKEN = env.LARK_BASE_TOKEN;
+  if (env.LARK_TABLE_ID) envVars.LARK_TABLE_ID = env.LARK_TABLE_ID;
 
   return envVars;
 }

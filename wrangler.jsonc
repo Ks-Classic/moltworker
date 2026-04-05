@@ -78,6 +78,7 @@
   // AI Provider (at least one set required):
   // - ANTHROPIC_API_KEY: Direct Anthropic API key
   // - OPENAI_API_KEY: Direct OpenAI API key
+  // - OPENROUTER_API_KEY: OpenRouter API key (for qwen3.6-plus:free etc.)
   // - Cloudflare AI Gateway (alternative to direct keys):
   //   - CLOUDFLARE_AI_GATEWAY_API_KEY: API key for requests through the gateway
   //   - CF_AI_GATEWAY_ACCOUNT_ID: Your Cloudflare account ID

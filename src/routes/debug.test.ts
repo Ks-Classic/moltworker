@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
+import type { AppEnv } from '../types';
 import { debug } from './debug';
 import { createMockSandbox, createMockEnv, suppressConsole, createMockProcess } from '../test-utils';
 import * as gatewayModule from '../gateway';
@@ -37,7 +38,7 @@ describe('Debug Routes - /debug/security', () => {
     const env = createMockEnv();
 
     // Setup Hono app with the mock sandbox
-    const app = new Hono();
+    const app = new Hono<AppEnv>();
     app.use('*', async (c, next) => {
       c.set('sandbox', sandbox);
       c.env = env;
@@ -49,7 +50,7 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json();
+    const body = await res.json() as any;
     expect(body).toEqual({
       status: 'STOPPED',
       alert_count: 0,
@@ -76,7 +77,7 @@ describe('Debug Routes - /debug/security', () => {
     });
 
     const env = createMockEnv();
-    const app = new Hono();
+    const app = new Hono<AppEnv>();
     app.use('*', async (c, next) => {
       c.set('sandbox', sandbox);
       c.env = env;
@@ -88,7 +89,7 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json();
+    const body = await res.json() as any;
     expect(body).toEqual({
       status: 'RUNNING',
       alert_count: 2,
@@ -112,7 +113,7 @@ describe('Debug Routes - /debug/security', () => {
     });
 
     const env = createMockEnv();
-    const app = new Hono();
+    const app = new Hono<AppEnv>();
     app.use('*', async (c, next) => {
       c.set('sandbox', sandbox);
       c.env = env;
@@ -124,7 +125,7 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json();
+    const body = await res.json() as any;
     expect(body.alert_count).toBe(1);
 
     // Verify clear command was called

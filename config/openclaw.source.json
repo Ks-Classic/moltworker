@@ -2,6 +2,9 @@
   "agents": {
     "defaults": {
       "workspace": "/root/clawd",
+      "model": {
+        "primary": "openrouter/qwen/qwen3.6-plus:free"
+      },
       "compaction": {
         "mode": "safeguard"
       },

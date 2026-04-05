@@ -70,6 +70,8 @@ if [ ! -f "$CONFIG_FILE" ] && [ ! -f "$CONFIG_SOURCE_FILE" ]; then
         AUTH_ARGS="--auth-choice apiKey --anthropic-api-key $ANTHROPIC_API_KEY"
     elif [ -n "$OPENAI_API_KEY" ]; then
         AUTH_ARGS="--auth-choice openai-api-key --openai-api-key $OPENAI_API_KEY"
+    elif [ -n "$OPENROUTER_API_KEY" ]; then
+        AUTH_ARGS="--auth-choice apiKey --token-provider openrouter --token $OPENROUTER_API_KEY"
     fi
 
     openclaw onboard --non-interactive --accept-risk \

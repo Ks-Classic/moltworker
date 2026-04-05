@@ -19,6 +19,7 @@ export interface MoltbotEnv {
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;
   OPENAI_API_KEY?: string;
+  OPENROUTER_API_KEY?: string; // OpenRouter API key (for qwen3.6-plus:free etc.)
   MOLTBOT_GATEWAY_TOKEN?: string; // Gateway token (mapped to OPENCLAW_GATEWAY_TOKEN for container)
   DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + openclaw device pairing)
   E2E_TEST_MODE?: string; // Set to 'true' for E2E tests (skips CF Access auth but keeps device pairing)
@@ -48,6 +49,11 @@ export interface MoltbotEnv {
   // Google Workspace integration (gog CLI)
   GOG_KEYRING_PASSWORD?: string; // Passphrase to unlock gog keyring (encrypted OAuth tokens)
   GOG_ACCOUNT?: string; // Google account email for gog commands
+  // Lark (Feishu) integration
+  LARK_APP_ID?: string;
+  LARK_APP_SECRET?: string;
+  LARK_BASE_TOKEN?: string; // Bitable document token
+  LARK_TABLE_ID?: string; // Bitable table ID
 }
 
 /**
