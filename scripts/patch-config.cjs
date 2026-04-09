@@ -233,13 +233,6 @@ function patchChannels(config) {
       enabled: true,
       dmPolicy,
       groupPolicy: 'open',
-      presence: {
-        status: 'online',
-        activity: {
-          name: 'Moltbot',
-          type: 'listening',
-        },
-      },
     };
     if (process.env.DISCORD_DM_ALLOW_FROM) {
       config.channels.discord.allowFrom = process.env.DISCORD_DM_ALLOW_FROM.split(',').map(s => s.trim());
