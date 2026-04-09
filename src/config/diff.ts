@@ -70,10 +70,7 @@ export function collectLeafPaths(value: unknown, prefix = ''): string[] {
   }
 
   return keys.flatMap((key) =>
-    collectLeafPaths(
-      (value as Record<string, unknown>)[key],
-      prefix ? `${prefix}.${key}` : key,
-    ),
+    collectLeafPaths((value as Record<string, unknown>)[key], prefix ? `${prefix}.${key}` : key),
   );
 }
 
@@ -138,9 +135,7 @@ export async function buildConfigDiffSummary(sandbox: Sandbox): Promise<ConfigDi
     overrides,
     generated,
     changedPathsFromSource:
-      source.exists && generated.exists
-        ? collectChangedPaths(source.json, generated.json)
-        : [],
+      source.exists && generated.exists ? collectChangedPaths(source.json, generated.json) : [],
     overridePaths: overrides.exists ? collectLeafPaths(overrides.json) : [],
     process: summarizeProcess(process, generated),
   };

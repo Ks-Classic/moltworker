@@ -83,7 +83,13 @@ function validateRequiredEnv(env: MoltbotEnv): string[] {
   const hasOpenAIKey = !!env.OPENAI_API_KEY;
   const hasOpenRouterKey = !!env.OPENROUTER_API_KEY;
 
-  if (!hasCloudflareGateway && !hasLegacyGateway && !hasAnthropicKey && !hasOpenAIKey && !hasOpenRouterKey) {
+  if (
+    !hasCloudflareGateway &&
+    !hasLegacyGateway &&
+    !hasAnthropicKey &&
+    !hasOpenAIKey &&
+    !hasOpenRouterKey
+  ) {
     missing.push(
       'ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, or CLOUDFLARE_AI_GATEWAY_API_KEY + CF_AI_GATEWAY_ACCOUNT_ID + CF_AI_GATEWAY_GATEWAY_ID',
     );
@@ -471,31 +477,29 @@ export default {
    * This is critical for Discord bot uptime: without this, a crashed gateway
    * process would only restart when an HTTP request arrives.
    */
-  async scheduled(
-    event: ScheduledEvent,
-    env: MoltbotEnv,
-    ctx: ExecutionContext,
-  ) {
+  async scheduled(event: ScheduledEvent, env: MoltbotEnv, ctx: ExecutionContext) {
     const options = buildSandboxOptions(env);
     const sandbox = getSandbox(env.Sandbox, 'moltbot', options);
 
     // If it's the daily Heartbeat cron (08:00 JST = 23:00 UTC)
-    if (event.cron === "0 23 * * *") {
+    if (event.cron === '0 23 * * *') {
       console.log('[CRON] Triggering Daily Heartbeat');
       const userId = env.DISCORD_DM_ALLOW_FROM || '1076754229294796834';
-      const prompt = "HEARTBEAT.mdの指示通りにセキュリティチェックとデイリーブリーフィング（gog calendarの情報のみ）を実行し、その結果を報告してください。";
+      const prompt =
+        'HEARTBEAT.mdの指示通りにセキュリティチェックとデイリーブリーフィング（gog calendarの情報のみ）を実行し、その結果を報告してください。';
       // We pass the token to the URL so OpenClaw CLI can authenticate with the gateway
       const tokenArg = env.MOLTBOT_GATEWAY_TOKEN ? `?token=${env.MOLTBOT_GATEWAY_TOKEN}` : '';
       const cmd = `openclaw agent --agent main --message "${prompt}" --deliver --reply-channel discord --reply-to "${userId}" --url "ws://localhost:18789${tokenArg}"`;
-      
+
       ctx.waitUntil(
-        sandbox.startProcess(cmd)
+        sandbox
+          .startProcess(cmd)
           .then(async (proc) => {
-             await new Promise(r => setTimeout(r, 5000)); // Give it time to start
-             const logs = await proc.getLogs();
-             console.log('[CRON] Heartbeat initialized:', logs.stdout || logs.stderr);
+            await new Promise((r) => setTimeout(r, 5000)); // Give it time to start
+            const logs = await proc.getLogs();
+            console.log('[CRON] Heartbeat initialized:', logs.stdout || logs.stderr);
           })
-          .catch((err: Error) => console.error('[CRON] Heartbeat trigger failed:', err))
+          .catch((err: Error) => console.error('[CRON] Heartbeat trigger failed:', err)),
       );
       return;
     }
@@ -508,9 +512,7 @@ export default {
       ctx.waitUntil(
         ensureMoltbotGateway(sandbox, env)
           .then(() => console.log('[CRON] Gateway started successfully'))
-          .catch((err: Error) =>
-            console.error('[CRON] Failed to start gateway:', err.message),
-          ),
+          .catch((err: Error) => console.error('[CRON] Failed to start gateway:', err.message)),
       );
       return;
     }
@@ -521,15 +523,9 @@ export default {
         mode: 'tcp',
         timeout: 10_000,
       });
-      console.log(
-        '[CRON] Health check passed — gateway is running',
-        existingProcess.id,
-      );
+      console.log('[CRON] Health check passed — gateway is running', existingProcess.id);
     } catch {
-      console.log(
-        '[CRON] Gateway not responding, killing process',
-        existingProcess.id,
-      );
+      console.log('[CRON] Gateway not responding, killing process', existingProcess.id);
       try {
         await existingProcess.kill();
       } catch (killErr) {
@@ -539,9 +535,7 @@ export default {
       ctx.waitUntil(
         ensureMoltbotGateway(sandbox, env)
           .then(() => console.log('[CRON] Gateway restarted successfully'))
-          .catch((err: Error) =>
-            console.error('[CRON] Failed to restart gateway:', err.message),
-          ),
+          .catch((err: Error) => console.error('[CRON] Failed to restart gateway:', err.message)),
       );
     }
   },

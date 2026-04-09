@@ -193,9 +193,7 @@ function patchAIGatewayModel(config) {
   config.agents = config.agents || {};
   config.agents.defaults = config.agents.defaults || {};
   config.agents.defaults.model = config.agents.defaults.model || {};
-  if (!config.agents.defaults.model.primary) {
-    config.agents.defaults.model.primary = providerName + '/' + gatewayModelId;
-  }
+  config.agents.defaults.model.primary = providerName + '/' + gatewayModelId;
   console.log(`AI Gateway model override: provider=${providerName} model=${gatewayModelId} via ${baseUrl}`);
 }
 
@@ -235,6 +233,13 @@ function patchChannels(config) {
       enabled: true,
       dmPolicy,
       groupPolicy: 'open',
+      presence: {
+        status: 'online',
+        activity: {
+          name: 'Moltbot',
+          type: 'listening',
+        },
+      },
     };
     if (process.env.DISCORD_DM_ALLOW_FROM) {
       config.channels.discord.allowFrom = process.env.DISCORD_DM_ALLOW_FROM.split(',').map(s => s.trim());
@@ -323,6 +328,12 @@ function patchAgentSecurity(config) {
     if (agent.sandbox) { delete agent.sandbox; }
     if (agent.shell) { delete agent.shell; console.log(`Cleaned unsupported 'shell' key from agent: ${agent.id}`); }
     if (agent.network) { delete agent.network; console.log(`Cleaned unsupported 'network' key from agent: ${agent.id}`); }
+    
+    // If system-wide AI Gateway model is set, override per-agent models too
+    if (process.env.CF_AI_GATEWAY_MODEL && agent.model) {
+      delete agent.model;
+      console.log(`Overriding per-agent model for: ${agent.id}`);
+    }
   }
   console.log('Security: agents cleaned, sandbox.mode=off (CF Container is sandbox)');
 }

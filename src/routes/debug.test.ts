@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
 import { debug } from './debug';
-import { createMockSandbox, createMockEnv, suppressConsole, createMockProcess } from '../test-utils';
+import {
+  createMockSandbox,
+  createMockEnv,
+  suppressConsole,
+  createMockProcess,
+} from '../test-utils';
 import * as gatewayModule from '../gateway';
 
 describe('Debug Routes - /debug/security', () => {
@@ -50,7 +55,7 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json() as any;
+    const body = (await res.json()) as any;
     expect(body).toEqual({
       status: 'STOPPED',
       alert_count: 0,
@@ -65,7 +70,9 @@ describe('Debug Routes - /debug/security', () => {
 
     startProcessMock.mockImplementation(async (cmd: string) => {
       if (cmd.includes('security-alerts-pending.log')) {
-        return createMockProcess('[CRITICAL] Unauthorized file access detected\n[WARNING] Suspicious network activity\n');
+        return createMockProcess(
+          '[CRITICAL] Unauthorized file access detected\n[WARNING] Suspicious network activity\n',
+        );
       }
       if (cmd.includes('pgrep -f security-monitor.sh')) {
         return createMockProcess('RUNNING\n');
@@ -89,11 +96,14 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json() as any;
+    const body = (await res.json()) as any;
     expect(body).toEqual({
       status: 'RUNNING',
       alert_count: 2,
-      alerts: ['[CRITICAL] Unauthorized file access detected', '[WARNING] Suspicious network activity'],
+      alerts: [
+        '[CRITICAL] Unauthorized file access detected',
+        '[WARNING] Suspicious network activity',
+      ],
       has_critical: true,
       recent_log: '[INFO] Monitor started',
     });
@@ -125,11 +135,11 @@ describe('Debug Routes - /debug/security', () => {
     const res = await app.fetch(req, env);
     expect(res.status).toBe(200);
 
-    const body = await res.json() as any;
+    const body = (await res.json()) as any;
     expect(body.alert_count).toBe(1);
 
     // Verify clear command was called
-    const cmds = startProcessMock.mock.calls.map(call => call[0]);
+    const cmds = startProcessMock.mock.calls.map((call) => call[0]);
     expect(cmds).toContain('rm -f /tmp/security-alerts-pending.log');
   });
 });

@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Process, Sandbox } from '@cloudflare/sandbox';
-import {
-  buildConfigDiffSummary,
-  collectChangedPaths,
-  collectLeafPaths,
-} from './diff';
+import { buildConfigDiffSummary, collectChangedPaths, collectLeafPaths } from './diff';
 
 describe('collectChangedPaths', () => {
   it('returns only changed nested paths', () => {

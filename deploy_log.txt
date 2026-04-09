@@ -1,0 +1,755 @@
+deploy	Set up job	﻿2026-04-09T04:14:28.7371344Z Current runner version: '2.333.1'
+deploy	Set up job	2026-04-09T04:14:28.7395011Z ##[group]Runner Image Provisioner
+deploy	Set up job	2026-04-09T04:14:28.7395910Z Hosted Compute Agent
+deploy	Set up job	2026-04-09T04:14:28.7396508Z Version: 20260213.493
+deploy	Set up job	2026-04-09T04:14:28.7397165Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+deploy	Set up job	2026-04-09T04:14:28.7397929Z Build Date: 2026-02-13T00:28:41Z
+deploy	Set up job	2026-04-09T04:14:28.7398579Z Worker ID: {ebb35562-40a8-4be0-bca3-0de75d90a787}
+deploy	Set up job	2026-04-09T04:14:28.7399248Z Azure Region: westus
+deploy	Set up job	2026-04-09T04:14:28.7400003Z ##[endgroup]
+deploy	Set up job	2026-04-09T04:14:28.7401395Z ##[group]Operating System
+deploy	Set up job	2026-04-09T04:14:28.7402031Z Ubuntu
+deploy	Set up job	2026-04-09T04:14:28.7402567Z 24.04.4
+deploy	Set up job	2026-04-09T04:14:28.7403021Z LTS
+deploy	Set up job	2026-04-09T04:14:28.7403494Z ##[endgroup]
+deploy	Set up job	2026-04-09T04:14:28.7404036Z ##[group]Runner Image
+deploy	Set up job	2026-04-09T04:14:28.7404581Z Image: ubuntu-24.04
+deploy	Set up job	2026-04-09T04:14:28.7405140Z Version: 20260406.80.1
+deploy	Set up job	2026-04-09T04:14:28.7406198Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+deploy	Set up job	2026-04-09T04:14:28.7407848Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+deploy	Set up job	2026-04-09T04:14:28.7408809Z ##[endgroup]
+deploy	Set up job	2026-04-09T04:14:28.7411788Z ##[group]GITHUB_TOKEN Permissions
+deploy	Set up job	2026-04-09T04:14:28.7413805Z Actions: write
+deploy	Set up job	2026-04-09T04:14:28.7414421Z ArtifactMetadata: write
+deploy	Set up job	2026-04-09T04:14:28.7414997Z Attestations: write
+deploy	Set up job	2026-04-09T04:14:28.7415515Z Checks: write
+deploy	Set up job	2026-04-09T04:14:28.7416077Z Contents: write
+deploy	Set up job	2026-04-09T04:14:28.7416597Z Deployments: write
+deploy	Set up job	2026-04-09T04:14:28.7417169Z Discussions: write
+deploy	Set up job	2026-04-09T04:14:28.7417706Z Issues: write
+deploy	Set up job	2026-04-09T04:14:28.7418201Z Metadata: read
+deploy	Set up job	2026-04-09T04:14:28.7418698Z Models: read
+deploy	Set up job	2026-04-09T04:14:28.7419294Z Packages: write
+deploy	Set up job	2026-04-09T04:14:28.7420136Z Pages: write
+deploy	Set up job	2026-04-09T04:14:28.7420877Z PullRequests: write
+deploy	Set up job	2026-04-09T04:14:28.7421449Z RepositoryProjects: write
+deploy	Set up job	2026-04-09T04:14:28.7422032Z SecurityEvents: write
+deploy	Set up job	2026-04-09T04:14:28.7422917Z Statuses: write
+deploy	Set up job	2026-04-09T04:14:28.7423511Z ##[endgroup]
+deploy	Set up job	2026-04-09T04:14:28.7425829Z Secret source: Actions
+deploy	Set up job	2026-04-09T04:14:28.7426578Z Prepare workflow directory
+deploy	Set up job	2026-04-09T04:14:28.7749516Z Prepare all required actions
+deploy	Set up job	2026-04-09T04:14:28.7793979Z Getting action download info
+deploy	Set up job	2026-04-09T04:14:29.2441459Z Download action repository 'actions/checkout@v5' (SHA:93cb6efe18208431cddfb8368fd83d5badbf9bfd)
+deploy	Set up job	2026-04-09T04:14:29.4244647Z Download action repository 'actions/setup-node@v5' (SHA:a0853c24544627f65ddf259abe73b1d18a591444)
+deploy	Set up job	2026-04-09T04:14:29.5681374Z Download action repository 'cloudflare/wrangler-action@v3' (SHA:da0e0dfe58b7a431659754fdf3f186c529afbe65)
+deploy	Set up job	2026-04-09T04:14:30.1533658Z Complete job name: deploy
+deploy	Run actions/checkout@v5	﻿2026-04-09T04:14:30.2216421Z ##[group]Run actions/checkout@v5
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2217253Z with:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2217690Z   repository: Ks-Classic/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2218354Z   token: ***
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2218740Z   ssh-strict: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2219148Z   ssh-user: git
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2219559Z   persist-credentials: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2220460Z   clean: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2220884Z   sparse-checkout-cone-mode: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2221381Z   fetch-depth: 1
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2221778Z   fetch-tags: false
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2222186Z   show-progress: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2222599Z   lfs: false
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2222970Z   submodules: false
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2223383Z   set-safe-directory: true
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.2224140Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3154959Z Syncing repository: Ks-Classic/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3157684Z ##[group]Getting Git version info
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3158878Z Working directory is '/home/runner/work/moltworker/moltworker'
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3160944Z [command]/usr/bin/git version
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3182042Z git version 2.53.0
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3234780Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3250407Z Temporarily overriding HOME='/home/runner/work/_temp/635df78b-19df-494e-870e-b793b6894f97' before making global git config changes
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3252794Z Adding repository directory to the temporary git global config as a safe directory
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3255765Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/moltworker/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3287345Z Deleting the contents of '/home/runner/work/moltworker/moltworker'
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3291392Z ##[group]Initializing the repository
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3295377Z [command]/usr/bin/git init /home/runner/work/moltworker/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3384536Z hint: Using 'master' as the name for the initial branch. This default branch name
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3386376Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3388105Z hint: to use in all of your new repositories, which will suppress this warning,
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3389469Z hint: call:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3390263Z hint:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3391031Z hint: 	git config --global init.defaultBranch <name>
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3392214Z hint:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3393195Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3394319Z hint: 'development'. The just-created branch can be renamed via this command:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3395350Z hint:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3395836Z hint: 	git branch -m <name>
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3396665Z hint:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3397717Z hint: Disable this message with "git config set advice.defaultBranchName false"
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3398901Z Initialized empty Git repository in /home/runner/work/moltworker/moltworker/.git/
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3400640Z [command]/usr/bin/git remote add origin https://github.com/Ks-Classic/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3426901Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3427680Z ##[group]Disabling automatic garbage collection
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3430534Z [command]/usr/bin/git config --local gc.auto 0
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3457962Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3458651Z ##[group]Setting up auth
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3465514Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3496382Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3768616Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.3799144Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4007658Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4038008Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4247688Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4279595Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4280638Z ##[group]Fetching the repository
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.4288162Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +af00103208c84e2061c9a7544ff3992a095f4b21:refs/remotes/origin/main
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9367192Z From https://github.com/Ks-Classic/moltworker
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9369427Z  * [new ref]         af00103208c84e2061c9a7544ff3992a095f4b21 -> origin/main
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9394905Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9396103Z ##[group]Determining the checkout info
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9397905Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9402459Z [command]/usr/bin/git sparse-checkout disable
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9437859Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9464377Z ##[group]Checking out the ref
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9466761Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9587336Z Switched to a new branch 'main'
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9590279Z branch 'main' set up to track 'origin/main'.
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9598529Z ##[endgroup]
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9632933Z [command]/usr/bin/git log -1 --format=%H
+deploy	Run actions/checkout@v5	2026-04-09T04:14:30.9655089Z af00103208c84e2061c9a7544ff3992a095f4b21
+deploy	Setup Node.js	﻿2026-04-09T04:14:31.0012736Z ##[group]Run actions/setup-node@v5
+deploy	Setup Node.js	2026-04-09T04:14:31.0013946Z with:
+deploy	Setup Node.js	2026-04-09T04:14:31.0014776Z   node-version: 22
+deploy	Setup Node.js	2026-04-09T04:14:31.0015701Z   always-auth: false
+deploy	Setup Node.js	2026-04-09T04:14:31.0016660Z   check-latest: false
+deploy	Setup Node.js	2026-04-09T04:14:31.0017912Z   token: ***
+deploy	Setup Node.js	2026-04-09T04:14:31.0018819Z   package-manager-cache: true
+deploy	Setup Node.js	2026-04-09T04:14:31.0020054Z ##[endgroup]
+deploy	Setup Node.js	2026-04-09T04:14:31.1685643Z Found in cache @ /opt/hostedtoolcache/node/22.22.2/x64
+deploy	Setup Node.js	2026-04-09T04:14:31.1690239Z (node:2403) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+deploy	Setup Node.js	2026-04-09T04:14:31.1694982Z (Use `node --trace-deprecation ...` to show where the warning was created)
+deploy	Setup Node.js	2026-04-09T04:14:31.1698794Z ##[group]Environment details
+deploy	Setup Node.js	2026-04-09T04:14:34.4170315Z node: v22.22.2
+deploy	Setup Node.js	2026-04-09T04:14:34.4170936Z npm: 10.9.7
+deploy	Setup Node.js	2026-04-09T04:14:34.4171320Z yarn: 1.22.22
+deploy	Setup Node.js	2026-04-09T04:14:34.4172591Z ##[endgroup]
+deploy	Install dependencies	﻿2026-04-09T04:14:34.4306210Z ##[group]Run npm ci
+deploy	Install dependencies	2026-04-09T04:14:34.4306551Z [36;1mnpm ci[0m
+deploy	Install dependencies	2026-04-09T04:14:34.4390154Z shell: /usr/bin/bash -e {0}
+deploy	Install dependencies	2026-04-09T04:14:34.4390472Z ##[endgroup]
+deploy	Install dependencies	2026-04-09T04:14:47.7515148Z 
+deploy	Install dependencies	2026-04-09T04:14:47.7524404Z added 242 packages, and audited 243 packages in 13s
+deploy	Install dependencies	2026-04-09T04:14:47.7524968Z 
+deploy	Install dependencies	2026-04-09T04:14:47.7525330Z 39 packages are looking for funding
+deploy	Install dependencies	2026-04-09T04:14:47.7525933Z   run `npm fund` for details
+deploy	Install dependencies	2026-04-09T04:14:47.8177953Z 
+deploy	Install dependencies	2026-04-09T04:14:47.8178754Z 9 vulnerabilities (8 high, 1 critical)
+deploy	Install dependencies	2026-04-09T04:14:47.8179257Z 
+deploy	Install dependencies	2026-04-09T04:14:47.8179535Z To address all issues, run:
+deploy	Install dependencies	2026-04-09T04:14:47.8180368Z   npm audit fix
+deploy	Install dependencies	2026-04-09T04:14:47.8180623Z 
+deploy	Install dependencies	2026-04-09T04:14:47.8180900Z Run `npm audit` for details.
+deploy	Build canonical OpenClaw config	﻿2026-04-09T04:14:47.8839009Z ##[group]Run npm run config:build
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.8839335Z [36;1mnpm run config:build[0m
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.8862011Z shell: /usr/bin/bash -e {0}
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.8862273Z ##[endgroup]
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.9814277Z 
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.9815034Z > moltbot-sandbox@1.0.0 config:build
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.9815773Z > node scripts/build-openclaw-config.cjs
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:47.9816142Z 
+deploy	Build canonical OpenClaw config	2026-04-09T04:14:48.0060827Z Built openclaw/openclaw.json from config/openclaw.source.json
+deploy	Upload configs to R2	﻿2026-04-09T04:14:48.0184274Z ##[group]Run # Upload openclaw.json
+deploy	Upload configs to R2	2026-04-09T04:14:48.0184628Z [36;1m# Upload openclaw.json[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0185013Z [36;1mnpx wrangler r2 object put "openclaw-data/openclaw/openclaw.json" \[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0185444Z [36;1m  --file openclaw/openclaw.json --remote[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0185725Z [36;1m[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0185919Z [36;1m# Upload canonical source config[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0186323Z [36;1mnpx wrangler r2 object put "openclaw-data/openclaw/openclaw.source.json" \[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0186776Z [36;1m  --file config/openclaw.source.json --remote[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0187101Z [36;1m[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0187298Z [36;1m# Upload all agent config files[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0187603Z [36;1mfor agent_dir in openclaw/agents/*/agent; do[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0187950Z [36;1m  agent_name=$(basename $(dirname "$agent_dir"))[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0188265Z [36;1m  for f in "$agent_dir"/*.md; do[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0188516Z [36;1m    [ -f "$f" ] || continue[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0188788Z [36;1m    fname=$(basename "$f")[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0189090Z [36;1m    echo "Uploading $agent_name/$fname..."[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0189430Z [36;1m    npx wrangler r2 object put \[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0190337Z [36;1m      "openclaw-data/openclaw/agents/$agent_name/agent/$fname" \[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0190748Z [36;1m      --file "$f" --remote[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0190992Z [36;1m  done[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0191253Z [36;1mdone[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0191422Z [36;1m[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0191623Z [36;1mecho "✅ Config upload complete"[0m
+deploy	Upload configs to R2	2026-04-09T04:14:48.0213630Z shell: /usr/bin/bash -e {0}
+deploy	Upload configs to R2	2026-04-09T04:14:48.0213883Z env:
+deploy	Upload configs to R2	2026-04-09T04:14:48.0214278Z   CLOUDFLARE_API_TOKEN: ***
+deploy	Upload configs to R2	2026-04-09T04:14:48.0214588Z   CLOUDFLARE_ACCOUNT_ID: ***
+deploy	Upload configs to R2	2026-04-09T04:14:48.0214814Z ##[endgroup]
+deploy	Upload configs to R2	2026-04-09T04:14:49.1432505Z 
+deploy	Upload configs to R2	2026-04-09T04:14:49.1433598Z  ⛅️ wrangler 4.75.0 (update available 4.81.0)
+deploy	Upload configs to R2	2026-04-09T04:14:49.1434268Z ─────────────────────────────────────────────
+deploy	Upload configs to R2	2026-04-09T04:14:49.1435542Z Resource location: remote 
+deploy	Upload configs to R2	2026-04-09T04:14:49.1435854Z 
+deploy	Upload configs to R2	2026-04-09T04:14:49.1678033Z Creating object "openclaw/openclaw.json" in bucket "openclaw-data".
+deploy	Upload configs to R2	2026-04-09T04:14:50.0232147Z Upload complete.
+deploy	Upload configs to R2	2026-04-09T04:14:50.9876646Z 
+deploy	Upload configs to R2	2026-04-09T04:14:50.9877737Z  ⛅️ wrangler 4.75.0 (update available 4.81.0)
+deploy	Upload configs to R2	2026-04-09T04:14:50.9878691Z ─────────────────────────────────────────────
+deploy	Upload configs to R2	2026-04-09T04:14:50.9882491Z Resource location: remote 
+deploy	Upload configs to R2	2026-04-09T04:14:50.9882843Z 
+deploy	Upload configs to R2	2026-04-09T04:14:51.0119434Z Creating object "openclaw/openclaw.source.json" in bucket "openclaw-data".
+deploy	Upload configs to R2	2026-04-09T04:14:51.6647877Z Upload complete.
+deploy	Upload configs to R2	2026-04-09T04:14:51.7526785Z Uploading e-spiral/AGENTS.md...
+deploy	Upload configs to R2	2026-04-09T04:14:52.6277625Z 
+deploy	Upload configs to R2	2026-04-09T04:14:52.6278945Z  ⛅️ wrangler 4.75.0 (update available 4.81.0)
+deploy	Upload configs to R2	2026-04-09T04:14:52.6280009Z ─────────────────────────────────────────────
+deploy	Upload configs to R2	2026-04-09T04:14:52.6283652Z Resource location: remote 
+deploy	Upload configs to R2	2026-04-09T04:14:52.6284210Z 
+deploy	Upload configs to R2	2026-04-09T04:14:52.6528266Z Creating object "openclaw/agents/e-spiral/agent/AGENTS.md" in bucket "openclaw-data".
+deploy	Upload configs to R2	2026-04-09T04:14:53.3491465Z Upload complete.
+deploy	Upload configs to R2	2026-04-09T04:14:53.4345676Z Uploading main/AGENTS.md...
+deploy	Upload configs to R2	2026-04-09T04:14:54.3205473Z 
+deploy	Upload configs to R2	2026-04-09T04:14:54.3206420Z  ⛅️ wrangler 4.75.0 (update available 4.81.0)
+deploy	Upload configs to R2	2026-04-09T04:14:54.3207308Z ─────────────────────────────────────────────
+deploy	Upload configs to R2	2026-04-09T04:14:54.3211295Z Resource location: remote 
+deploy	Upload configs to R2	2026-04-09T04:14:54.3211652Z 
+deploy	Upload configs to R2	2026-04-09T04:14:54.3490342Z Creating object "openclaw/agents/main/agent/AGENTS.md" in bucket "openclaw-data".
+deploy	Upload configs to R2	2026-04-09T04:14:55.0622703Z Upload complete.
+deploy	Upload configs to R2	2026-04-09T04:14:55.1470494Z ✅ Config upload complete
+deploy	Deploy to Cloudflare Workers	﻿2026-04-09T04:14:55.1547608Z ##[group]Run cloudflare/wrangler-action@v3
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1547924Z with:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1548315Z   apiToken: ***
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1548541Z   accountId: ***
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1548718Z   command: deploy
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1548905Z   packageManager: npm
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1549107Z   quiet: false
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.1549281Z ##[endgroup]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.2462488Z ##[group]🔍 Checking for existing Wrangler installation
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:55.2503831Z [command]/opt/hostedtoolcache/node/22.22.2/x64/bin/npx --no-install wrangler --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1324915Z 4.75.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1622872Z ✅ No wrangler version specified, using pre-installed wrangler version 4.75.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1623992Z ##[endgroup]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1624312Z ##[endgroup]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1626746Z ##[group]🚀 Running Wrangler Commands
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:56.1649537Z [command]/opt/hostedtoolcache/node/22.22.2/x64/bin/npx wrangler deploy
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.0475840Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.0480691Z  ⛅️ wrangler 4.75.0 (update available 4.81.0)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.0481651Z ─────────────────────────────────────────────
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.0589926Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.0593249Z Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.1011543Z [custom build] Running: npm run build
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.2075300Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.2076243Z [custom build] > moltbot-sandbox@1.0.0 build
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.2077050Z [custom build] > vite build
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.2077732Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:57.2078319Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2685618Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2686934Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2689244Z [custom build] [43mWARNING[0m: your worker config (at `wrangler.jsonc`) contains the following configuration options which are ignored since they are not applicable when using Vite:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2693787Z [custom build]   - `build`, `rules` which are not relevant in the context of a Vite project
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2694646Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2695017Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2800431Z [custom build] (node:2777) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2802455Z [custom build] (Use `node --trace-deprecation ...` to show where the warning was created)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.2830581Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.3087073Z [custom build] [36mvite v6.4.1 [32mbuilding SSR bundle for production...[36m[39m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.3088004Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.3480820Z [custom build] transforming...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:58.3481487Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.5751671Z [custom build] [32m✓[39m 270 modules transformed.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.5752844Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.7232031Z [custom build] rendering chunks...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.7232946Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8405165Z [custom build] [2mdist/moltbot_sandbox/[22m[32mwrangler.json                                 [39m[1m[2m    1.79 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8406612Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8408284Z [custom build] [2mdist/moltbot_sandbox/[22m[32m.vite/manifest.json                           [39m[1m[2m    2.42 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8410975Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[32mconfig-error-BiHBZmt2.html             [39m[1m[2m    4.36 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8413389Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[32mloading-DBoxPamg.html                  [39m[1m[2m    5.22 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8415641Z [custom build] [2mdist/moltbot_sandbox/[22m[36mindex.js                                      [39m[1m[2m    0.28 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8418512Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36mBrowserWebSocketTransport-_4zER8KH.js  [39m[1m[2m    0.83 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8422000Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36m_commonjsHelpers-TeSvKOnp.js           [39m[1m[2m    0.90 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8441549Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36mNodeWebSocketTransport-D-pqK6YH.js     [39m[1m[2m    2.06 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8444343Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36mpromises-F8iJR05N.js                   [39m[1m[2m    5.20 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8446828Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36mindex-odlij83S.js                      [39m[1m[2m   20.25 kB[22m[1m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8449357Z [custom build] [2mdist/moltbot_sandbox/[22m[2massets/[22m[36mworker-entry-CFa3IP9W.js               [39m[1m[33m1,029.15 kB[39m[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8450943Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8451786Z [custom build] [32m✓ built in 1.51s[39m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8452952Z [custom build] [36mvite v6.4.1 [32mbuilding for production...[36m[39m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8453904Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8619094Z [custom build] transforming...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:14:59.8625293Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.4347459Z [custom build] [32m✓[39m 33 modules transformed.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.4348489Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5189180Z [custom build] rendering chunks...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5190187Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5222359Z [custom build] computing gzip size...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5222890Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5293815Z [custom build] [2mdist/client/[22m[32mindex.html                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:  0.28 kB[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5296850Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5302287Z [custom build] [2mdist/client/[22m[2massets/[22m[35mindex-B1XPMD5E.css  [39m[1m[2m  6.09 kB[22m[1m[22m[2m │ gzip:  1.73 kB[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5303940Z [custom build] [2mdist/client/[22m[2massets/[22m[36mindex-BmTf80Tt.js   [39m[1m[2m203.54 kB[22m[1m[22m[2m │ gzip: 63.19 kB[22m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5304554Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5304940Z [custom build] [32m✓ built in 688ms[39m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:00.5305219Z [custom build] 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:07.1548670Z 🌀 Building list of assets...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:07.1555310Z ✨ Read 6 files from the assets directory /home/runner/work/moltworker/moltworker/dist/client
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:07.1630274Z 🌀 Starting asset upload...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:10.2472244Z No updated asset files to upload. Proceeding with deployment...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:10.2760415Z Total Upload: 1156.14 KiB / gzip: 231.20 KiB
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.2997989Z Worker Startup Time: 23 ms
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3014875Z Your Worker has access to the following bindings:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3015737Z Binding                                 Resource            
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3019597Z env.Sandbox (Sandbox)                   Durable Object      
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3021081Z env.MOLTBOT_BUCKET (openclaw-data)      R2 Bucket           
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3022216Z env.BROWSER                             Browser             
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3022995Z env.ASSETS                              Assets              
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3023348Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3023602Z The following containers are available:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3024220Z - moltbot-sandbox-sandbox (/home/runner/work/moltworker/moltworker/Dockerfile)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3024690Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3032797Z Uploaded moltbot-sandbox (10.63 sec)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.3059605Z Building image moltbot-sandbox-sandbox:8c690f9f
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5957072Z #0 building with "default" instance using docker driver
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5957579Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5957870Z #1 [internal] load build definition from Dockerfile
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5958246Z #1 transferring dockerfile: 2.37kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5958931Z #1 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 2)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5960115Z #1 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 7)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5960938Z #1 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5961050Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.5961315Z #2 [internal] load metadata for docker.io/library/golang:1.25-bookworm
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8134963Z #2 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8135227Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8135550Z #3 [auth] library/golang:pull token for registry-1.docker.io
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8135964Z #3 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8136099Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8136400Z #4 [auth] cloudflare/sandbox:pull token for registry-1.docker.io
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.8136801Z #4 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.9638606Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:13.9639184Z #5 [internal] load metadata for docker.io/cloudflare/sandbox:0.7.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.2682871Z #5 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.2683074Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.2683406Z #2 [internal] load metadata for docker.io/library/golang:1.25-bookworm
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.2683837Z #2 DONE 0.8s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4281926Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4282734Z #5 [internal] load metadata for docker.io/cloudflare/sandbox:0.7.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4283413Z #5 DONE 0.9s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4283559Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4283717Z #6 [internal] load .dockerignore
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4284052Z #6 transferring context: 2B done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4284308Z #6 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4284421Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4284564Z #7 [internal] load build context
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4284891Z #7 transferring context: 82.46kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4285157Z #7 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4285272Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4285876Z #8 [stage-1  1/12] FROM docker.io/cloudflare/sandbox:0.7.0@sha256:7d646f289c3727592cd091d2f5684c322fa25e89bad51055b390bc68cabac832
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4286976Z #8 resolve docker.io/cloudflare/sandbox:0.7.0@sha256:7d646f289c3727592cd091d2f5684c322fa25e89bad51055b390bc68cabac832 done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4287888Z #8 sha256:000684096682e3f1cebee2a4c099215b1edacbd72774a192acf80404a91a759f 0B / 307B 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4288910Z #8 sha256:7d646f289c3727592cd091d2f5684c322fa25e89bad51055b390bc68cabac832 856B / 856B done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4289978Z #8 sha256:5f8849d80942e0a49eee1a9bbf3af9a89a6759326d97f55cdf4950493d090eae 5.87kB / 5.87kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4290716Z #8 sha256:6f4ebca3e823b18dac366f72e537b1772bc3522a5c7ae299d6491fb17378410e 0B / 29.54MB 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4291432Z #8 sha256:0b75ca1a423e99d7ffca170b79b1bdc8b183817442366e230865bc6996e270ec 2.58kB / 2.58kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.4292145Z #8 sha256:60558c1cba8ba668aae246340d5fb500074454d9c463d00cd720d6bba9bd1fd7 0B / 47.09MB 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.5284532Z #8 sha256:6f4ebca3e823b18dac366f72e537b1772bc3522a5c7ae299d6491fb17378410e 24.12MB / 29.54MB 0.2s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6291024Z #8 sha256:000684096682e3f1cebee2a4c099215b1edacbd72774a192acf80404a91a759f 307B / 307B 0.2s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6292267Z #8 sha256:6f4ebca3e823b18dac366f72e537b1772bc3522a5c7ae299d6491fb17378410e 29.54MB / 29.54MB 0.2s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6293536Z #8 sha256:60558c1cba8ba668aae246340d5fb500074454d9c463d00cd720d6bba9bd1fd7 19.92MB / 47.09MB 0.3s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6294408Z #8 extracting sha256:6f4ebca3e823b18dac366f72e537b1772bc3522a5c7ae299d6491fb17378410e
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6295109Z #8 sha256:45513cd067fd11700fdb75fac40238cc2ed9c0000a6f9b01ceaf2a42d2950105 0B / 36.58MB 0.3s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.6296299Z #8 sha256:9609dbb4b32e8c7b372e6f024af569766839176d42c4b017277c483215e5a948 0B / 2.78MB 0.3s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.8284770Z #8 sha256:60558c1cba8ba668aae246340d5fb500074454d9c463d00cd720d6bba9bd1fd7 47.09MB / 47.09MB 0.4s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.8286347Z #8 sha256:45513cd067fd11700fdb75fac40238cc2ed9c0000a6f9b01ceaf2a42d2950105 31.46MB / 36.58MB 0.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.8289000Z #8 sha256:9609dbb4b32e8c7b372e6f024af569766839176d42c4b017277c483215e5a948 2.78MB / 2.78MB 0.4s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.8290569Z #8 sha256:f91e86eb2c32ea9d154cb8ee974bc0043e623b8cb923014caeaa11926625abfe 0B / 203B 0.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.8291337Z #8 sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0 0B / 39.79MB 0.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.9285794Z #8 sha256:45513cd067fd11700fdb75fac40238cc2ed9c0000a6f9b01ceaf2a42d2950105 36.58MB / 36.58MB 0.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.9288221Z #8 sha256:f91e86eb2c32ea9d154cb8ee974bc0043e623b8cb923014caeaa11926625abfe 203B / 203B 0.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.9290724Z #8 sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0 12.58MB / 39.79MB 0.6s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.9291818Z #8 sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 0B / 32B 0.6s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:14.9292532Z #8 sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81 0B / 39.82MB 0.6s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.0288205Z #8 sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0 33.55MB / 39.79MB 0.7s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.0292228Z #8 sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 32B / 32B 0.6s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.0293707Z #8 sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81 18.87MB / 39.82MB 0.7s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.0295103Z #8 sha256:ea2644942930d73040dc56c22d0628dc2259286aea5d8e03728fd39d2c39b31d 0B / 36.50kB 0.7s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.1439976Z #8 sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0 39.79MB / 39.79MB 0.7s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.1443714Z #8 sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81 33.55MB / 39.82MB 0.8s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.1445157Z #8 sha256:ea2644942930d73040dc56c22d0628dc2259286aea5d8e03728fd39d2c39b31d 36.50kB / 36.50kB 0.7s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.1445921Z #8 sha256:063305166cb58d67d1ab741d35b89bbc36dc892eaa16822749274f07261b96c5 0B / 99B 0.8s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.1446823Z #8 sha256:094941f9824c3406f44033bded13df86ce9be3e9702a44f3f31e00f4ee6b5954 0B / 34.75kB 0.8s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.3330643Z #8 sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81 39.82MB / 39.82MB 0.8s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.3331881Z #8 sha256:063305166cb58d67d1ab741d35b89bbc36dc892eaa16822749274f07261b96c5 99B / 99B 0.8s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.3333707Z #8 sha256:094941f9824c3406f44033bded13df86ce9be3e9702a44f3f31e00f4ee6b5954 34.75kB / 34.75kB 0.8s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:15.9566714Z #8 extracting sha256:6f4ebca3e823b18dac366f72e537b1772bc3522a5c7ae299d6491fb17378410e 1.2s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:16.0661186Z #8 extracting sha256:60558c1cba8ba668aae246340d5fb500074454d9c463d00cd720d6bba9bd1fd7
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:18.1758181Z #8 extracting sha256:60558c1cba8ba668aae246340d5fb500074454d9c463d00cd720d6bba9bd1fd7 2.2s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:19.0806014Z #8 extracting sha256:000684096682e3f1cebee2a4c099215b1edacbd72774a192acf80404a91a759f
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:19.2054672Z #8 extracting sha256:000684096682e3f1cebee2a4c099215b1edacbd72774a192acf80404a91a759f done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:19.2056060Z #8 extracting sha256:45513cd067fd11700fdb75fac40238cc2ed9c0000a6f9b01ceaf2a42d2950105 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:19.6875780Z #8 extracting sha256:45513cd067fd11700fdb75fac40238cc2ed9c0000a6f9b01ceaf2a42d2950105 0.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:19.6878153Z #8 extracting sha256:9609dbb4b32e8c7b372e6f024af569766839176d42c4b017277c483215e5a948
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:20.3875691Z #8 extracting sha256:9609dbb4b32e8c7b372e6f024af569766839176d42c4b017277c483215e5a948 0.6s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:20.4958798Z #8 extracting sha256:f91e86eb2c32ea9d154cb8ee974bc0043e623b8cb923014caeaa11926625abfe done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:20.4961031Z #8 extracting sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.1431359Z #8 extracting sha256:da8841bbd6d039f8e06f73ecb33b2842ccb09c43a3dddf3176c8f899be9355e0 0.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.1432703Z #8 extracting sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.7717900Z #8 extracting sha256:c6a2386f74a5b8d29ce0e984972bcdf7ad2138897fa3877b96a4fb26f507cc81 0.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.7719404Z #8 extracting sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.7721255Z #8 extracting sha256:ea2644942930d73040dc56c22d0628dc2259286aea5d8e03728fd39d2c39b31d done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.7722893Z #8 extracting sha256:094941f9824c3406f44033bded13df86ce9be3e9702a44f3f31e00f4ee6b5954 done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.7724052Z #8 extracting sha256:063305166cb58d67d1ab741d35b89bbc36dc892eaa16822749274f07261b96c5
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.9052301Z #8 extracting sha256:063305166cb58d67d1ab741d35b89bbc36dc892eaa16822749274f07261b96c5 done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.9053042Z #8 DONE 7.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.9053333Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:21.9057711Z #9 [stage-1  2/12] RUN ARCH="$(dpkg --print-architecture)"     && case "${ARCH}" in          amd64) NODE_ARCH="x64" ;;          arm64) NODE_ARCH="arm64" ;;          *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;;        esac     && apt-get update && apt-get install -y xz-utils ca-certificates rclone     && curl -fsSLk https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1     && rm /tmp/node.tar.xz     && node --version     && npm --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.3603910Z #9 0.462 Get:1 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.5175007Z #9 0.607 Get:2 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.6944758Z #9 0.878 Get:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.7946612Z #9 0.978 Get:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.8950581Z #9 1.063 Get:5 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [1311 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:22.8955001Z #9 1.079 Get:6 http://archive.ubuntu.com/ubuntu jammy/main amd64 Packages [1792 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.2955393Z #9 1.387 Get:7 http://archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [266 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.2957406Z #9 1.390 Get:8 http://archive.ubuntu.com/ubuntu jammy/restricted amd64 Packages [164 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.2959405Z #9 1.398 Get:9 http://archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [17.5 MB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.3967173Z #9 1.537 Get:10 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [3889 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.6137447Z #9 1.774 Get:11 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [6917 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.7190464Z #9 1.828 Get:12 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1622 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.7191942Z #9 1.850 Get:13 http://archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [7143 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.7193162Z #9 1.902 Get:14 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [4226 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.8351890Z #9 1.944 Get:15 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [62.6 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.8354646Z #9 1.953 Get:16 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [70.9 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.8356821Z #9 1.953 Get:17 http://archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [84.0 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:23.8359180Z #9 1.954 Get:18 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [35.6 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4664005Z #9 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4664647Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4666093Z #10 [gog-builder 1/2] FROM docker.io/library/golang:1.25-bookworm@sha256:29e59af995c51a5bf63d072eca973b918e0e7af4db0e4667aa73f1b8da1a6d8c
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4668634Z #10 resolve docker.io/library/golang:1.25-bookworm@sha256:29e59af995c51a5bf63d072eca973b918e0e7af4db0e4667aa73f1b8da1a6d8c done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4670342Z #10 sha256:1c4f3ff66efd8e835690a576d446cfaf007572b421236c5edd2250ccdee29dbc 3.06kB / 3.06kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4671291Z #10 sha256:29e59af995c51a5bf63d072eca973b918e0e7af4db0e4667aa73f1b8da1a6d8c 9.10kB / 9.10kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4672208Z #10 sha256:e29e14633a7d43fe3161fee1849a0a11efe81145b0572bfc162743698c3257ae 2.32kB / 2.32kB done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4673120Z #10 sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 32B / 32B 0.6s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4674104Z #10 sha256:c150dd3f5fc91eabd1818cc30298a4a956782621583cadfd369c4d327584008e 48.49MB / 48.49MB 1.1s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4675368Z #10 sha256:c2c3414b1d6b49c54c305584faac46aad75c67644cf4f8495e8145206d28e416 24.04MB / 24.04MB 1.1s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4676350Z #10 sha256:de73ef470b7b271fede6f98a4c8376971bd059ce04ebc13b9f86e34e534b89ae 64.40MB / 64.40MB 1.3s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4677326Z #10 sha256:36df5c69c67e8043557959ede453e7dd9086b79a02fd8f6902948a8af44966b9 92.45MB / 92.45MB 1.6s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4678259Z #10 extracting sha256:c150dd3f5fc91eabd1818cc30298a4a956782621583cadfd369c4d327584008e 2.1s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4679218Z #10 sha256:f2975120dd41bd35f641db62b50cab83d9b4d923ffb4e7ec012a7ed4775d33e6 60.18MB / 60.18MB 1.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4680122Z #10 sha256:93087e76a1e2e414b67bdb5aae343d9757f462cafc76441021d2208fde0c315e 125B / 125B 1.4s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4680851Z #10 extracting sha256:c2c3414b1d6b49c54c305584faac46aad75c67644cf4f8495e8145206d28e416 0.6s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4681579Z #10 extracting sha256:de73ef470b7b271fede6f98a4c8376971bd059ce04ebc13b9f86e34e534b89ae 2.7s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.4682287Z #10 extracting sha256:36df5c69c67e8043557959ede453e7dd9086b79a02fd8f6902948a8af44966b9 2.1s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:24.5191369Z #10 extracting sha256:f2975120dd41bd35f641db62b50cab83d9b4d923ffb4e7ec012a7ed4775d33e6
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:25.3848004Z #10 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:25.3850635Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:25.3855722Z #9 [stage-1  2/12] RUN ARCH="$(dpkg --print-architecture)"     && case "${ARCH}" in          amd64) NODE_ARCH="x64" ;;          arm64) NODE_ARCH="arm64" ;;          *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;;        esac     && apt-get update && apt-get install -y xz-utils ca-certificates rclone     && curl -fsSLk https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1     && rm /tmp/node.tar.xz     && node --version     && npm --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:25.3859397Z #9 3.497 Fetched 45.7 MB in 3s (13.8 MB/s)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:26.5552271Z #9 3.497 Reading package lists...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:26.5553310Z #9 4.727 Reading package lists...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:26.7793270Z #9 4.742 Building dependency tree...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:26.7794075Z #9 4.962 Reading state information...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.1087207Z #9 5.142 ca-certificates is already the newest version (20240203~22.04.1).
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.1088476Z #9 5.142 The following NEW packages will be installed:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.1089200Z #9 5.142   rclone xz-utils
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.3847116Z #9 5.568 0 upgraded, 2 newly installed, 0 to remove and 30 not upgraded.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.3847970Z #9 5.568 Need to get 11.8 MB of archives.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.3848692Z #9 5.568 After this operation, 43.0 MB of additional disk space will be used.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.3850255Z #9 5.568 Get:1 http://archive.ubuntu.com/ubuntu jammy/main amd64 xz-utils amd64 5.2.5-2ubuntu1 [84.8 kB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:27.9079483Z #9 6.092 Get:2 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 rclone amd64 1.53.3-4ubuntu1.22.04.3 [11.7 MB]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.6944561Z #9 7.878 debconf: delaying package configuration, since apt-utils is not installed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9066075Z #9 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9066721Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9068175Z #10 [gog-builder 1/2] FROM docker.io/library/golang:1.25-bookworm@sha256:29e59af995c51a5bf63d072eca973b918e0e7af4db0e4667aa73f1b8da1a6d8c
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9073505Z #10 extracting sha256:f2975120dd41bd35f641db62b50cab83d9b4d923ffb4e7ec012a7ed4775d33e6 4.2s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9074877Z #10 extracting sha256:93087e76a1e2e414b67bdb5aae343d9757f462cafc76441021d2208fde0c315e done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9076162Z #10 extracting sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9076926Z #10 DONE 15.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9077130Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9081477Z #9 [stage-1  2/12] RUN ARCH="$(dpkg --print-architecture)"     && case "${ARCH}" in          amd64) NODE_ARCH="x64" ;;          arm64) NODE_ARCH="arm64" ;;          *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;;        esac     && apt-get update && apt-get install -y xz-utils ca-certificates rclone     && curl -fsSLk https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1     && rm /tmp/node.tar.xz     && node --version     && npm --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9085111Z #9 7.902 Fetched 11.8 MB in 3s (4500 kB/s)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9085786Z #9 7.928 Selecting previously unselected package xz-utils.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9086396Z #9 7.928 (Reading database ... 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9087093Z (Reading database ... 5%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9087510Z (Reading database ... 10%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9087899Z (Reading database ... 15%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9088467Z (Reading database ... 20%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9088901Z (Reading database ... 25%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9089276Z (Reading database ... 30%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9090009Z (Reading database ... 35%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9090416Z (Reading database ... 40%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9090832Z (Reading database ... 45%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9091197Z (Reading database ... 50%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9091583Z (Reading database ... 55%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9091939Z (Reading database ... 60%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9092323Z (Reading database ... 65%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9092699Z (Reading database ... 70%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9093057Z (Reading database ... 75%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9093427Z (Reading database ... 80%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9093801Z (Reading database ... 85%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9094387Z (Reading database ... 90%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9094835Z (Reading database ... 95%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9095228Z (Reading database ... 100%
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9095936Z (Reading database ... 10912 files and directories currently installed.)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9096876Z #9 7.935 Preparing to unpack .../xz-utils_5.2.5-2ubuntu1_amd64.deb ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9097891Z #9 7.936 Unpacking xz-utils (5.2.5-2ubuntu1) ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9098577Z #9 7.961 Selecting previously unselected package rclone.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9099436Z #9 7.962 Preparing to unpack .../rclone_1.53.3-4ubuntu1.22.04.3_amd64.deb ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:29.9100441Z #9 7.963 Unpacking rclone (1.53.3-4ubuntu1.22.04.3) ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1074982Z #9 8.132 Setting up rclone (1.53.3-4ubuntu1.22.04.3) ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1075934Z #9 8.135 Setting up xz-utils (5.2.5-2ubuntu1) ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1077052Z #9 8.139 update-alternatives: using /usr/bin/xz to provide /usr/bin/lzma (lzma) in auto mode
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1078457Z #9 8.139 update-alternatives: warning: skip creation of /usr/share/man/man1/lzma.1.gz because associated file /usr/share/man/man1/xz.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1080651Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/unlzma.1.gz because associated file /usr/share/man/man1/unxz.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1082427Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/lzcat.1.gz because associated file /usr/share/man/man1/xzcat.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1084132Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/lzmore.1.gz because associated file /usr/share/man/man1/xzmore.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1085817Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/lzless.1.gz because associated file /usr/share/man/man1/xzless.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1087285Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/lzdiff.1.gz because associated file /usr/share/man/man1/xzdiff.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1088569Z #9 8.140 update-alternatives: warning: skip creation of /usr/share/man/man1/lzcmp.1.gz because associated file /usr/share/man/man1/xzcmp.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1090445Z #9 8.141 update-alternatives: warning: skip creation of /usr/share/man/man1/lzgrep.1.gz because associated file /usr/share/man/man1/xzgrep.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1091758Z #9 8.141 update-alternatives: warning: skip creation of /usr/share/man/man1/lzegrep.1.gz because associated file /usr/share/man/man1/xzegrep.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:30.1093075Z #9 8.141 update-alternatives: warning: skip creation of /usr/share/man/man1/lzfgrep.1.gz because associated file /usr/share/man/man1/xzfgrep.1.gz (of link group lzma) doesn't exist
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:32.9702715Z #9 11.15 v22.16.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:33.2064825Z #9 11.24 10.9.2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6827002Z #9 DONE 12.9s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6828145Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6829642Z #11 [gog-builder 2/2] RUN git clone --depth 1 --branch v0.12.0 https://github.com/steipete/gogcli.git /build     && cd /build && make
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6831527Z #11 0.115 Cloning into '/build'...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6832617Z #11 0.870 Note: switching to 'c18c58c8daadce2d6b4a6cf4fe95b1e3817bae1b'.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6833918Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6836137Z #11 0.870 You are in 'detached HEAD' state. You can look around, make experimental
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6837550Z #11 0.870 changes and commit them, and you can discard any commits you make in this
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6840844Z #11 0.870 state without impacting any branches by switching back to a branch.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6841567Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6842510Z #11 0.870 If you want to create a new branch to retain commits you create, you may
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6850827Z #11 0.870 do so (now or later) by using -c with the switch command. Example:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6851472Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6851909Z #11 0.870   git switch -c <new-branch-name>
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6852357Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6852746Z #11 0.870 Or undo this operation with:
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6855415Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6855761Z #11 0.870   git switch -
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6856126Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6856841Z #11 0.870 Turn off this advice by setting config variable advice.detachedHead to false
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6857526Z #11 0.870 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6858048Z #11 1.003 go: downloading github.com/99designs/keyring v1.2.2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6858824Z #11 1.003 go: downloading github.com/alecthomas/kong v1.14.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6859571Z #11 1.004 go: downloading github.com/muesli/termenv v0.16.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6863484Z #11 1.008 go: downloading golang.org/x/net v0.51.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6865227Z #11 1.080 go: downloading golang.org/x/term v0.40.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6866375Z #11 1.106 go: downloading golang.org/x/text v0.34.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6867101Z #11 1.123 go: downloading google.golang.org/api v0.269.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6868918Z #11 4.486 go: downloading github.com/yosuke-furukawa/json5 v0.1.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6869949Z #11 4.486 go: downloading golang.org/x/oauth2 v0.35.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6870743Z #11 4.507 go: downloading github.com/dvsekhvalnov/jose2go v1.8.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6874991Z #11 4.634 go: downloading github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6882191Z #11 4.636 go: downloading github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6883269Z #11 4.636 go: downloading github.com/mtibben/percent v0.2.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6883993Z #11 4.682 go: downloading golang.org/x/sys v0.41.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6884742Z #11 4.686 go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6885615Z #11 4.700 go: downloading github.com/lucasb-eyer/go-colorful v1.3.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6915355Z #11 4.730 go: downloading github.com/mattn/go-isatty v0.0.20
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6916053Z #11 4.751 go: downloading github.com/rivo/uniseg v0.4.7
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6916879Z #11 4.799 go: downloading github.com/googleapis/gax-go/v2 v2.17.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6917790Z #11 4.843 go: downloading cloud.google.com/go/auth/oauth2adapt v0.2.8
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.6919011Z #11 4.843 go: downloading cloud.google.com/go/auth v0.18.2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.8220803Z #11 4.977 go: downloading cloud.google.com/go/compute/metadata v0.9.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.8222661Z #11 5.031 go: downloading google.golang.org/grpc v1.79.2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.9250934Z #11 5.035 go: downloading github.com/google/s2a-go v0.1.9
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.9251938Z #11 5.117 go: downloading github.com/google/uuid v1.6.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:34.9253022Z #11 5.133 go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.67.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.1256687Z #11 5.184 go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.14
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.2608776Z #11 5.469 go: downloading google.golang.org/protobuf v1.36.11
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.5198135Z #11 5.728 go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.7116716Z #11 5.742 go: downloading github.com/felixge/httpsnoop v1.0.4
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.7118882Z #11 5.759 go: downloading go.opentelemetry.io/otel v1.42.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.7119408Z #11 5.770 go: downloading go.opentelemetry.io/otel/metric v1.42.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:35.9034354Z #11 6.111 go: downloading go.opentelemetry.io/otel/trace v1.42.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.0784669Z #11 6.113 go: downloading github.com/go-logr/logr v1.4.3
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.0785537Z #11 6.115 go: downloading github.com/go-logr/stdr v1.2.2
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.0786324Z #11 6.120 go: downloading go.opentelemetry.io/auto/sdk v1.2.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.0787140Z #11 6.136 go: downloading github.com/cespare/xxhash/v2 v2.3.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.0787909Z #11 6.136 go: downloading golang.org/x/crypto v0.48.0
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6864090Z #11 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6869350Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6869966Z #12 [stage-1  3/12] RUN npm install -g pnpm
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6870474Z #12 1.551 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6871017Z #12 1.551 added 1 package in 1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6874244Z #12 1.551 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6874897Z #12 1.551 1 package is looking for funding
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6875491Z #12 1.551   run `npm fund` for details
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6876204Z #12 1.552 npm notice
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6876926Z #12 1.552 npm notice New major version of npm available! 10.9.2 -> 11.12.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6878619Z #12 1.552 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6879956Z #12 1.552 npm notice To update run: npm install -g npm@11.12.1
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6881040Z #12 1.552 npm notice
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.6881438Z #12 DONE 2.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.8380060Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:36.8381055Z #13 [stage-1  4/12] RUN npm install -g openclaw@2026.4.2     && openclaw --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:15:51.8679383Z #13 15.18 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.7905289Z #13 ...
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.7905757Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.7907059Z #11 [gog-builder 2/2] RUN git clone --depth 1 --branch v0.12.0 https://github.com/steipete/gogcli.git /build     && cd /build && make
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.7908971Z #11 DONE 48.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.9409515Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:17.9410555Z #13 [stage-1  4/12] RUN npm install -g openclaw@2026.4.2     && openclaw --version
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.0040311Z #13 75.32 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.0041151Z #13 75.32 added 482 packages in 1m
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.0041607Z #13 75.32 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.1283613Z #13 75.32 88 packages are looking for funding
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.1284488Z #13 75.32   run `npm fund` for details
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:52.1284886Z #13 75.44 OpenClaw 2026.4.2 (d74a122)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:54.9493085Z #13 DONE 78.3s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1589096Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1590613Z #14 [stage-1  5/12] COPY --from=gog-builder /build/bin/gog /usr/local/bin/gog
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1591146Z #14 DONE 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1591264Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1592010Z #15 [stage-1  6/12] RUN mkdir -p /root/.openclaw     && mkdir -p /root/clawd     && mkdir -p /root/clawd/skills     && mkdir -p /root/.config/gogcli/keyring
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.1592647Z #15 DONE 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3227649Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3229105Z #16 [stage-1  7/12] COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3229959Z #16 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3230279Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3231298Z #17 [stage-1  8/12] COPY scripts/ /usr/local/lib/openclaw/
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3233081Z #17 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3233576Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3234674Z #18 [stage-1  9/12] COPY config/openclaw.source.json /usr/local/lib/openclaw/openclaw.source.json
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3235462Z #18 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3235778Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3236522Z #19 [stage-1 10/12] RUN chmod +x /usr/local/bin/start-openclaw.sh     && chmod +x /usr/local/lib/openclaw/*.sh
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.3237492Z #19 DONE 0.1s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4972101Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4981244Z #20 [stage-1 11/12] COPY skills/ /root/clawd/skills/
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4981988Z #20 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4982356Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4982700Z #21 [stage-1 12/12] WORKDIR /root/clawd
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4983175Z #21 DONE 0.0s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4983368Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4983677Z #22 exporting to image
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:16:55.4984207Z #22 exporting layers
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.8829252Z #22 exporting layers 25.5s done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9011467Z #22 writing image sha256:388db6dc49202871d4dcfe75c8439faf1980b7c3fadb503c512bac2a7fc1aa1a done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9013024Z #22 naming to docker.io/library/moltbot-sandbox-sandbox:8c690f9f done
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9013460Z #22 DONE 25.5s
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9021057Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9021768Z  [33m2 warnings found (use docker --debug to expand):
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9023077Z [0m - FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 2)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:20.9024226Z  - FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 7)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8229408Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8231463Z WARNING! Your credentials are stored unencrypted in '/home/runner/.docker/config.json'.
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8232701Z Configure a credential helper to remove this warning. See
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8233556Z https://docs.docker.com/go/credential-store/
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8233934Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8234067Z Login Succeeded
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8251950Z Image does not exist remotely, pushing: registry.cloudflare.com/***/moltbot-sandbox-sandbox:8c690f9f
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8543503Z The push refers to repository [registry.cloudflare.com/***/moltbot-sandbox-sandbox]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8732138Z 5f70bf18a086: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8732950Z 8bf5d608f139: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8733567Z 67875c095c2d: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8733835Z 7fb961a1cda4: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8734290Z 755b72b2d6af: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8734524Z 04b3c6f41131: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8734774Z 0ccd3de570a1: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8735170Z 707b4bbe8754: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8735605Z 7dab3e42d28a: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8736030Z 03dc4d91d9ce: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8736348Z d117be29959e: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8736563Z e4ab19e597b0: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8736760Z 89dc7f3e0b45: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8736961Z 619139e40d51: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8737329Z 5f70bf18a086: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8737551Z f8478915d65b: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8737756Z 33b14c7fedc1: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8737957Z f69606d87cb1: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8738171Z b28af7c451be: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8738493Z 554aa3f73103: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8738715Z 627bb9c197bc: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8738922Z 932228497637: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8739129Z fbb9bbbaf4d2: Preparing
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8739328Z e4ab19e597b0: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8739635Z 89dc7f3e0b45: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8740020Z 619139e40d51: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8740218Z 0ccd3de570a1: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8740404Z f8478915d65b: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8740733Z 707b4bbe8754: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8740981Z 7dab3e42d28a: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8741481Z 03dc4d91d9ce: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8741668Z d117be29959e: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8741985Z 33b14c7fedc1: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8742206Z f69606d87cb1: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8742396Z b28af7c451be: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8742595Z 554aa3f73103: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8742784Z 04b3c6f41131: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8743021Z 627bb9c197bc: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8743283Z 932228497637: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:21.8743477Z fbb9bbbaf4d2: Waiting
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:22.0421046Z 5f70bf18a086: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:24.2029614Z 8bf5d608f139: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:24.2254406Z 67875c095c2d: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:24.2711202Z 755b72b2d6af: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:24.3660318Z 7fb961a1cda4: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:24.6568071Z 04b3c6f41131: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:26.4952622Z 0ccd3de570a1: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:26.6953302Z e4ab19e597b0: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:26.9163692Z 89dc7f3e0b45: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:27.1093279Z 619139e40d51: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:27.2893194Z f8478915d65b: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:27.4913943Z 33b14c7fedc1: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:27.6780823Z f69606d87cb1: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:27.8583263Z b28af7c451be: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:28.0197966Z 554aa3f73103: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:28.2072560Z 627bb9c197bc: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:28.3602935Z 932228497637: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:28.4730940Z fbb9bbbaf4d2: Layer already exists
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:30.6755806Z 03dc4d91d9ce: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:17:34.3295583Z 707b4bbe8754: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:04.1006727Z 7dab3e42d28a: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:52.0708662Z d117be29959e: Pushed
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:57.9228856Z 8c690f9f: digest: sha256:b204421b46baa6b8adb68111be00ded1d7337e260a6bffaa3cbe801155e091d3 size: 5135
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.1721891Z ╭ Deploy a container application deploy changes to your application
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.1722913Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.5980008Z │ Container application changes
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.5980740Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.5999048Z ├ EDIT moltbot-sandbox-sandbox
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.5999494Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6004314Z │           "command": [],
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6004977Z │           "durable_object_offset_instances": 4,
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6005480Z │           "entrypoint": [],
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6008114Z │ -         "image": "registry.cloudflare.com/***/moltbot-sandbox-sandbox:3f192aed",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6009131Z │ +         "image": "registry.cloudflare.com/***/moltbot-sandbox-sandbox:8c690f9f",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6009656Z │ -         "instance_type": "standard",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6010310Z │ +         "instance_type": "standard-1",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6010625Z │           "network": {
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6010926Z │             "assign_ipv4": "none",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6011262Z │             "assign_ipv6": "none",
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:19:58.6011529Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:00.9452018Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:00.9453108Z │  SUCCESS  Modified application moltbot-sandbox-sandbox (Application ID: a039b325-da84-498b-8477-dfc067674d10)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:00.9454158Z │
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:00.9454539Z ╰ Applied changes 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:00.9454764Z 
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:08.9806641Z Deployed moltbot-sandbox triggers (8.04 sec)
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:08.9807442Z   https://moltbot-sandbox.yasuhiko-kohata.workers.dev
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:08.9808022Z   schedule: */5 * * * *
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:08.9808269Z   schedule: 0 23 * * *
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:08.9808601Z Current Version ID: 8c690f9f-4d08-41b9-a213-602af57a8b2c
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:09.0389672Z Multiple deployment urls found in wrangler deploy output file, deployment-url will be set to the first url
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:09.0391202Z ##[endgroup]
+deploy	Deploy to Cloudflare Workers	2026-04-09T04:20:09.0391990Z 🏁 Wrangler Action completed
+deploy	Post Setup Node.js	﻿2026-04-09T04:20:09.0505608Z Post job cleanup.
+deploy	Post Setup Node.js	2026-04-09T04:20:09.1638665Z (node:7337) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+deploy	Post Setup Node.js	2026-04-09T04:20:09.1639572Z (Use `node --trace-deprecation ...` to show where the warning was created)
+deploy	Post Run actions/checkout@v5	﻿2026-04-09T04:20:09.1768303Z Post job cleanup.
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2532248Z [command]/usr/bin/git version
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2568078Z git version 2.53.0
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2606398Z Temporarily overriding HOME='/home/runner/work/_temp/d767a146-1261-4e28-8978-c0490558ab96' before making global git config changes
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2611342Z Adding repository directory to the temporary git global config as a safe directory
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2612250Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/moltworker/moltworker
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2646276Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2678747Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2892797Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2913593Z http.https://github.com/.extraheader
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2924009Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.2954471Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.3166205Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy	Post Run actions/checkout@v5	2026-04-09T04:20:09.3193916Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy	Complete job	﻿2026-04-09T04:20:09.3533504Z Cleaning up orphan processes
+deploy	Complete job	2026-04-09T04:20:09.3859493Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: cloudflare/wrangler-action@v3. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
