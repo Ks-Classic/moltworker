@@ -24,6 +24,7 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   if (env.ANTHROPIC_API_KEY) envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
   if (env.OPENAI_API_KEY) envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
   if (env.OPENROUTER_API_KEY) envVars.OPENROUTER_API_KEY = env.OPENROUTER_API_KEY;
+  if (env.XAI_API_KEY) envVars.XAI_API_KEY = env.XAI_API_KEY;
 
   // Legacy AI Gateway support: AI_GATEWAY_BASE_URL + AI_GATEWAY_API_KEY
   // When set, these override direct keys for backward compatibility
@@ -67,19 +68,7 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   if (env.LARK_BASE_TOKEN) envVars.LARK_BASE_TOKEN = env.LARK_BASE_TOKEN;
   if (env.LARK_TABLE_ID) envVars.LARK_TABLE_ID = env.LARK_TABLE_ID;
 
-  // Jira MCP configuration
-  if (env.JIRA_MCP_URL) envVars.JIRA_MCP_URL = env.JIRA_MCP_URL;
-  if (env.JIRA_MCP_TRANSPORT) envVars.JIRA_MCP_TRANSPORT = env.JIRA_MCP_TRANSPORT;
-  if (env.JIRA_MCP_AUTH_TOKEN) envVars.JIRA_MCP_AUTH_TOKEN = env.JIRA_MCP_AUTH_TOKEN;
-  if (env.JIRA_MCP_HEADERS_JSON) envVars.JIRA_MCP_HEADERS_JSON = env.JIRA_MCP_HEADERS_JSON;
-  if (env.JIRA_MCP_CONNECTION_TIMEOUT_MS) envVars.JIRA_MCP_CONNECTION_TIMEOUT_MS = env.JIRA_MCP_CONNECTION_TIMEOUT_MS;
-  if (env.JIRA_MCP_COMMAND) envVars.JIRA_MCP_COMMAND = env.JIRA_MCP_COMMAND;
-  if (env.JIRA_MCP_ARGS_JSON) envVars.JIRA_MCP_ARGS_JSON = env.JIRA_MCP_ARGS_JSON;
-  if (env.JIRA_MCP_ENV_JSON) envVars.JIRA_MCP_ENV_JSON = env.JIRA_MCP_ENV_JSON;
-  if (env.JIRA_MCP_CWD) envVars.JIRA_MCP_CWD = env.JIRA_MCP_CWD;
-  if (env.JIRA_BASE_URL) envVars.JIRA_BASE_URL = env.JIRA_BASE_URL;
-  if (env.JIRA_EMAIL) envVars.JIRA_EMAIL = env.JIRA_EMAIL;
-  if (env.JIRA_API_TOKEN) envVars.JIRA_API_TOKEN = env.JIRA_API_TOKEN;
+
 
   return envVars;
 }

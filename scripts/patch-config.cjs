@@ -26,7 +26,7 @@ function main() {
   patchProviders(config);
   patchAIGatewayModel(config);
   patchChannels(config);
-  patchJiraMcp(config);
+
   normalizeBindings(config);
 
   // ── Security Model ──────────────────────────────────────────
@@ -121,6 +121,17 @@ function patchProviders(config) {
       models: existing.models || [{ id: "*", name: "Any Model", contextWindow: 128000 }]
     };
   }
+
+  if (process.env.XAI_API_KEY) {
+    const existing = config.models.providers.grok || {};
+    config.models.providers.grok = {
+      ...existing,
+      api: 'openai-completions',
+      baseUrl: 'https://api.x.ai/v1',
+      apiKey: process.env.XAI_API_KEY,
+      models: existing.models || [{ id: "*", name: "Any Model", contextWindow: 128000 }]
+    };
+  }
 }
 
 // ============================================================
@@ -134,16 +145,24 @@ function patchAIGatewayModel(config) {
   //   workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast
   //   openai/gpt-4o
   //   anthropic/claude-sonnet-4-5
+  //   grok/grok-4-1-fast-non-reasoning
   if (!process.env.CF_AI_GATEWAY_MODEL) return;
 
   const raw = process.env.CF_AI_GATEWAY_MODEL;
   const slashIdx = raw.indexOf('/');
+  if (slashIdx <= 0) {
+    console.warn('CF_AI_GATEWAY_MODEL must be in provider/model-id format');
+    return;
+  }
   const gwProvider = raw.substring(0, slashIdx);
   const modelId = raw.substring(slashIdx + 1);
 
   const accountId = process.env.CF_AI_GATEWAY_ACCOUNT_ID;
   const gatewayId = process.env.CF_AI_GATEWAY_GATEWAY_ID;
-  const apiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
+  const defaultApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
+  const apiKey = gwProvider === 'grok'
+    ? (process.env.XAI_API_KEY || defaultApiKey)
+    : defaultApiKey;
 
   let baseUrl;
   let api;
@@ -156,6 +175,10 @@ function patchAIGatewayModel(config) {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = 'google-generative-ai';
       providerName = 'google';
+      providerHeaders = undefined;
+    } else if (gwProvider === 'grok') {
+      baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/grok`;
+      api = 'openai-completions';
       providerHeaders = undefined;
     } else {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/${gwProvider}`;
@@ -278,140 +301,7 @@ function patchChannels(config) {
   }
 }
 
-// ============================================================
-// MCP
-// ============================================================
 
-function patchJiraMcp(config) {
-  const remoteUrl = readTrimmedEnv('JIRA_MCP_URL');
-  const command = readTrimmedEnv('JIRA_MCP_COMMAND');
-
-  if (!remoteUrl && !command) {
-    return;
-  }
-
-  config.mcp = config.mcp || {};
-  config.mcp.servers = config.mcp.servers || {};
-
-  if (remoteUrl) {
-    const headers = parseJsonEnv('JIRA_MCP_HEADERS_JSON', 'object');
-    const authToken = readTrimmedEnv('JIRA_MCP_AUTH_TOKEN');
-    const transport = readTrimmedEnv('JIRA_MCP_TRANSPORT');
-    const connectionTimeoutMs = parseIntegerEnv('JIRA_MCP_CONNECTION_TIMEOUT_MS');
-    const serverConfig = {
-      url: remoteUrl,
-    };
-
-    if (headers) {
-      serverConfig.headers = headers;
-    }
-    if (authToken) {
-      serverConfig.headers = {
-        ...serverConfig.headers,
-        Authorization: `Bearer ${authToken}`,
-      };
-    }
-    if (transport === 'streamable-http') {
-      serverConfig.transport = 'streamable-http';
-    } else if (transport && transport !== 'sse') {
-      console.warn(`Ignoring unsupported JIRA_MCP_TRANSPORT=${transport}`);
-    }
-    if (connectionTimeoutMs !== undefined) {
-      serverConfig.connectionTimeoutMs = connectionTimeoutMs;
-    }
-
-    config.mcp.servers.jira = serverConfig;
-    console.log('Configured Jira MCP server via remote transport');
-    return;
-  }
-
-  const args = parseJsonEnv('JIRA_MCP_ARGS_JSON', 'array') || [];
-  const extraEnv = parseJsonEnv('JIRA_MCP_ENV_JSON', 'object') || {};
-  const cwd = readTrimmedEnv('JIRA_MCP_CWD');
-  const serverEnv = {
-    ...collectJiraRuntimeEnv(),
-    ...extraEnv,
-  };
-  const serverConfig = {
-    command,
-  };
-
-  if (args.length > 0) {
-    serverConfig.args = args;
-  }
-  if (Object.keys(serverEnv).length > 0) {
-    serverConfig.env = serverEnv;
-  }
-  if (cwd) {
-    serverConfig.cwd = cwd;
-  }
-
-  config.mcp.servers.jira = serverConfig;
-  console.log('Configured Jira MCP server via stdio transport');
-}
-
-function collectJiraRuntimeEnv() {
-  const runtimeEnv = {};
-  const passThroughKeys = [
-    'JIRA_BASE_URL',
-    'JIRA_EMAIL',
-    'JIRA_API_TOKEN',
-  ];
-
-  for (const key of passThroughKeys) {
-    const value = readTrimmedEnv(key);
-    if (value) {
-      runtimeEnv[key] = value;
-    }
-  }
-
-  return runtimeEnv;
-}
-
-function parseJsonEnv(name, expectedType) {
-  const raw = readTrimmedEnv(name);
-  if (!raw) {
-    return undefined;
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (expectedType === 'array' && Array.isArray(parsed)) {
-      return parsed;
-    }
-    if (expectedType === 'object' && parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed;
-    }
-    console.warn(`Ignoring ${name}: expected ${expectedType} JSON`);
-  } catch (error) {
-    console.warn(`Ignoring ${name}: invalid JSON (${error.message})`);
-  }
-
-  return undefined;
-}
-
-function parseIntegerEnv(name) {
-  const raw = readTrimmedEnv(name);
-  if (!raw) {
-    return undefined;
-  }
-
-  const parsed = Number.parseInt(raw, 10);
-  if (Number.isFinite(parsed) && parsed > 0) {
-    return parsed;
-  }
-
-  console.warn(`Ignoring ${name}: expected positive integer`);
-  return undefined;
-}
-
-function readTrimmedEnv(name) {
-  const value = process.env[name];
-  if (typeof value !== 'string') {
-    return '';
-  }
-  return value.trim();
-}
 
 // ============================================================
 // LEGACY CONFIG NORMALIZATION

@@ -246,50 +246,27 @@ test('Default model is set correctly', () => {
   assert(primary === 'google/gemini-3.1-flash-lite-preview', `Expected google/gemini-3.1-flash-lite-preview, got ${primary}`);
 });
 
-// -------------------------------------------------------------------
-console.log('\nJira MCP config:');
-
-test('Jira MCP remote server is configured from URL env', () => {
+test('Grok provider-native AI Gateway uses the grok endpoint and xAI key', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
-    JIRA_MCP_URL: 'https://jira-mcp.example.com/sse',
-    JIRA_MCP_AUTH_TOKEN: 'jira-secret',
-    JIRA_MCP_TRANSPORT: 'streamable-http',
-    JIRA_MCP_CONNECTION_TIMEOUT_MS: '15000',
+    CF_AI_GATEWAY_MODEL: 'grok/grok-4-1-fast-non-reasoning',
+    XAI_API_KEY: 'xai-test-key',
   });
 
-  assert(result.mcp?.servers?.jira?.url === 'https://jira-mcp.example.com/sse', 'Expected Jira MCP URL');
-  assert(result.mcp?.servers?.jira?.transport === 'streamable-http', 'Expected Jira MCP transport');
-  assert(result.mcp?.servers?.jira?.connectionTimeoutMs === 15000, 'Expected Jira MCP timeout');
+  const provider = result.models?.providers?.['cf-ai-gw-grok'];
+  assert(provider, 'Grok AI Gateway provider should be configured');
   assert(
-    result.mcp?.servers?.jira?.headers?.Authorization === 'Bearer jira-secret',
-    'Expected Jira MCP Authorization header'
+    provider.baseUrl === 'https://gateway.ai.cloudflare.com/v1/test-account/test-gateway/grok',
+    `Expected grok provider-native URL, got ${provider?.baseUrl}`
+  );
+  assert(provider.apiKey === 'xai-test-key', 'Expected xAI API key to be used for grok');
+  assert(!provider.headers, 'Grok provider-native should not inject cf-aig-authorization headers');
+  assert(
+    result.agents?.defaults?.model?.primary === 'cf-ai-gw-grok/grok-4-1-fast-non-reasoning',
+    `Expected grok default model, got ${result.agents?.defaults?.model?.primary}`
   );
 });
 
-test('Jira MCP stdio server is configured from command env', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
-    JIRA_MCP_COMMAND: 'npx',
-    JIRA_MCP_ARGS_JSON: '["-y","mcp-jira"]',
-    JIRA_MCP_CWD: '/root/clawd',
-    JIRA_BASE_URL: 'https://example.atlassian.net',
-    JIRA_EMAIL: 'owner@example.com',
-    JIRA_API_TOKEN: 'jira-token',
-    JIRA_MCP_ENV_JSON: '{"JIRA_PROJECT_KEY":"OPS"}',
-  });
 
-  assert(result.mcp?.servers?.jira?.command === 'npx', 'Expected Jira MCP command');
-  assert(Array.isArray(result.mcp?.servers?.jira?.args), 'Expected Jira MCP args array');
-  assert(result.mcp.servers.jira.args[1] === 'mcp-jira', 'Expected Jira MCP args to include package');
-  assert(result.mcp.servers.jira.cwd === '/root/clawd', 'Expected Jira MCP cwd');
-  assert(
-    result.mcp.servers.jira.env.JIRA_BASE_URL === 'https://example.atlassian.net',
-    'Expected JIRA_BASE_URL in stdio env'
-  );
-  assert(
-    result.mcp.servers.jira.env.JIRA_PROJECT_KEY === 'OPS',
-    'Expected merged JIRA_MCP_ENV_JSON values'
-  );
-});
 
 // -------------------------------------------------------------------
 // Summary

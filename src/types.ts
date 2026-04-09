@@ -20,6 +20,7 @@ export interface MoltbotEnv {
   ANTHROPIC_BASE_URL?: string;
   OPENAI_API_KEY?: string;
   OPENROUTER_API_KEY?: string; // OpenRouter API key (for qwen3.6-plus:free etc.)
+  XAI_API_KEY?: string; // xAI API key (for Grok direct or AI Gateway grok provider)
   MOLTBOT_GATEWAY_TOKEN?: string; // Gateway token (mapped to OPENCLAW_GATEWAY_TOKEN for container)
   DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + openclaw device pairing)
   E2E_TEST_MODE?: string; // Set to 'true' for E2E tests (skips CF Access auth but keeps device pairing)
@@ -54,19 +55,7 @@ export interface MoltbotEnv {
   LARK_APP_SECRET?: string;
   LARK_BASE_TOKEN?: string; // Bitable document token
   LARK_TABLE_ID?: string; // Bitable table ID
-  // Jira MCP integration
-  JIRA_MCP_URL?: string; // Remote Jira MCP endpoint (SSE by default)
-  JIRA_MCP_TRANSPORT?: string; // 'sse' or 'streamable-http'
-  JIRA_MCP_AUTH_TOKEN?: string; // Optional bearer token for remote MCP
-  JIRA_MCP_HEADERS_JSON?: string; // JSON object for custom remote MCP headers
-  JIRA_MCP_CONNECTION_TIMEOUT_MS?: string; // Connection timeout for remote MCP
-  JIRA_MCP_COMMAND?: string; // Local stdio command (e.g. npx)
-  JIRA_MCP_ARGS_JSON?: string; // JSON array of stdio args
-  JIRA_MCP_ENV_JSON?: string; // JSON object merged into stdio child env
-  JIRA_MCP_CWD?: string; // Working directory for stdio MCP process
-  JIRA_BASE_URL?: string; // Passed through for stdio Jira MCP servers
-  JIRA_EMAIL?: string; // Passed through for stdio Jira MCP servers
-  JIRA_API_TOKEN?: string; // Passed through for stdio Jira MCP servers
+
 }
 
 /**

@@ -95,10 +95,7 @@
   // Chat channels (optional):
   // - TELEGRAM_BOT_TOKEN, DISCORD_BOT_TOKEN, SLACK_BOT_TOKEN, SLACK_APP_TOKEN
   //
-  // Jira MCP (optional):
-  // - Remote MCP: JIRA_MCP_URL, JIRA_MCP_TRANSPORT, JIRA_MCP_AUTH_TOKEN, JIRA_MCP_HEADERS_JSON
-  // - Stdio MCP: JIRA_MCP_COMMAND, JIRA_MCP_ARGS_JSON, JIRA_MCP_ENV_JSON, JIRA_MCP_CWD
-  // - Common Jira credentials for stdio servers: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN
+
   //
   // Browser automation (optional):
   // - CDP_SECRET: Shared secret for /cdp endpoint authentication

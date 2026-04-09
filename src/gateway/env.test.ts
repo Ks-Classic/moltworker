@@ -21,6 +21,12 @@ describe('buildEnvVars', () => {
     expect(result.OPENAI_API_KEY).toBe('sk-openai-key');
   });
 
+  it('includes XAI_API_KEY when set directly', () => {
+    const env = createMockEnv({ XAI_API_KEY: 'xai-key' });
+    const result = buildEnvVars(env);
+    expect(result.XAI_API_KEY).toBe('xai-key');
+  });
+
   // Cloudflare AI Gateway (new native provider)
   it('passes Cloudflare AI Gateway env vars', () => {
     const env = createMockEnv({
@@ -144,27 +150,7 @@ describe('buildEnvVars', () => {
     expect(result.CF_ACCOUNT_ID).toBe('acct-123');
   });
 
-  it('passes Jira MCP env vars to container', () => {
-    const env = createMockEnv({
-      JIRA_MCP_URL: 'https://jira-mcp.example.com/sse',
-      JIRA_MCP_TRANSPORT: 'streamable-http',
-      JIRA_MCP_AUTH_TOKEN: 'jira-token',
-      JIRA_MCP_COMMAND: 'npx',
-      JIRA_MCP_ARGS_JSON: '["-y","mcp-jira"]',
-      JIRA_BASE_URL: 'https://example.atlassian.net',
-      JIRA_EMAIL: 'owner@example.com',
-      JIRA_API_TOKEN: 'jira-api-token',
-    });
-    const result = buildEnvVars(env);
-    expect(result.JIRA_MCP_URL).toBe('https://jira-mcp.example.com/sse');
-    expect(result.JIRA_MCP_TRANSPORT).toBe('streamable-http');
-    expect(result.JIRA_MCP_AUTH_TOKEN).toBe('jira-token');
-    expect(result.JIRA_MCP_COMMAND).toBe('npx');
-    expect(result.JIRA_MCP_ARGS_JSON).toBe('["-y","mcp-jira"]');
-    expect(result.JIRA_BASE_URL).toBe('https://example.atlassian.net');
-    expect(result.JIRA_EMAIL).toBe('owner@example.com');
-    expect(result.JIRA_API_TOKEN).toBe('jira-api-token');
-  });
+
 
   it('combines all env vars correctly', () => {
     const env = createMockEnv({
