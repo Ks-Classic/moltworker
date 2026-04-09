@@ -9,7 +9,7 @@
     "config:build": "node scripts/build-openclaw-config.cjs",
     "config:check": "node scripts/check-openclaw-config.cjs",
     "config:mention:test": "node scripts/set-discord-mention-mode.test.cjs",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "node -e \"if(process.arch !== 'x64') { console.error('\\n🚫 [ERROR] Local deploy failed: ARM/M1 architecture not supported because Cloudflare Sandbox requires amd64 images.\\n👉 Please commit and push to GitHub to use the Actions pipeline.\\n'); process.exit(1); }\" && npm run build && wrangler deploy",
     "dev": "vite dev",
     "start": "wrangler dev",
     "types": "wrangler types",

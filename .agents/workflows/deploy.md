@@ -114,10 +114,17 @@ cd /home/ykoha/moltworker && grep -o '"bucket_name":"[^"]*"' dist/moltbot_sandbo
 `"bucket_name":"openclaw-data"` であること。
 
 ### 2-3. デプロイ
+
+> 🛑 **絶対にローカルでデプロイを実行しないこと (Do not run `wrangler deploy` manually)** 
+> ローカルが M1/M2/Linux aarch64(ARM) の場合、本番互換のビルドができず `exec format error` でコンテナ起動に失敗します。デプロイは**必ず GitHub に push し、Actions (.github/workflows/deploy.yml) に実行させて**ください。
+
 ```bash
-cd /home/ykoha/moltworker && npx wrangler deploy --name moltbot-sandbox 2>&1
+cd /home/ykoha/moltworker
+git add .
+git commit -m "chore: deploy"
+git push origin main
 ```
-新しい Docker イメージがプッシュされ `SUCCESS` が出ることを確認。
+GitHub Actions で `Deployment` ワークフローが `SUCCESS` となることを確認。
 
 ---
 

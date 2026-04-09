@@ -113,11 +113,17 @@ npm run config:check  # Verify generated config is up to date
 npm test              # Run tests (vitest)
 npm run test:watch    # Run tests in watch mode
 npm run build         # Build worker + client
-npm run deploy        # Build and deploy to Cloudflare
+npm run deploy        # 🚫 DO NOT USE LOCALLY (exec format error on ARM). Use GitHub Actions.
 npm run dev           # Vite dev server
 npm run start         # wrangler dev (local worker)
 npm run typecheck     # TypeScript check
 ```
+
+## Deployment Rules (CRITICAL)
+
+1. **DO NOT DEPLOY LOCALLY via `npm run deploy`**
+   - The Cloudflare Sandbox container requires a `linux/amd64` architecture. Running deployments locally on an ARM64 machine (e.g. M1/M2/M3 Mac, aarch64 Linux) will cause Docker to throw an `exec format error` and crash the build.
+   - **ALWAYS** commit and push your changes to GitHub (`git commit` -> `git push`), and allow the GitHub Actions workflow (`.github/workflows/deploy.yml`) to deploy it from an `amd64` environment.
 
 ## Testing
 
