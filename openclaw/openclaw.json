@@ -2,6 +2,9 @@
   "agents": {
     "defaults": {
       "workspace": "/root/clawd",
+      "model": {
+        "primary": "openrouter/google/gemma-4-31b-it:free"
+      },
       "compaction": {
         "mode": "safeguard"
       },

@@ -23,6 +23,7 @@ function main() {
   config.channels = config.channels || {};
 
   patchGateway(config);
+  patchProviders(config);
   patchAIGatewayModel(config);
   patchChannels(config);
   normalizeBindings(config);
@@ -77,6 +78,45 @@ function patchGateway(config) {
 
   if (process.env.OPENCLAW_DEV_MODE === 'true') {
     config.gateway.controlUi.allowInsecureAuth = true;
+  }
+}
+
+// ============================================================
+// PROVIDERS DIRECT CONFIG
+// ============================================================
+
+function patchProviders(config) {
+  config.models = config.models || {};
+  config.models.providers = config.models.providers || {};
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    const existing = config.models.providers.anthropic || {};
+    config.models.providers.anthropic = {
+      ...existing,
+      api: 'anthropic-messages',
+      baseUrl: process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
+      apiKey: process.env.ANTHROPIC_API_KEY
+    };
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    const existing = config.models.providers.openai || {};
+    config.models.providers.openai = {
+      ...existing,
+      api: 'openai-completions',
+      baseUrl: 'https://api.openai.com/v1',
+      apiKey: process.env.OPENAI_API_KEY
+    };
+  }
+
+  if (process.env.OPENROUTER_API_KEY) {
+    const existing = config.models.providers.openrouter || {};
+    config.models.providers.openrouter = {
+      ...existing,
+      api: 'openai-completions',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY
+    };
   }
 }
 
@@ -150,7 +190,10 @@ function patchAIGatewayModel(config) {
   config.models.providers[providerName] = providerConfig;
   config.agents = config.agents || {};
   config.agents.defaults = config.agents.defaults || {};
-  config.agents.defaults.model = { primary: providerName + '/' + gatewayModelId };
+  config.agents.defaults.model = config.agents.defaults.model || {};
+  if (!config.agents.defaults.model.primary) {
+    config.agents.defaults.model.primary = providerName + '/' + gatewayModelId;
+  }
   console.log(`AI Gateway model override: provider=${providerName} model=${gatewayModelId} via ${baseUrl}`);
 }
 
