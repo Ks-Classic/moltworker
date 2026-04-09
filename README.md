@@ -253,6 +253,16 @@ The supported mutation path is:
 3. Sync source / overrides / generated config to R2
 4. Reload the gateway
 
+### Jira MCP
+
+Jira integration should be wired as an MCP server entry under `mcp.servers`, not as new Worker routes. This repo now injects a `jira` MCP server into OpenClaw at startup when Jira MCP env vars are present.
+
+- Remote MCP: set `JIRA_MCP_URL` and optional auth headers/token.
+- Local stdio MCP: set `JIRA_MCP_COMMAND` plus `JIRA_MCP_ARGS_JSON`.
+- Common Jira credentials for stdio servers: `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`.
+
+Setup details and Codex config snippets live in [`docs/jira-mcp.md`](/home/ykoha/moltworker/docs/jira-mcp.md).
+
 ## Deploy Note for ARM Hosts
 
 The container base image `cloudflare/sandbox:0.7.0` is currently `linux/amd64` only.

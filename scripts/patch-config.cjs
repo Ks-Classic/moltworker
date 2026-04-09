@@ -26,6 +26,7 @@ function main() {
   patchProviders(config);
   patchAIGatewayModel(config);
   patchChannels(config);
+  patchJiraMcp(config);
   normalizeBindings(config);
 
   // ── Security Model ──────────────────────────────────────────
@@ -275,6 +276,141 @@ function patchChannels(config) {
       enabled: true,
     };
   }
+}
+
+// ============================================================
+// MCP
+// ============================================================
+
+function patchJiraMcp(config) {
+  const remoteUrl = readTrimmedEnv('JIRA_MCP_URL');
+  const command = readTrimmedEnv('JIRA_MCP_COMMAND');
+
+  if (!remoteUrl && !command) {
+    return;
+  }
+
+  config.mcp = config.mcp || {};
+  config.mcp.servers = config.mcp.servers || {};
+
+  if (remoteUrl) {
+    const headers = parseJsonEnv('JIRA_MCP_HEADERS_JSON', 'object');
+    const authToken = readTrimmedEnv('JIRA_MCP_AUTH_TOKEN');
+    const transport = readTrimmedEnv('JIRA_MCP_TRANSPORT');
+    const connectionTimeoutMs = parseIntegerEnv('JIRA_MCP_CONNECTION_TIMEOUT_MS');
+    const serverConfig = {
+      url: remoteUrl,
+    };
+
+    if (headers) {
+      serverConfig.headers = headers;
+    }
+    if (authToken) {
+      serverConfig.headers = {
+        ...serverConfig.headers,
+        Authorization: `Bearer ${authToken}`,
+      };
+    }
+    if (transport === 'streamable-http') {
+      serverConfig.transport = 'streamable-http';
+    } else if (transport && transport !== 'sse') {
+      console.warn(`Ignoring unsupported JIRA_MCP_TRANSPORT=${transport}`);
+    }
+    if (connectionTimeoutMs !== undefined) {
+      serverConfig.connectionTimeoutMs = connectionTimeoutMs;
+    }
+
+    config.mcp.servers.jira = serverConfig;
+    console.log('Configured Jira MCP server via remote transport');
+    return;
+  }
+
+  const args = parseJsonEnv('JIRA_MCP_ARGS_JSON', 'array') || [];
+  const extraEnv = parseJsonEnv('JIRA_MCP_ENV_JSON', 'object') || {};
+  const cwd = readTrimmedEnv('JIRA_MCP_CWD');
+  const serverEnv = {
+    ...collectJiraRuntimeEnv(),
+    ...extraEnv,
+  };
+  const serverConfig = {
+    command,
+  };
+
+  if (args.length > 0) {
+    serverConfig.args = args;
+  }
+  if (Object.keys(serverEnv).length > 0) {
+    serverConfig.env = serverEnv;
+  }
+  if (cwd) {
+    serverConfig.cwd = cwd;
+  }
+
+  config.mcp.servers.jira = serverConfig;
+  console.log('Configured Jira MCP server via stdio transport');
+}
+
+function collectJiraRuntimeEnv() {
+  const runtimeEnv = {};
+  const passThroughKeys = [
+    'JIRA_BASE_URL',
+    'JIRA_EMAIL',
+    'JIRA_API_TOKEN',
+  ];
+
+  for (const key of passThroughKeys) {
+    const value = readTrimmedEnv(key);
+    if (value) {
+      runtimeEnv[key] = value;
+    }
+  }
+
+  return runtimeEnv;
+}
+
+function parseJsonEnv(name, expectedType) {
+  const raw = readTrimmedEnv(name);
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (expectedType === 'array' && Array.isArray(parsed)) {
+      return parsed;
+    }
+    if (expectedType === 'object' && parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed;
+    }
+    console.warn(`Ignoring ${name}: expected ${expectedType} JSON`);
+  } catch (error) {
+    console.warn(`Ignoring ${name}: invalid JSON (${error.message})`);
+  }
+
+  return undefined;
+}
+
+function parseIntegerEnv(name) {
+  const raw = readTrimmedEnv(name);
+  if (!raw) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+
+  console.warn(`Ignoring ${name}: expected positive integer`);
+  return undefined;
+}
+
+function readTrimmedEnv(name) {
+  const value = process.env[name];
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.trim();
 }
 
 // ============================================================

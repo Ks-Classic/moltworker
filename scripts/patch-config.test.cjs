@@ -247,6 +247,51 @@ test('Default model is set correctly', () => {
 });
 
 // -------------------------------------------------------------------
+console.log('\nJira MCP config:');
+
+test('Jira MCP remote server is configured from URL env', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    JIRA_MCP_URL: 'https://jira-mcp.example.com/sse',
+    JIRA_MCP_AUTH_TOKEN: 'jira-secret',
+    JIRA_MCP_TRANSPORT: 'streamable-http',
+    JIRA_MCP_CONNECTION_TIMEOUT_MS: '15000',
+  });
+
+  assert(result.mcp?.servers?.jira?.url === 'https://jira-mcp.example.com/sse', 'Expected Jira MCP URL');
+  assert(result.mcp?.servers?.jira?.transport === 'streamable-http', 'Expected Jira MCP transport');
+  assert(result.mcp?.servers?.jira?.connectionTimeoutMs === 15000, 'Expected Jira MCP timeout');
+  assert(
+    result.mcp?.servers?.jira?.headers?.Authorization === 'Bearer jira-secret',
+    'Expected Jira MCP Authorization header'
+  );
+});
+
+test('Jira MCP stdio server is configured from command env', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    JIRA_MCP_COMMAND: 'npx',
+    JIRA_MCP_ARGS_JSON: '["-y","mcp-jira"]',
+    JIRA_MCP_CWD: '/root/clawd',
+    JIRA_BASE_URL: 'https://example.atlassian.net',
+    JIRA_EMAIL: 'owner@example.com',
+    JIRA_API_TOKEN: 'jira-token',
+    JIRA_MCP_ENV_JSON: '{"JIRA_PROJECT_KEY":"OPS"}',
+  });
+
+  assert(result.mcp?.servers?.jira?.command === 'npx', 'Expected Jira MCP command');
+  assert(Array.isArray(result.mcp?.servers?.jira?.args), 'Expected Jira MCP args array');
+  assert(result.mcp.servers.jira.args[1] === 'mcp-jira', 'Expected Jira MCP args to include package');
+  assert(result.mcp.servers.jira.cwd === '/root/clawd', 'Expected Jira MCP cwd');
+  assert(
+    result.mcp.servers.jira.env.JIRA_BASE_URL === 'https://example.atlassian.net',
+    'Expected JIRA_BASE_URL in stdio env'
+  );
+  assert(
+    result.mcp.servers.jira.env.JIRA_PROJECT_KEY === 'OPS',
+    'Expected merged JIRA_MCP_ENV_JSON values'
+  );
+});
+
+// -------------------------------------------------------------------
 // Summary
 console.log(`\n${'─'.repeat(40)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);

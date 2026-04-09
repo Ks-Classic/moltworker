@@ -22,6 +22,8 @@ ALLOWED_DOMAINS=(
     "open.feishu.cn"
     "api.chatwork.com"
     "api.github.com"
+    "api.atlassian.com"
+    "atlassian.net"
     "oauth2.googleapis.com"
     "www.googleapis.com"
     "sheets.googleapis.com"

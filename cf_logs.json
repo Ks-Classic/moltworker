@@ -1,0 +1,741 @@
+{
+    "wallTime": 2670,
+    "cpuTime": 1,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "exception",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714006066
+        },
+        {
+            "stack": "    at Sandbox.alarm (index.js:5863:28)",
+            "name": "Error",
+            "message": "Durable Object reset because its code was updated.",
+            "timestamp": 1775714007703
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714006702
+        },
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714007028
+        },
+        {
+            "message": [
+                "{\"level\":\"error\",\"msg\":\"Container startup failed with permanent error\",\"component\":\"sandbox-do\",\"sandboxId\":\"bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08\",\"traceId\":\"tr_71f4ed867943477e\",\"timestamp\":\"2026-04-09T05:53:27.702Z\",\"error\":{\"message\":\"Durable Object reset because its code was updated.\",\"stack\":\"Error: Durable Object reset because its code was updated.\\n    at Sandbox.scheduleNextAlarm (index.js:5904:28)\\n    at Sandbox.startContainerIfNotRunning (index.js:5716:18)\\n    at async Sandbox.startAndWaitForPorts (index.js:5334:23)\\n    at async Sandbox.containerFetch (index.js:8655:7)\\n    at async HttpTransport.fetch (index.js:6590:24)\\n    at async UtilityClient.post (index.js:7098:22)\\n    at async UtilityClient.createSession (index.js:7899:24)\\n    at async Sandbox.ensureDefaultSession (index.js:8799:7)\\n    at async Sandbox.listProcesses (index.js:9225:34)\",\"name\":\"Error\"}}"
+            ],
+            "level": "error",
+            "timestamp": 1775714007702
+        }
+    ],
+    "eventTimestamp": 1775714004223,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:25.033Z"
+    }
+}
+{
+    "wallTime": 48346,
+    "cpuTime": 1,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775713960076
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "{\"level\":\"error\",\"msg\":\"Unexpected error in createSession\",\"component\":\"sandbox-do\",\"sandboxId\":\"bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08\",\"traceId\":\"tr_71f4ed867943477e\",\"httpStatus\":500,\"timestamp\":\"2026-04-09T05:53:27.703Z\",\"error\":{\"message\":\"HTTP error! status: 500\",\"stack\":\"SandboxError: HTTP error! status: 500\\n    at createErrorFromResponse (index.js:6562:14)\\n    at UtilityClient.handleErrorResponse (index.js:7153:20)\\n    at async UtilityClient.handleResponse (index.js:7123:23)\\n    at async UtilityClient.createSession (index.js:7899:24)\\n    at async Sandbox.ensureDefaultSession (index.js:8799:7)\\n    at async Sandbox.listProcesses (index.js:9225:34)\",\"name\":\"SandboxError\"}}"
+            ],
+            "level": "error",
+            "timestamp": 1775714007703
+        }
+    ],
+    "eventTimestamp": 1775713959357,
+    "event": {
+        "rpcMethod": "listProcesses"
+    }
+}
+{
+    "wallTime": 48365,
+    "cpuTime": 5,
+    "truncated": false,
+    "executionModel": "stateless",
+    "outcome": "ok",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [
+        {
+            "message": [
+                "[REQ] GET /debug/processes"
+            ],
+            "level": "log",
+            "timestamp": 1775713959345
+        },
+        {
+            "message": [
+                "[REQ] DEV_MODE: true"
+            ],
+            "level": "log",
+            "timestamp": 1775713959345
+        },
+        {
+            "message": [
+                "[REQ] DEBUG_ROUTES: true"
+            ],
+            "level": "log",
+            "timestamp": 1775713959345
+        }
+    ],
+    "eventTimestamp": 1775713959290,
+    "event": {
+        "request": {
+            "url": "https://moltbot-sandbox.yasuhiko-kohata.workers.dev/debug/processes",
+            "method": "GET",
+            "headers": {
+                "accept": "*/*",
+                "accept-encoding": "gzip, br",
+                "cf-connecting-ip": "2001:268:7221:1003:28d7:9613:25da:5812",
+                "cf-ipcountry": "JP",
+                "cf-ray": "9e973f35887ad78c",
+                "cf-visitor": "{\"scheme\":\"https\"}",
+                "connection": "Keep-Alive",
+                "host": "moltbot-sandbox.yasuhiko-kohata.workers.dev",
+                "user-agent": "curl/8.5.0",
+                "x-forwarded-proto": "https",
+                "x-real-ip": "2001:268:7221:1003:28d7:9613:25da:5812"
+            },
+            "cf": {
+                "httpProtocol": "HTTP/2",
+                "requestPriority": "weight=16;exclusive=0;group=0;group-weight=0",
+                "edgeRequestKeepAliveStatus": 1,
+                "requestHeaderNames": {},
+                "clientTcpRtt": 25,
+                "clientQuicRtt": 0,
+                "colo": "NRT",
+                "asn": 2516,
+                "asOrganization": "KDDI CORPORATION",
+                "country": "JP",
+                "isEUCountry": false,
+                "city": "Minato City",
+                "continent": "AS",
+                "region": "Tokyo",
+                "regionCode": "13",
+                "timezone": "Asia/Tokyo",
+                "longitude": "139.7515",
+                "latitude": "35.6581",
+                "postalCode": "100-8602",
+                "tlsVersion": "TLSv1.3",
+                "tlsCipher": "AEAD-AES256-GCM-SHA384",
+                "tlsClientRandom": "xJlygveKHQ2W8TzSarWPWIwXRBdnre4Vpd/SQVDMjCQ=",
+                "tlsClientCiphersSha1": "GXSPDLP4G3X+prK73a4wBuOaHRc=",
+                "tlsClientExtensionsSha1": "tlH5gnoC5Z1HF45J5OgHEi338V0=",
+                "tlsClientExtensionsSha1Le": "mRCkyUCRFDTLCNHGQsZNFhkU1/4=",
+                "tlsExportedAuthenticator": {
+                    "clientHandshake": "976ddea6e0bccee3cc0006a0a9417146b1ee3718762c78883bd5458853088ac5a021935031e723f99e37dfabf898939c",
+                    "serverHandshake": "fdd79cf67120b336fc6a69dddaa88fe949a091fb7afaeaf1c3cff83d96dac43b7153f23fd7507ddcd81b30cee5ddf5ef",
+                    "clientFinished": "f6aefd451bbf06fb4cd75bc5f7ca48d0f5171d5e379c6705a311ab64eb879268f5fee1aa6cabd633c6960e9901bdfdb7",
+                    "serverFinished": "baa1d253ae124c604a3619fbe984f6d678b3ffa4e5cf5ae8a84d0872f6c9dcfdca1b2822ccafd7ad2c7e588766a7efd4"
+                },
+                "tlsClientHelloLength": "508",
+                "tlsClientAuth": {
+                    "certPresented": "0",
+                    "certVerified": "NONE",
+                    "certRevoked": "0",
+                    "certIssuerDN": "",
+                    "certSubjectDN": "",
+                    "certIssuerDNRFC2253": "",
+                    "certSubjectDNRFC2253": "",
+                    "certIssuerDNLegacy": "",
+                    "certSubjectDNLegacy": "",
+                    "certSerial": "",
+                    "certIssuerSerial": "",
+                    "certSKI": "",
+                    "certIssuerSKI": "",
+                    "certFingerprintSHA1": "",
+                    "certFingerprintSHA256": "",
+                    "certNotBefore": "",
+                    "certNotAfter": "",
+                    "certRFC9440": "",
+                    "certRFC9440TooLarge": false,
+                    "certChainRFC9440": "",
+                    "certChainRFC9440TooLarge": false
+                },
+                "verifiedBotCategory": "",
+                "edgeL4": {
+                    "deliveryRate": 151455
+                }
+            }
+        },
+        "response": {
+            "status": 500
+        }
+    }
+}
+{
+    "wallTime": 792,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "exception",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1775714010014,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:25.033Z"
+    }
+}
+{
+    "wallTime": 8,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1775714010819,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:31.430Z"
+    }
+}
+{
+    "wallTime": 9,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1775714011452,
+    "event": {
+        "rpcMethod": "setSandboxName"
+    }
+}
+{
+    "wallTime": 10,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1775714015292,
+    "event": {
+        "rpcMethod": "setKeepAlive"
+    }
+}
+{
+    "wallTime": 1826,
+    "cpuTime": 1,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714017314
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714017931
+        }
+    ],
+    "eventTimestamp": 1775714016118,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:36.292Z"
+    }
+}
+{
+    "wallTime": 1813,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714019133
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714019756
+        }
+    ],
+    "eventTimestamp": 1775714017931,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:38.118Z"
+    }
+}
+{
+    "wallTime": 21,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1775714019756,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:39.931Z"
+    }
+}
+{
+    "wallTime": 4728,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "canceled",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714015484
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714016118
+        }
+    ],
+    "eventTimestamp": 1775714015292,
+    "event": {
+        "rpcMethod": "listProcesses"
+    }
+}
+{
+    "wallTime": 4739,
+    "cpuTime": 7,
+    "truncated": false,
+    "executionModel": "stateless",
+    "outcome": "canceled",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [
+        {
+            "message": [
+                "[REQ] GET /api/status"
+            ],
+            "level": "log",
+            "timestamp": 1775714015277
+        },
+        {
+            "message": [
+                "[REQ] DEV_MODE: true"
+            ],
+            "level": "log",
+            "timestamp": 1775714015277
+        },
+        {
+            "message": [
+                "[REQ] DEBUG_ROUTES: true"
+            ],
+            "level": "log",
+            "timestamp": 1775714015277
+        }
+    ],
+    "eventTimestamp": 1775714015201,
+    "event": {
+        "request": {
+            "url": "https://moltbot-sandbox.yasuhiko-kohata.workers.dev/api/status",
+            "method": "GET",
+            "headers": {
+                "accept": "*/*",
+                "accept-encoding": "gzip, br",
+                "cf-connecting-ip": "2001:268:7221:1003:28d7:9613:25da:5812",
+                "cf-ipcountry": "JP",
+                "cf-ray": "9e974092fa0817a5",
+                "cf-visitor": "{\"scheme\":\"https\"}",
+                "connection": "Keep-Alive",
+                "host": "moltbot-sandbox.yasuhiko-kohata.workers.dev",
+                "user-agent": "curl/8.5.0",
+                "x-forwarded-proto": "https",
+                "x-real-ip": "2001:268:7221:1003:28d7:9613:25da:5812"
+            },
+            "cf": {
+                "httpProtocol": "HTTP/2",
+                "requestPriority": "weight=16;exclusive=0;group=0;group-weight=0",
+                "edgeRequestKeepAliveStatus": 1,
+                "requestHeaderNames": {},
+                "clientTcpRtt": 71,
+                "clientQuicRtt": 0,
+                "colo": "NRT",
+                "asn": 2516,
+                "asOrganization": "KDDI CORPORATION",
+                "country": "JP",
+                "isEUCountry": false,
+                "city": "Minato City",
+                "continent": "AS",
+                "region": "Tokyo",
+                "regionCode": "13",
+                "timezone": "Asia/Tokyo",
+                "longitude": "139.7515",
+                "latitude": "35.6581",
+                "postalCode": "100-8602",
+                "tlsVersion": "TLSv1.3",
+                "tlsCipher": "AEAD-AES256-GCM-SHA384",
+                "tlsClientRandom": "tz4lSrzM2u3CEjyQtkGYp+SlXN4Q6sgHQ+MCouBRzHs=",
+                "tlsClientCiphersSha1": "GXSPDLP4G3X+prK73a4wBuOaHRc=",
+                "tlsClientExtensionsSha1": "tlH5gnoC5Z1HF45J5OgHEi338V0=",
+                "tlsClientExtensionsSha1Le": "mRCkyUCRFDTLCNHGQsZNFhkU1/4=",
+                "tlsExportedAuthenticator": {
+                    "clientHandshake": "5ec1c48ea7e0789580ecd7cd55c1449b2ab25b7d343a5908d7b7d4d3874a75581c99a1649ee8bdfc4526e1794ae59063",
+                    "serverHandshake": "315ff631ec0d2aab840b1366a2aa325c0929d1dab828774cd8dde0dcc07b5a52abf9a2e49f99cc252b075963e37ec791",
+                    "clientFinished": "b343d1a48714da37a260c2830575106fd2336ccd08bacf51b3a1f0898ac910c0b117357380aaec78702a76f47da9f0e1",
+                    "serverFinished": "e7cc9c2f839402dcefd503b28ae0606f1bd17cf38e7b4e82e9fe76b89dbfb2bf134de5b438ff6f71aa9230acf56b8b35"
+                },
+                "tlsClientHelloLength": "508",
+                "tlsClientAuth": {
+                    "certPresented": "0",
+                    "certVerified": "NONE",
+                    "certRevoked": "0",
+                    "certIssuerDN": "",
+                    "certSubjectDN": "",
+                    "certIssuerDNRFC2253": "",
+                    "certSubjectDNRFC2253": "",
+                    "certIssuerDNLegacy": "",
+                    "certSubjectDNLegacy": "",
+                    "certSerial": "",
+                    "certIssuerSerial": "",
+                    "certSKI": "",
+                    "certIssuerSKI": "",
+                    "certFingerprintSHA1": "",
+                    "certFingerprintSHA256": "",
+                    "certNotBefore": "",
+                    "certNotAfter": "",
+                    "certRFC9440": "",
+                    "certRFC9440TooLarge": false,
+                    "certChainRFC9440": "",
+                    "certChainRFC9440TooLarge": false
+                },
+                "verifiedBotCategory": "",
+                "edgeL4": {
+                    "deliveryRate": 150312
+                }
+            }
+        }
+    }
+}
+{
+    "wallTime": 1803,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "exception",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714020961
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714021592
+        }
+    ],
+    "eventTimestamp": 1775714019944,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:39.932Z"
+    }
+}
+{
+    "wallTime": 1835,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714022787
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714023378
+        }
+    ],
+    "eventTimestamp": 1775714021592,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:41.756Z"
+    }
+}
+{
+    "wallTime": 1785,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714024592
+        }
+    ],
+    "logs": [],
+    "eventTimestamp": 1775714023378,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:43.592Z"
+    }
+}
+{
+    "wallTime": 2045,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714026617
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714025423
+        },
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714027241
+        }
+    ],
+    "eventTimestamp": 1775714024592,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:45.378Z"
+    }
+}
+{
+    "wallTime": 1817,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714028437
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714029221
+        }
+    ],
+    "eventTimestamp": 1775714027241,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:47.423Z"
+    }
+}
+{
+    "wallTime": 1979,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "durableObject",
+    "outcome": "ok",
+    "durableObjectId": "bf746b152d1cf92c123f38065093019eb468d827a8036d90c5fea16521be5d08",
+    "scriptVersion": {
+        "id": "511f1f56-cdc6-4e0d-affd-713593b4b94e"
+    },
+    "entrypoint": "Sandbox",
+    "scriptName": "moltbot-sandbox",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [
+        {
+            "name": "Error",
+            "message": "There is no container instance that can be provided to this Durable Object, try again later",
+            "timestamp": 1775714030434
+        }
+    ],
+    "logs": [
+        {
+            "message": [
+                "Error checking if container is ready:",
+                "There is no container instance that can be provided to this Durable Object, try again later"
+            ],
+            "level": "debug",
+            "timestamp": 1775714031056
+        }
+    ],
+    "eventTimestamp": 1775714029221,
+    "event": {
+        "scheduledTime": "2026-04-09T05:53:49.241Z"
+    }
+}

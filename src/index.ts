@@ -313,9 +313,12 @@ app.all('*', async (c) => {
 
     // Inject gateway token into WebSocket request if not already present.
     // CF Access redirects strip query params, so authenticated users lose ?token=.
-    // Since the user already passed CF Access auth, we inject the token server-side.
+    // Since the user already passed CF Access auth (via middleware), we inject the token server-side,
+    // ONLY IF they actually have an accessUser indicating they passed CF auth successfully.
+    // Device connections bypassing CF Auth will NOT get the token injected, so they must pair.
     let wsRequest = request;
-    if (c.env.MOLTBOT_GATEWAY_TOKEN && !url.searchParams.has('token')) {
+    const hasPassedCFAccess = c.get('accessUser') !== undefined;
+    if (c.env.MOLTBOT_GATEWAY_TOKEN && !url.searchParams.has('token') && hasPassedCFAccess) {
       const tokenUrl = new URL(url.toString());
       tokenUrl.searchParams.set('token', c.env.MOLTBOT_GATEWAY_TOKEN);
       wsRequest = new Request(tokenUrl.toString(), request);

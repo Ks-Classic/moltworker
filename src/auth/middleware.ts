@@ -88,6 +88,12 @@ export function createAccessMiddleware(options: AccessMiddlewareOptions) {
     const jwt = extractJWT(c);
 
     if (!jwt) {
+      // Allow WebSocket upgrade requests (e.g. from local OpenClaw CLI) to bypass CF Access
+      // They will still be protected by the Gateway token/pairing process inside the Sandbox
+      if (c.req.header('Upgrade')?.toLowerCase() === 'websocket') {
+        return next();
+      }
+
       if (type === 'html' && redirectOnMissing) {
         return c.redirect(`https://${teamDomain}`, 302);
       }
