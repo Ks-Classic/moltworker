@@ -507,39 +507,10 @@ export default {
       return;
     }
 
-    // Check for an existing gateway process (every 5 mins)
-    const existingProcess = await findExistingMoltbotProcess(sandbox);
-
-    if (!existingProcess) {
-      console.log('[CRON] No gateway process found, starting new one...');
-      ctx.waitUntil(
-        ensureMoltbotGateway(sandbox, env)
-          .then(() => console.log('[CRON] Gateway started successfully'))
-          .catch((err: Error) => console.error('[CRON] Failed to start gateway:', err.message)),
-      );
-      return;
-    }
-
-    // Process exists — verify it's actually responding on the port
-    try {
-      await existingProcess.waitForPort(MOLTBOT_PORT, {
-        mode: 'tcp',
-        timeout: 10_000,
-      });
-      console.log('[CRON] Health check passed — gateway is running', existingProcess.id);
-    } catch {
-      console.log('[CRON] Gateway not responding, killing process', existingProcess.id);
-      try {
-        await existingProcess.kill();
-      } catch (killErr) {
-        console.error('[CRON] Failed to kill process:', killErr);
-      }
-
-      ctx.waitUntil(
-        ensureMoltbotGateway(sandbox, env)
-          .then(() => console.log('[CRON] Gateway restarted successfully'))
-          .catch((err: Error) => console.error('[CRON] Failed to restart gateway:', err.message)),
-      );
-    }
+    ctx.waitUntil(
+      ensureMoltbotGateway(sandbox, env)
+        .then((process) => console.log('[CRON] Gateway ensured successfully', process.id))
+        .catch((err: Error) => console.error('[CRON] Failed to ensure gateway:', err.message)),
+    );
   },
 };

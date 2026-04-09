@@ -4,6 +4,54 @@ import { MOLTBOT_PORT, STARTUP_TIMEOUT_MS } from '../config';
 import { buildEnvVars } from './env';
 import { ensureRcloneConfig } from './r2';
 
+interface EffectiveGatewayConfig {
+  primaryModel: string | null;
+  gatewayToken: string | null;
+}
+
+function getDesiredPrimaryModel(env: MoltbotEnv): string | null {
+  const raw = env.CF_AI_GATEWAY_MODEL;
+  if (!raw) return null;
+
+  const slashIdx = raw.indexOf('/');
+  if (slashIdx <= 0) return null;
+
+  const provider = raw.substring(0, slashIdx);
+  const modelId = raw.substring(slashIdx + 1);
+
+  if (provider === 'google-ai-studio') {
+    return `google/${modelId}`;
+  }
+
+  return `cf-ai-gw-${provider}/${modelId}`;
+}
+
+async function readEffectiveGatewayConfig(sandbox: Sandbox): Promise<EffectiveGatewayConfig | null> {
+  const result = await sandbox.exec(
+    `node -e "const fs=require('fs'); const config=JSON.parse(fs.readFileSync('/root/.openclaw/openclaw.json','utf8')); process.stdout.write(JSON.stringify({primaryModel: config?.agents?.defaults?.model?.primary || null, gatewayToken: config?.gateway?.auth?.token || null}))"`,
+    { timeout: 10000 },
+  );
+
+  if (!result.success) {
+    return null;
+  }
+
+  const stdout = (result.stdout || '').trim();
+  if (!stdout) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(stdout) as Partial<EffectiveGatewayConfig>;
+    return {
+      primaryModel: parsed.primaryModel ?? null,
+      gatewayToken: parsed.gatewayToken ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Find an existing OpenClaw gateway process
  *
@@ -68,22 +116,71 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
       existingProcess.status,
     );
 
-    // Always use full startup timeout - a process can be "running" but not ready yet
-    // (e.g., just started by another concurrent request). Using a shorter timeout
-    // causes race conditions where we kill processes that are still initializing.
+    let restartRequired = false;
+    const desiredPrimaryModel = getDesiredPrimaryModel(env);
+    const desiredGatewayToken = env.MOLTBOT_GATEWAY_TOKEN || null;
     try {
-      console.log('Waiting for gateway on port', MOLTBOT_PORT, 'timeout:', STARTUP_TIMEOUT_MS);
-      await existingProcess.waitForPort(MOLTBOT_PORT, { mode: 'tcp', timeout: STARTUP_TIMEOUT_MS });
-      console.log('Gateway is reachable');
-      return existingProcess;
-      // eslint-disable-next-line no-unused-vars
-    } catch (_e) {
-      // Timeout waiting for port - process is likely dead or stuck, kill and restart
-      console.log('Existing process not reachable after full timeout, killing and restarting...');
+      const effectiveConfig = await readEffectiveGatewayConfig(sandbox);
+      if (!effectiveConfig) {
+        console.log('Could not read effective gateway config from openclaw.json');
+      } else {
+        const { primaryModel: effectivePrimaryModel, gatewayToken: effectiveGatewayToken } =
+          effectiveConfig;
+
+        if (desiredPrimaryModel && effectivePrimaryModel !== desiredPrimaryModel) {
+          console.log(
+            'Gateway model drift detected, restarting process:',
+            existingProcess.id,
+            'effective model:',
+            effectivePrimaryModel,
+            'desired model:',
+            desiredPrimaryModel,
+          );
+          await existingProcess.kill();
+          restartRequired = true;
+        } else if (desiredPrimaryModel) {
+          console.log('Gateway primary model matches desired env:', desiredPrimaryModel);
+        }
+
+        if (!restartRequired && effectiveGatewayToken !== desiredGatewayToken) {
+          console.log(
+            'Gateway token drift detected, restarting process:',
+            existingProcess.id,
+            'effective token configured:',
+            effectiveGatewayToken !== null,
+            'desired token configured:',
+            desiredGatewayToken !== null,
+          );
+          await existingProcess.kill();
+          restartRequired = true;
+        } else if (!restartRequired) {
+          console.log('Gateway token matches desired env');
+        }
+      }
+    } catch (driftError) {
+      console.log('Failed to check gateway config drift:', driftError);
+    }
+
+    if (restartRequired) {
+      console.log('Existing gateway process killed due to config drift, starting fresh');
+    } else {
+      // Always use full startup timeout - a process can be "running" but not ready yet
+      // (e.g., just started by another concurrent request). Using a shorter timeout
+      // causes race conditions where we kill processes that are still initializing.
       try {
-        await existingProcess.kill();
-      } catch (killError) {
-        console.log('Failed to kill process:', killError);
+        console.log('Waiting for gateway on port', MOLTBOT_PORT, 'timeout:', STARTUP_TIMEOUT_MS);
+        await existingProcess.waitForPort(MOLTBOT_PORT, { mode: 'tcp', timeout: STARTUP_TIMEOUT_MS });
+        console.log('Gateway is reachable');
+        return existingProcess;
+        // eslint-disable-next-line no-unused-vars
+      } catch (_e) {
+        // Timeout waiting for port - process is likely dead or stuck, kill and restart
+        console.log('Existing process not reachable after full timeout, killing and restarting...');
+        try {
+          await existingProcess.kill();
+        } catch (killError) {
+          console.log('Failed to kill process:', killError);
+        }
       }
     }
   }

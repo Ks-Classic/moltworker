@@ -38,11 +38,13 @@ src/
     └── pages/
 
 scripts/                    # Container startup scripts (copied to /usr/local/lib/openclaw/)
+├── bootstrap-openclaw.sh  # Restore/config/bootstrap phases before gateway launch
 ├── restore-from-r2.sh     # R2 → local restore via rclone
-├── patch-config.js        # Runtime config patching (gateway, channels, models)
+├── patch-config.cjs       # Runtime config patching (gateway, channels, models)
+├── run-openclaw-gateway.sh # Gateway supervision + restart loop
 └── sync-loop.sh           # Background R2 sync (30s interval)
 
-start-openclaw.sh          # Main orchestrator (calls scripts/*, launches gateway)
+start-openclaw.sh          # Thin orchestrator (bootstrap + gateway supervisor)
 Dockerfile                 # Container image (Node 22 + OpenClaw + rclone)
 wrangler.jsonc             # Cloudflare Worker + Container + R2 configuration
 ```
@@ -79,14 +81,26 @@ Browser / Discord
 
 ## Container Startup Flow
 
-`start-openclaw.sh` orchestrates 6 phases:
+`start-openclaw.sh` now delegates to two focused scripts:
+
+1. **Bootstrap** (`scripts/bootstrap-openclaw.sh`)
+2. **Gateway Supervision** (`scripts/run-openclaw-gateway.sh`)
+
+`scripts/bootstrap-openclaw.sh` executes these phases:
 
 1. **Restore** (`scripts/restore-from-r2.sh`) — rclone で R2 → local にリストア
 2. **Clean** — `agents/main/agent/auth-profiles.json` 等の stale state を削除
 3. **Onboard** — 初回のみ `openclaw onboard --non-interactive` を実行
-4. **Patch** (`scripts/patch-config.js`) — gateway, channels, models をランタイム設定で上書き
-5. **Sync** (`scripts/sync-loop.sh`) — バックグラウンド R2 同期開始
-6. **Launch** — `openclaw gateway --port 18789` で起動
+4. **Build** (`scripts/build-openclaw-config.cjs`) — source + overrides から effective config を生成
+5. **Patch** (`scripts/patch-config.cjs`) — gateway, channels, models をランタイム設定で上書き
+6. **Doctor** (`openclaw doctor --fix`) — 壊れた config/state を自動修復
+7. **Sync** (`scripts/sync-loop.sh`) — バックグラウンド R2 同期開始
+8. **Security Monitor** (`scripts/security-monitor.sh`) — セキュリティ監視 daemon を起動
+
+`scripts/run-openclaw-gateway.sh` handles:
+
+1. **Launch** — `openclaw gateway --port 18789` で起動
+2. **Supervision** — lock cleanup, signal handling, restart loop
 
 ## R2 Storage
 

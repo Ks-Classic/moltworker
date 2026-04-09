@@ -1,7 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
-import { findExistingMoltbotProcess } from './process';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ensureMoltbotGateway, findExistingMoltbotProcess } from './process';
 import type { Sandbox, Process } from '@cloudflare/sandbox';
-import { createMockSandbox } from '../test-utils';
+import { createMockEnv, createMockExecResult, createMockSandbox } from '../test-utils';
+
+const { ensureRcloneConfigMock } = vi.hoisted(() => ({
+  ensureRcloneConfigMock: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('./r2', () => ({
+  ensureRcloneConfig: ensureRcloneConfigMock,
+}));
 
 function createFullMockProcess(overrides: Partial<Process> = {}): Process {
   return {
@@ -19,6 +27,10 @@ function createFullMockProcess(overrides: Partial<Process> = {}): Process {
 }
 
 describe('findExistingMoltbotProcess', () => {
+  beforeEach(() => {
+    ensureRcloneConfigMock.mockClear();
+  });
+
   it('returns null when no processes exist', async () => {
     const { sandbox } = createMockSandbox({ processes: [] });
     const result = await findExistingMoltbotProcess(sandbox);
@@ -141,5 +153,165 @@ describe('findExistingMoltbotProcess', () => {
 
     const result = await findExistingMoltbotProcess(sandbox);
     expect(result).toBeNull();
+  });
+});
+
+describe('ensureMoltbotGateway', () => {
+  beforeEach(() => {
+    ensureRcloneConfigMock.mockClear();
+  });
+
+  it('restarts an existing process when the effective primary model drifts from env', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      kill: vi.fn().mockResolvedValue(undefined),
+      waitForPort: vi.fn(),
+    });
+    const freshProcess = createFullMockProcess({
+      id: 'gateway-2',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      waitForPort: vi.fn().mockResolvedValue(undefined),
+      getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+    });
+
+    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock.mockResolvedValue(
+      createMockExecResult(
+        JSON.stringify({
+          primaryModel: 'openrouter/google/gemma-4-26b-a4b-it:free',
+          gatewayToken: null,
+        }),
+        { success: true },
+      ),
+    );
+    startProcessMock.mockResolvedValue(freshProcess);
+
+    const env = createMockEnv({
+      CF_AI_GATEWAY_MODEL: 'google-ai-studio/gemini-3.1-flash-lite-preview',
+    });
+
+    const result = await ensureMoltbotGateway(sandbox, env);
+
+    expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
+    expect(startProcessMock).toHaveBeenCalledTimes(1);
+    expect(result).toBe(freshProcess);
+  });
+
+  it('keeps an existing process when the effective primary model matches env', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      kill: vi.fn().mockResolvedValue(undefined),
+      waitForPort: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock.mockResolvedValue(
+      createMockExecResult(
+        JSON.stringify({
+          primaryModel: 'google/gemini-3.1-flash-lite-preview',
+          gatewayToken: null,
+        }),
+        { success: true },
+      ),
+    );
+
+    const env = createMockEnv({
+      CF_AI_GATEWAY_MODEL: 'google-ai-studio/gemini-3.1-flash-lite-preview',
+    });
+
+    const result = await ensureMoltbotGateway(sandbox, env);
+
+    expect(gatewayProcess.kill).not.toHaveBeenCalled();
+    expect(startProcessMock).not.toHaveBeenCalled();
+    expect(result).toBe(gatewayProcess);
+  });
+
+  it('restarts an existing process when the effective gateway token drifts from env', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      kill: vi.fn().mockResolvedValue(undefined),
+      waitForPort: vi.fn(),
+    });
+    const freshProcess = createFullMockProcess({
+      id: 'gateway-2',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      waitForPort: vi.fn().mockResolvedValue(undefined),
+      getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+    });
+
+    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock.mockResolvedValue(
+      createMockExecResult(
+        JSON.stringify({
+          primaryModel: null,
+          gatewayToken: 'old-token',
+        }),
+        { success: true },
+      ),
+    );
+    startProcessMock.mockResolvedValue(freshProcess);
+
+    const env = createMockEnv({
+      MOLTBOT_GATEWAY_TOKEN: 'new-token',
+    });
+
+    const result = await ensureMoltbotGateway(sandbox, env);
+
+    expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
+    expect(startProcessMock).toHaveBeenCalledTimes(1);
+    expect(result).toBe(freshProcess);
+  });
+
+  it('restarts an existing process when the effective gateway token remains after env removal', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      kill: vi.fn().mockResolvedValue(undefined),
+      waitForPort: vi.fn(),
+    });
+    const freshProcess = createFullMockProcess({
+      id: 'gateway-2',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      waitForPort: vi.fn().mockResolvedValue(undefined),
+      getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+    });
+
+    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock.mockResolvedValue(
+      createMockExecResult(
+        JSON.stringify({
+          primaryModel: null,
+          gatewayToken: 'old-token',
+        }),
+        { success: true },
+      ),
+    );
+    startProcessMock.mockResolvedValue(freshProcess);
+
+    const env = createMockEnv({});
+
+    const result = await ensureMoltbotGateway(sandbox, env);
+
+    expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
+    expect(startProcessMock).toHaveBeenCalledTimes(1);
+    expect(result).toBe(freshProcess);
   });
 });
