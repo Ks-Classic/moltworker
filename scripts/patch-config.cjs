@@ -105,7 +105,8 @@ function patchProviders(config) {
       ...existing,
       api: 'openai-completions',
       baseUrl: 'https://api.openai.com/v1',
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: process.env.OPENAI_API_KEY,
+      models: existing.models || [{ id: "*", name: "Any Model", contextWindow: 128000 }]
     };
   }
 
@@ -115,7 +116,8 @@ function patchProviders(config) {
       ...existing,
       api: 'openai-completions',
       baseUrl: 'https://openrouter.ai/api/v1',
-      apiKey: process.env.OPENROUTER_API_KEY
+      apiKey: process.env.OPENROUTER_API_KEY,
+      models: existing.models || [{ id: "*", name: "Any Model", contextWindow: 128000 }]
     };
   }
 }
