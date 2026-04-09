@@ -42,7 +42,7 @@ RUN mkdir -p /root/.openclaw \
     && mkdir -p /root/.config/gogcli/keyring
 
 # Copy startup scripts
-# Build cache bust: 2026-04-05-v34-openclaw-update-openrouter
+# Build cache bust: 2026-04-09-v35-openclaw-fix-discord-presence
 COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
 COPY scripts/ /usr/local/lib/openclaw/
 COPY config/openclaw.source.json /usr/local/lib/openclaw/openclaw.source.json
