@@ -3,7 +3,7 @@
     "defaults": {
       "workspace": "/root/clawd",
       "model": {
-        "primary": "openrouter/qwen/qwen3.6-plus"
+        "primary": "openrouter/google/gemma-4-26b-a4b-it:free"
       },
       "compaction": {
         "mode": "safeguard"
