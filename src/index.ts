@@ -1,8 +1,9 @@
 /**
- * Moltbot + Cloudflare Sandbox
+ * MoltWorker + Cloudflare Sandbox
  *
- * This Worker runs Moltbot personal AI assistant in a Cloudflare Sandbox container.
- * It proxies all requests to the Moltbot Gateway's web UI and WebSocket endpoint.
+ * This Worker is the control plane for an OpenClaw runtime inside a Cloudflare
+ * Sandbox container. It proxies HTTP/WebSocket traffic to the gateway and owns
+ * startup, health, debug, and admin boundaries.
  *
  * Features:
  * - Web UI (Control Dashboard + WebChat) at /
@@ -24,10 +25,17 @@ import { Hono } from 'hono';
 import { getSandbox, Sandbox, type SandboxOptions } from '@cloudflare/sandbox';
 
 import type { AppEnv, MoltbotEnv } from './types';
-import { MOLTBOT_PORT } from './config';
-import { createAccessMiddleware } from './auth';
-import { ensureMoltbotGateway, findExistingMoltbotProcess } from './gateway';
+import {
+  GATEWAY_RUNTIME_NAME,
+  LEGACY_SANDBOX_INSTANCE_NAME,
+  MOLTBOT_PORT,
+  WORKER_RUNTIME_NAME,
+} from './config';
+import { createAccessMiddleware, createOwnerMiddleware } from './auth';
+import { ensureGatewayRuntime, getGatewayRuntimeStatus, isGatewayReady } from './gateway';
+import { handleScheduledEvent } from './ops/scheduled';
 import { publicRoutes, api, adminUi, debug, cdp } from './routes';
+import { isReservedWorkerPath } from './routes/reserved-paths';
 import { redactSensitiveParams } from './utils/logging';
 import loadingPageHtml from './assets/loading.html';
 import configErrorHtml from './assets/config-error.html';
@@ -141,7 +149,7 @@ app.use('*', async (c, next) => {
 // Middleware: Initialize sandbox for all requests
 app.use('*', async (c, next) => {
   const options = buildSandboxOptions(c.env);
-  const sandbox = getSandbox(c.env.Sandbox, 'moltbot', options);
+  const sandbox = getSandbox(c.env.Sandbox, LEGACY_SANDBOX_INSTANCE_NAME, options);
   c.set('sandbox', sandbox);
   await next();
 });
@@ -226,10 +234,11 @@ app.use('/debug/*', async (c, next) => {
   }
   return next();
 });
+app.use('/debug/*', createOwnerMiddleware({ type: 'json' }));
 app.route('/debug', debug);
 
 // =============================================================================
-// CATCH-ALL: Proxy to Moltbot gateway
+// CATCH-ALL: Proxy to the OpenClaw gateway managed by MoltWorker
 // =============================================================================
 
 app.all('*', async (c) => {
@@ -239,20 +248,31 @@ app.all('*', async (c) => {
 
   console.log('[PROXY] Handling request:', url.pathname);
 
-  // Check if gateway is already running
-  const existingProcess = await findExistingMoltbotProcess(sandbox);
-  const isGatewayReady = existingProcess !== null && existingProcess.status === 'running';
+  if (isReservedWorkerPath(url.pathname)) {
+    console.error(`[PROXY] Reserved worker path escaped routing: ${url.pathname}`);
+    return c.json(
+      {
+        error: 'Worker route resolution failure',
+        details: `Reserved worker path reached gateway proxy: ${url.pathname}`,
+        hint: `Check worker routing/auth middleware for the ${url.pathname} namespace before relying on gateway responses.`,
+      },
+      500,
+    );
+  }
+
+  const gatewayStatus = await getGatewayRuntimeStatus(sandbox);
+  const gatewayReady = isGatewayReady(gatewayStatus);
 
   // For browser requests (non-WebSocket, non-API), show loading page if gateway isn't ready
   const isWebSocketRequest = request.headers.get('Upgrade')?.toLowerCase() === 'websocket';
   const acceptsHtml = request.headers.get('Accept')?.includes('text/html');
 
-  if (!isGatewayReady && !isWebSocketRequest && acceptsHtml) {
+  if (!gatewayReady && !isWebSocketRequest && acceptsHtml) {
     console.log('[PROXY] Gateway not ready, serving loading page');
 
     // Start the gateway in the background (don't await)
     c.executionCtx.waitUntil(
-      ensureMoltbotGateway(sandbox, c.env).catch((err: Error) => {
+      ensureGatewayRuntime(sandbox, c.env).catch((err: Error) => {
         console.error('[PROXY] Background gateway start failed:', err);
       }),
     );
@@ -261,11 +281,11 @@ app.all('*', async (c) => {
     return c.html(loadingPageHtml);
   }
 
-  // Ensure moltbot is running (this will wait for startup)
+  // Ensure the supervised OpenClaw gateway is running (this will wait for startup)
   try {
-    await ensureMoltbotGateway(sandbox, c.env);
+    await ensureGatewayRuntime(sandbox, c.env);
   } catch (error) {
-    console.error('[PROXY] Failed to start Moltbot:', error);
+    console.error(`[PROXY] Failed to start ${GATEWAY_RUNTIME_NAME}:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     let hint = 'Check worker logs with: wrangler tail';
@@ -293,7 +313,7 @@ app.all('*', async (c) => {
 
     return c.json(
       {
-        error: 'Moltbot gateway failed to start',
+        error: `${GATEWAY_RUNTIME_NAME} gateway failed to start`,
         details: errorMessage,
         hint,
       },
@@ -301,12 +321,12 @@ app.all('*', async (c) => {
     );
   }
 
-  // Proxy to Moltbot with WebSocket message interception
+  // Proxy to the OpenClaw gateway with WebSocket message interception
   if (isWebSocketRequest) {
     const debugLogs = c.env.DEBUG_ROUTES === 'true';
     const redactedSearch = redactSensitiveParams(url);
 
-    console.log('[WS] Proxying WebSocket connection to Moltbot');
+    console.log(`[WS] Proxying WebSocket connection to ${GATEWAY_RUNTIME_NAME}`);
     if (debugLogs) {
       console.log('[WS] URL:', url.pathname + redactedSearch);
     }
@@ -459,7 +479,7 @@ app.all('*', async (c) => {
 
   // Add debug header to verify worker handled the request
   const newHeaders = new Headers(httpResponse.headers);
-  newHeaders.set('X-Worker-Debug', 'proxy-to-moltbot');
+  newHeaders.set('X-Worker-Debug', `proxy-to-${WORKER_RUNTIME_NAME}`);
   newHeaders.set('X-Debug-Path', url.pathname);
 
   return new Response(httpResponse.body, {
@@ -482,35 +502,7 @@ export default {
    */
   async scheduled(event: ScheduledEvent, env: MoltbotEnv, ctx: ExecutionContext) {
     const options = buildSandboxOptions(env);
-    const sandbox = getSandbox(env.Sandbox, 'moltbot', options);
-
-    // If it's the daily Heartbeat cron (08:00 JST = 23:00 UTC)
-    if (event.cron === '0 23 * * *') {
-      console.log('[CRON] Triggering Daily Heartbeat');
-      const userId = env.DISCORD_DM_ALLOW_FROM || '1076754229294796834';
-      const prompt =
-        'HEARTBEAT.mdの指示通りにセキュリティチェックとデイリーブリーフィング（gog calendarの情報のみ）を実行し、その結果を報告してください。';
-      // We pass the token to the URL so OpenClaw CLI can authenticate with the gateway
-      const tokenArg = env.MOLTBOT_GATEWAY_TOKEN ? `?token=${env.MOLTBOT_GATEWAY_TOKEN}` : '';
-      const cmd = `openclaw agent --agent main --message "${prompt}" --deliver --reply-channel discord --reply-to "${userId}" --url "ws://localhost:18789${tokenArg}"`;
-
-      ctx.waitUntil(
-        sandbox
-          .startProcess(cmd)
-          .then(async (proc) => {
-            await new Promise((r) => setTimeout(r, 5000)); // Give it time to start
-            const logs = await proc.getLogs();
-            console.log('[CRON] Heartbeat initialized:', logs.stdout || logs.stderr);
-          })
-          .catch((err: Error) => console.error('[CRON] Heartbeat trigger failed:', err)),
-      );
-      return;
-    }
-
-    ctx.waitUntil(
-      ensureMoltbotGateway(sandbox, env)
-        .then((process) => console.log('[CRON] Gateway ensured successfully', process.id))
-        .catch((err: Error) => console.error('[CRON] Failed to ensure gateway:', err.message)),
-    );
+    const sandbox = getSandbox(env.Sandbox, LEGACY_SANDBOX_INSTANCE_NAME, options);
+    await handleScheduledEvent(event, env, ctx, sandbox);
   },
 };

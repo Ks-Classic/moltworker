@@ -1,29 +1,15 @@
 import type { Sandbox, Process } from '@cloudflare/sandbox';
 import type { MoltbotEnv } from '../types';
-import { MOLTBOT_PORT, STARTUP_TIMEOUT_MS } from '../config';
+import { STARTUP_TIMEOUT_MS } from '../config';
 import { buildEnvVars } from './env';
+import { findExistingGatewayProcess } from './process-discovery';
 import { ensureRcloneConfig } from './r2';
+import { isRuntimeStateStarting, probeGatewayHttp, readRuntimeState } from './runtime-state';
+import { buildDesiredRuntimeSpec } from './runtime-spec';
 
 interface EffectiveGatewayConfig {
   primaryModel: string | null;
   gatewayToken: string | null;
-}
-
-function getDesiredPrimaryModel(env: MoltbotEnv): string | null {
-  const raw = env.CF_AI_GATEWAY_MODEL;
-  if (!raw) return null;
-
-  const slashIdx = raw.indexOf('/');
-  if (slashIdx <= 0) return null;
-
-  const provider = raw.substring(0, slashIdx);
-  const modelId = raw.substring(slashIdx + 1);
-
-  if (provider === 'google-ai-studio') {
-    return `google/${modelId}`;
-  }
-
-  return `cf-ai-gw-${provider}/${modelId}`;
 }
 
 async function readEffectiveGatewayConfig(sandbox: Sandbox): Promise<EffectiveGatewayConfig | null> {
@@ -52,41 +38,42 @@ async function readEffectiveGatewayConfig(sandbox: Sandbox): Promise<EffectiveGa
   }
 }
 
-/**
- * Find an existing OpenClaw gateway process
- *
- * @param sandbox - The sandbox instance
- * @returns The process if found and running/starting, null otherwise
- */
-export async function findExistingMoltbotProcess(sandbox: Sandbox): Promise<Process | null> {
-  try {
-    const processes = await sandbox.listProcesses();
-    for (const proc of processes) {
-      // Match gateway process (openclaw gateway or legacy clawdbot gateway)
-      // Don't match CLI commands like "openclaw devices list"
-      const isGatewayProcess =
-        proc.command.includes('start-openclaw.sh') ||
-        proc.command.includes('openclaw gateway') ||
-        // Legacy: match old startup script during transition
-        proc.command.includes('start-moltbot.sh') ||
-        proc.command.includes('clawdbot gateway');
-      const isCliCommand =
-        proc.command.includes('openclaw devices') ||
-        proc.command.includes('openclaw --version') ||
-        proc.command.includes('openclaw onboard') ||
-        proc.command.includes('clawdbot devices') ||
-        proc.command.includes('clawdbot --version');
+async function waitForGatewayHttpReady(sandbox: Sandbox, timeoutMs: number): Promise<boolean> {
+  const startedAt = Date.now();
 
-      if (isGatewayProcess && !isCliCommand) {
-        if (proc.status === 'starting' || proc.status === 'running') {
-          return proc;
-        }
-      }
+  while (Date.now() - startedAt < timeoutMs) {
+    const gatewayHttp = await probeGatewayHttp(sandbox);
+    if (gatewayHttp.ok) {
+      return true;
     }
-  } catch (e) {
-    console.log('Could not list processes:', e);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  return null;
+
+  return false;
+}
+
+async function waitForGatewayHealthy(sandbox: Sandbox, timeoutMs: number): Promise<boolean> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const [runtime, gatewayHttp] = await Promise.all([
+      readRuntimeState(sandbox),
+      probeGatewayHttp(sandbox),
+    ]);
+
+    if (gatewayHttp.ok) {
+      return true;
+    }
+
+    if (runtime?.status === 'degraded' || runtime?.phase === 'gateway-exited' || runtime?.phase === 'gateway-timeout') {
+      return false;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  return false;
 }
 
 /**
@@ -101,13 +88,16 @@ export async function findExistingMoltbotProcess(sandbox: Sandbox): Promise<Proc
  * @param env - Worker environment bindings
  * @returns The running gateway process
  */
-export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): Promise<Process> {
+export async function ensureGatewayRuntime(sandbox: Sandbox, env: MoltbotEnv): Promise<Process> {
   // Configure rclone for R2 persistence (non-blocking if not configured).
   // The startup script uses rclone to restore data from R2 on boot.
   await ensureRcloneConfig(sandbox, env);
 
+  const desiredRuntime = buildDesiredRuntimeSpec(env);
+  let startReason = 'cold-start';
+
   // Check if gateway is already running or starting
-  const existingProcess = await findExistingMoltbotProcess(sandbox);
+  const existingProcess = await findExistingGatewayProcess(sandbox);
   if (existingProcess) {
     console.log(
       'Found existing gateway process:',
@@ -117,8 +107,6 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
     );
 
     let restartRequired = false;
-    const desiredPrimaryModel = getDesiredPrimaryModel(env);
-    const desiredGatewayToken = env.MOLTBOT_GATEWAY_TOKEN || null;
     try {
       const effectiveConfig = await readEffectiveGatewayConfig(sandbox);
       if (!effectiveConfig) {
@@ -127,32 +115,34 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
         const { primaryModel: effectivePrimaryModel, gatewayToken: effectiveGatewayToken } =
           effectiveConfig;
 
-        if (desiredPrimaryModel && effectivePrimaryModel !== desiredPrimaryModel) {
+        if (desiredRuntime.primaryModel && effectivePrimaryModel !== desiredRuntime.primaryModel) {
           console.log(
             'Gateway model drift detected, restarting process:',
             existingProcess.id,
             'effective model:',
             effectivePrimaryModel,
             'desired model:',
-            desiredPrimaryModel,
+            desiredRuntime.primaryModel,
           );
           await existingProcess.kill();
           restartRequired = true;
-        } else if (desiredPrimaryModel) {
-          console.log('Gateway primary model matches desired env:', desiredPrimaryModel);
+          startReason = 'config-drift:model';
+        } else if (desiredRuntime.primaryModel) {
+          console.log('Gateway primary model matches desired env:', desiredRuntime.primaryModel);
         }
 
-        if (!restartRequired && effectiveGatewayToken !== desiredGatewayToken) {
+        if (!restartRequired && effectiveGatewayToken !== desiredRuntime.gatewayToken) {
           console.log(
             'Gateway token drift detected, restarting process:',
             existingProcess.id,
             'effective token configured:',
             effectiveGatewayToken !== null,
             'desired token configured:',
-            desiredGatewayToken !== null,
+            desiredRuntime.gatewayTokenConfigured,
           );
           await existingProcess.kill();
           restartRequired = true;
+          startReason = 'config-drift:token';
         } else if (!restartRequired) {
           console.log('Gateway token matches desired env');
         }
@@ -164,23 +154,32 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
     if (restartRequired) {
       console.log('Existing gateway process killed due to config drift, starting fresh');
     } else {
-      // Always use full startup timeout - a process can be "running" but not ready yet
-      // (e.g., just started by another concurrent request). Using a shorter timeout
-      // causes race conditions where we kill processes that are still initializing.
-      try {
-        console.log('Waiting for gateway on port', MOLTBOT_PORT, 'timeout:', STARTUP_TIMEOUT_MS);
-        await existingProcess.waitForPort(MOLTBOT_PORT, { mode: 'tcp', timeout: STARTUP_TIMEOUT_MS });
-        console.log('Gateway is reachable');
+      const gatewayHttp = await probeGatewayHttp(sandbox);
+      if (gatewayHttp.ok) {
+        console.log('Existing gateway is already serving HTTP');
         return existingProcess;
-        // eslint-disable-next-line no-unused-vars
-      } catch (_e) {
-        // Timeout waiting for port - process is likely dead or stuck, kill and restart
-        console.log('Existing process not reachable after full timeout, killing and restarting...');
-        try {
-          await existingProcess.kill();
-        } catch (killError) {
-          console.log('Failed to kill process:', killError);
+      }
+
+      const runtime = await readRuntimeState(sandbox);
+      const shouldWaitForExisting =
+        isRuntimeStateStarting(runtime) ||
+        (!runtime && existingProcess.status === 'starting');
+
+      if (shouldWaitForExisting) {
+        console.log('Waiting for existing gateway to finish startup');
+        const becameHealthy = await waitForGatewayHealthy(sandbox, STARTUP_TIMEOUT_MS);
+        if (becameHealthy) {
+          console.log('Existing gateway became healthy');
+          return existingProcess;
         }
+      }
+
+      console.log('Existing process is not healthy, killing and restarting...');
+      try {
+        await existingProcess.kill();
+        startReason = 'unhealthy-runtime';
+      } catch (killError) {
+        console.log('Failed to kill process:', killError);
       }
     }
   }
@@ -188,6 +187,8 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
   // Start a new OpenClaw gateway
   console.log('Starting new OpenClaw gateway...');
   const envVars = buildEnvVars(env);
+  envVars.OPENCLAW_DESIRED_RUNTIME_FINGERPRINT = desiredRuntime.fingerprint;
+  envVars.OPENCLAW_RESTART_REASON = startReason;
   const command = '/usr/local/bin/start-openclaw.sh';
 
   console.log('Starting process with command:', command);
@@ -206,15 +207,21 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
 
   // Wait for the gateway to be ready
   try {
-    console.log('[Gateway] Waiting for OpenClaw gateway to be ready on port', MOLTBOT_PORT);
-    await process.waitForPort(MOLTBOT_PORT, { mode: 'tcp', timeout: STARTUP_TIMEOUT_MS });
+    console.log('[Gateway] Waiting for OpenClaw gateway to become healthy via runtime-state and HTTP');
+    const becameHealthy = await waitForGatewayHealthy(sandbox, STARTUP_TIMEOUT_MS);
+    if (!becameHealthy) {
+      const gatewayHttp = await waitForGatewayHttpReady(sandbox, 10_000);
+      if (!gatewayHttp) {
+        throw new Error('OpenClaw gateway did not become healthy');
+      }
+    }
     console.log('[Gateway] OpenClaw gateway is ready!');
 
     const logs = await process.getLogs();
     if (logs.stdout) console.log('[Gateway] stdout:', logs.stdout);
     if (logs.stderr) console.log('[Gateway] stderr:', logs.stderr);
   } catch (e) {
-    console.error('[Gateway] waitForPort failed:', e);
+    console.error('[Gateway] health wait failed:', e);
     try {
       const logs = await process.getLogs();
       console.error('[Gateway] startup failed. Stderr:', logs.stderr);
@@ -233,3 +240,7 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
 
   return process;
 }
+
+// Backward-compatible alias while the rest of the codebase migrates away from
+// legacy Moltbot naming.
+export const ensureMoltbotGateway = ensureGatewayRuntime;

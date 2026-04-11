@@ -8,6 +8,15 @@ CONFIG_FILE="${CONFIG_FILE:-$CONFIG_DIR/openclaw.json}"
 CONFIG_SOURCE_FILE="${CONFIG_SOURCE_FILE:-$CONFIG_DIR/openclaw.source.json}"
 CONFIG_OVERRIDES_FILE="${CONFIG_OVERRIDES_FILE:-$CONFIG_DIR/openclaw.overrides.json}"
 AGENT_STATE_DIR="${AGENT_STATE_DIR:-$CONFIG_DIR/agents/main/agent}"
+RUNTIME_STATE_FILE="${RUNTIME_STATE_FILE:-/tmp/openclaw-runtime-state.json}"
+DESIRED_RUNTIME_FINGERPRINT="${OPENCLAW_DESIRED_RUNTIME_FINGERPRINT:-null}"
+RESTART_REASON="${OPENCLAW_RESTART_REASON:-cold-start}"
+
+write_runtime_state() {
+    node "$SCRIPTS_DIR/write-runtime-state.cjs" "$@"
+}
+
+write_runtime_state phase=bootstrap status=starting gatewayReady=false discordReady=false desiredRuntimeFingerprint="$DESIRED_RUNTIME_FINGERPRINT" lastRestartReason="$RESTART_REASON" lastDiscordReadyAt=null lastDiscordHeartbeatAt=null lastDiscordError=null bootstrapStartedAt=now lastError=null >/dev/null
 
 echo "Config directory: $CONFIG_DIR"
 mkdir -p "$CONFIG_DIR"
@@ -106,3 +115,5 @@ if [ -f "$SCRIPTS_DIR/security-monitor.sh" ]; then
     bash "$SCRIPTS_DIR/security-monitor.sh" &
     echo "Security monitor started (PID: $!)"
 fi
+
+write_runtime_state phase=bootstrap status=ready gatewayReady=false discordReady=false desiredRuntimeFingerprint="$DESIRED_RUNTIME_FINGERPRINT" lastRestartReason="$RESTART_REASON" lastDiscordReadyAt=null lastDiscordHeartbeatAt=null lastDiscordError=null bootstrapCompletedAt=now lastError=null >/dev/null

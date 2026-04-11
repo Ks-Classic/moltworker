@@ -6,6 +6,7 @@
  * Extracted from start-openclaw.sh for maintainability and testability.
  */
 const fs = require('fs');
+const { applyLarkIntegration } = require('./patch-lark-integration.cjs');
 
 const CONFIG_PATH = process.env.CONFIG_PATH || '/root/.openclaw/openclaw.json';
 
@@ -26,6 +27,7 @@ function main() {
   patchProviders(config);
   patchAIGatewayModel(config);
   patchChannels(config);
+  applyLarkIntegration(config);
 
   normalizeBindings(config);
 
@@ -246,7 +248,7 @@ function patchChannels(config) {
   if (process.env.DISCORD_BOT_TOKEN) {
     const dmPolicy = process.env.DISCORD_DM_POLICY || 'pairing';
     const existingDiscord = config.channels.discord && typeof config.channels.discord === 'object'
-      ? config.channels.discord
+      ? sanitizeDiscordChannelConfig(config.channels.discord)
       : {};
     const existingGuilds = existingDiscord.guilds && typeof existingDiscord.guilds === 'object'
       ? existingDiscord.guilds
@@ -299,6 +301,23 @@ function patchChannels(config) {
       enabled: true,
     };
   }
+}
+
+function sanitizeDiscordChannelConfig(discordConfig) {
+  if (!discordConfig || typeof discordConfig !== 'object') {
+    return {};
+  }
+
+  const next = { ...discordConfig };
+
+  // OpenClaw 2026.4.x rejects this legacy key. Old runtime/R2 state may still
+  // carry it, so strip it before patching the effective config.
+  if ('presence' in next) {
+    delete next.presence;
+    console.log('Removed legacy channels.discord.presence key');
+  }
+
+  return next;
 }
 
 

@@ -1,7 +1,12 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
-import { MOLTBOT_PORT } from '../config';
-import { findExistingMoltbotProcess } from '../gateway';
+import {
+  GATEWAY_RUNTIME_NAME,
+  LEGACY_WORKER_SERVICE_NAME,
+  MOLTBOT_PORT,
+  WORKER_RUNTIME_NAME,
+} from '../config';
+import { getGatewayLifecycleState, getGatewayRuntimeStatus, isGatewayReady } from '../gateway';
 
 /**
  * Public routes - NO Cloudflare Access authentication required
@@ -15,7 +20,9 @@ const publicRoutes = new Hono<AppEnv>();
 publicRoutes.get('/sandbox-health', (c) => {
   return c.json({
     status: 'ok',
-    service: 'moltbot-sandbox',
+    service: WORKER_RUNTIME_NAME,
+    gatewayRuntime: GATEWAY_RUNTIME_NAME,
+    legacyServiceName: LEGACY_WORKER_SERVICE_NAME,
     gateway_port: MOLTBOT_PORT,
   });
 });
@@ -35,19 +42,13 @@ publicRoutes.get('/api/status', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    const process = await findExistingMoltbotProcess(sandbox);
-    if (!process) {
-      return c.json({ ok: false, status: 'not_running' });
-    }
-
-    // Process exists, check if it's actually responding
-    // Try to reach the gateway with a short timeout
-    try {
-      await process.waitForPort(18789, { mode: 'tcp', timeout: 5000 });
-      return c.json({ ok: true, status: 'running', processId: process.id });
-    } catch {
-      return c.json({ ok: false, status: 'not_responding', processId: process.id });
-    }
+    const status = await getGatewayRuntimeStatus(sandbox);
+    return c.json({
+      ok: isGatewayReady(status),
+      status: getGatewayLifecycleState(status),
+      runtimeFresh: status.runtimeFresh,
+      runtimeAgeMs: status.runtimeAgeMs,
+    });
   } catch (err) {
     return c.json({
       ok: false,

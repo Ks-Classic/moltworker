@@ -1,7 +1,10 @@
 import type { Sandbox } from '@cloudflare/sandbox';
 
 /**
- * Environment bindings for the Moltbot Worker
+ * Environment bindings for the MoltWorker control plane.
+ *
+ * The interface name stays `MoltbotEnv` for compatibility with the existing
+ * codebase, but the runtime ownership model is MoltWorker -> OpenClaw.
  */
 export interface MoltbotEnv {
   Sandbox: DurableObjectNamespace<Sandbox>;
@@ -38,6 +41,7 @@ export interface MoltbotEnv {
   // Cloudflare Access configuration for admin routes
   CF_ACCESS_TEAM_DOMAIN?: string; // e.g., 'myteam.cloudflareaccess.com'
   CF_ACCESS_AUD?: string; // Application Audience (AUD) tag
+  ADMIN_ALLOWED_EMAILS?: string; // Comma-separated Cloudflare Access emails allowed to perform privileged admin/debug actions
   // R2 credentials for bucket mounting (set via wrangler secret)
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
@@ -50,12 +54,13 @@ export interface MoltbotEnv {
   // Google Workspace integration (gog CLI)
   GOG_KEYRING_PASSWORD?: string; // Passphrase to unlock gog keyring (encrypted OAuth tokens)
   GOG_ACCOUNT?: string; // Google account email for gog commands
+  HEARTBEAT_RECIPIENT_ID?: string; // Optional Discord user override for the daily heartbeat report
+  HEARTBEAT_PROMPT?: string; // Optional OpenClaw prompt override for the daily heartbeat report
   // Lark (Feishu) integration
   LARK_APP_ID?: string;
   LARK_APP_SECRET?: string;
   LARK_BASE_TOKEN?: string; // Bitable document token
   LARK_TABLE_ID?: string; // Bitable table ID
-
 }
 
 /**

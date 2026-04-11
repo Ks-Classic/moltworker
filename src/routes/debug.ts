@@ -1,6 +1,15 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
-import { findExistingMoltbotProcess, waitForProcess } from '../gateway';
+import {
+  getContainerConfig,
+  getProcessLogs,
+  getRuntimeStateDebug,
+  getSecurityStatus,
+  getVersionInfo,
+  listProcesses,
+  probeGatewayApi,
+  runCliCommand,
+} from '../debug/service';
 
 /**
  * Debug routes for inspecting container state
@@ -13,22 +22,7 @@ const debug = new Hono<AppEnv>();
 debug.get('/version', async (c) => {
   const sandbox = c.get('sandbox');
   try {
-    // Get OpenClaw version
-    const versionProcess = await sandbox.startProcess('openclaw --version');
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const versionLogs = await versionProcess.getLogs();
-    const moltbotVersion = (versionLogs.stdout || versionLogs.stderr || '').trim();
-
-    // Get node version
-    const nodeProcess = await sandbox.startProcess('node --version');
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const nodeLogs = await nodeProcess.getLogs();
-    const nodeVersion = (nodeLogs.stdout || '').trim();
-
-    return c.json({
-      moltbot_version: moltbotVersion,
-      node_version: nodeVersion,
-    });
+    return c.json(await getVersionInfo(sandbox));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ status: 'error', message: `Failed to get version info: ${errorMessage}` }, 500);
@@ -39,56 +33,8 @@ debug.get('/version', async (c) => {
 debug.get('/processes', async (c) => {
   const sandbox = c.get('sandbox');
   try {
-    const processes = await sandbox.listProcesses();
     const includeLogs = c.req.query('logs') === 'true';
-
-    const processData = await Promise.all(
-      processes.map(async (p) => {
-        const data: Record<string, unknown> = {
-          id: p.id,
-          command: p.command,
-          status: p.status,
-          startTime: p.startTime?.toISOString(),
-          endTime: p.endTime?.toISOString(),
-          exitCode: p.exitCode,
-        };
-
-        if (includeLogs) {
-          try {
-            const logs = await p.getLogs();
-            data.stdout = logs.stdout || '';
-            data.stderr = logs.stderr || '';
-          } catch {
-            data.logs_error = 'Failed to retrieve logs';
-          }
-        }
-
-        return data;
-      }),
-    );
-
-    // Sort by status (running first, then starting, completed, failed)
-    // Within each status, sort by startTime descending (newest first)
-    const statusOrder: Record<string, number> = {
-      running: 0,
-      starting: 1,
-      completed: 2,
-      failed: 3,
-    };
-
-    processData.sort((a, b) => {
-      const statusA = statusOrder[a.status as string] ?? 99;
-      const statusB = statusOrder[b.status as string] ?? 99;
-      if (statusA !== statusB) {
-        return statusA - statusB;
-      }
-      // Within same status, sort by startTime descending
-      const timeA = (a.startTime as string) || '';
-      const timeB = (b.startTime as string) || '';
-      return timeB.localeCompare(timeA);
-    });
-
-    return c.json({ count: processes.length, processes: processData });
+    return c.json(await listProcesses(sandbox, includeLogs));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -99,26 +45,9 @@ debug.get('/processes', async (c) => {
 debug.get('/gateway-api', async (c) => {
   const sandbox = c.get('sandbox');
   const path = c.req.query('path') || '/';
-  const MOLTBOT_PORT = 18789;
 
   try {
-    const url = `http://localhost:${MOLTBOT_PORT}${path}`;
-    const response = await sandbox.containerFetch(new Request(url), MOLTBOT_PORT);
-    const contentType = response.headers.get('content-type') || '';
-
-    let body: string | object;
-    if (contentType.includes('application/json')) {
-      body = await response.json();
-    } else {
-      body = await response.text();
-    }
-
-    return c.json({
-      path,
-      status: response.status,
-      contentType,
-      body,
-    });
+    return c.json(await probeGatewayApi(sandbox, path));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage, path }, 500);
@@ -131,18 +60,7 @@ debug.get('/cli', async (c) => {
   const cmd = c.req.query('cmd') || 'openclaw --help';
 
   try {
-    const proc = await sandbox.startProcess(cmd);
-    await waitForProcess(proc, 120000);
-
-    const logs = await proc.getLogs();
-    const status = proc.getStatus ? await proc.getStatus() : proc.status;
-    return c.json({
-      command: cmd,
-      status,
-      exitCode: proc.exitCode,
-      stdout: logs.stdout || '',
-      stderr: logs.stderr || '',
-    });
+    return c.json(await runCliCommand(sandbox, cmd));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage, command: cmd }, 500);
@@ -154,42 +72,9 @@ debug.get('/logs', async (c) => {
   const sandbox = c.get('sandbox');
   try {
     const processId = c.req.query('id');
-    let process = null;
-
-    if (processId) {
-      const processes = await sandbox.listProcesses();
-      process = processes.find((p) => p.id === processId);
-      if (!process) {
-        return c.json(
-          {
-            status: 'not_found',
-            message: `Process ${processId} not found`,
-            stdout: '',
-            stderr: '',
-          },
-          404,
-        );
-      }
-    } else {
-      process = await findExistingMoltbotProcess(sandbox);
-      if (!process) {
-        return c.json({
-          status: 'no_process',
-          message: 'No Moltbot process is currently running',
-          stdout: '',
-          stderr: '',
-        });
-      }
-    }
-
-    const logs = await process.getLogs();
-    return c.json({
-      status: 'ok',
-      process_id: process.id,
-      process_status: process.status,
-      stdout: logs.stdout || '',
-      stderr: logs.stderr || '',
-    });
+    const result = await getProcessLogs(sandbox, processId);
+    const status = result.status === 'not_found' ? 404 : 200;
+    return c.json(result, status);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json(
@@ -341,45 +226,7 @@ debug.get('/ws-test', async (c) => {
 debug.get('/security', async (c) => {
   const sandbox = c.get('sandbox');
   try {
-    // Read pending security alerts
-    const alertProc = await sandbox.startProcess(
-      'cat /tmp/security-alerts-pending.log 2>/dev/null || echo "NO_ALERTS"',
-    );
-    await waitForProcess(alertProc, 5000);
-    const alertLogs = await alertProc.getLogs();
-    const alertContent = (alertLogs.stdout || '').trim();
-
-    // Read monitor status
-    const statusProc = await sandbox.startProcess(
-      'pgrep -f security-monitor.sh > /dev/null 2>&1 && echo "RUNNING" || echo "STOPPED"',
-    );
-    await waitForProcess(statusProc, 3000);
-    const statusLogs = await statusProc.getLogs();
-    const monitorStatus = (statusLogs.stdout || '').trim();
-
-    // Read recent monitor log (last 50 lines)
-    const logProc = await sandbox.startProcess(
-      'tail -50 /tmp/security-monitor.log 2>/dev/null || echo "NO_LOG"',
-    );
-    await waitForProcess(logProc, 5000);
-    const logLogs = await logProc.getLogs();
-    const monitorLog = (logLogs.stdout || '').trim();
-
-    const hasAlerts = alertContent !== 'NO_ALERTS' && alertContent.length > 0;
-    const alerts = hasAlerts ? alertContent.split('\n').filter((l: string) => l.trim()) : [];
-
-    // Clear pending alerts after reading (add ?clear=true)
-    if (c.req.query('clear') === 'true' && hasAlerts) {
-      await sandbox.startProcess('rm -f /tmp/security-alerts-pending.log');
-    }
-
-    return c.json({
-      status: monitorStatus,
-      alert_count: alerts.length,
-      alerts,
-      has_critical: alerts.some((a: string) => a.includes('CRITICAL')),
-      recent_log: monitorLog,
-    });
+    return c.json(await getSecurityStatus(sandbox, c.req.query('clear') === 'true'));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ status: 'error', error: errorMessage }, 500);
@@ -392,6 +239,10 @@ debug.get('/env', async (c) => {
     has_anthropic_key: !!c.env.ANTHROPIC_API_KEY,
     has_openai_key: !!c.env.OPENAI_API_KEY,
     has_gateway_token: !!c.env.MOLTBOT_GATEWAY_TOKEN,
+    has_lark_app_id: !!c.env.LARK_APP_ID,
+    has_lark_app_secret: !!c.env.LARK_APP_SECRET,
+    has_lark_base_token: !!c.env.LARK_BASE_TOKEN,
+    has_lark_table_id: !!c.env.LARK_TABLE_ID,
     has_r2_access_key: !!c.env.R2_ACCESS_KEY_ID,
     has_r2_secret_key: !!c.env.R2_SECRET_ACCESS_KEY,
     has_cf_account_id: !!c.env.CF_ACCOUNT_ID,
@@ -403,32 +254,24 @@ debug.get('/env', async (c) => {
   });
 });
 
+// GET /debug/runtime-state - Single runtime truth for lifecycle/debugging
+debug.get('/runtime-state', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    return c.json(await getRuntimeStateDebug(sandbox));
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ error: errorMessage }, 500);
+  }
+});
+
 // GET /debug/container-config - Read the moltbot config from inside the container
 debug.get('/container-config', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    const proc = await sandbox.startProcess('cat /root/.openclaw/openclaw.json');
-    await waitForProcess(proc, 5000);
-
-    const logs = await proc.getLogs();
-    const stdout = logs.stdout || '';
-    const stderr = logs.stderr || '';
-
-    let config = null;
-    try {
-      config = JSON.parse(stdout);
-    } catch {
-      // Not valid JSON
-    }
-
-    return c.json({
-      status: proc.status,
-      exitCode: proc.exitCode,
-      config,
-      raw: config ? undefined : stdout,
-      stderr,
-    });
+    return c.json(await getContainerConfig(sandbox));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
