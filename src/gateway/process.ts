@@ -6,6 +6,7 @@ import { findExistingGatewayProcess } from './process-discovery';
 import { ensureRcloneConfig } from './r2';
 import { isRuntimeStateStarting, probeGatewayHttp, readRuntimeState } from './runtime-state';
 import { buildDesiredRuntimeSpec } from './runtime-spec';
+import { findExistingGatewayProcess as findExistingMoltbotProcess } from './process-discovery';
 
 interface EffectiveGatewayConfig {
   primaryModel: string | null;
@@ -244,3 +245,4 @@ export async function ensureGatewayRuntime(sandbox: Sandbox, env: MoltbotEnv): P
 // Backward-compatible alias while the rest of the codebase migrates away from
 // legacy Moltbot naming.
 export const ensureMoltbotGateway = ensureGatewayRuntime;
+export { findExistingMoltbotProcess };
