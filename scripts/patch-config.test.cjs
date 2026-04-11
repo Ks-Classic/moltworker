@@ -212,6 +212,25 @@ test('Existing guild requireMention setting is preserved when env guilds are app
   );
 });
 
+test('Legacy discord presence key is removed from runtime config', () => {
+  const dirty = JSON.parse(JSON.stringify(BASE_CONFIG));
+  dirty.channels = {
+    discord: {
+      presence: {
+        status: 'online',
+      },
+      guilds: {
+        '1455869574355619934': {
+          channels: { '*': {} },
+        },
+      },
+    },
+  };
+
+  const result = runPatchConfig(dirty);
+  assert(!('presence' in result.channels.discord), 'Legacy discord presence key should be removed');
+});
+
 
 
 // -------------------------------------------------------------------
@@ -244,6 +263,19 @@ test('Default model is set correctly', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
   const primary = result.agents?.defaults?.model?.primary;
   assert(primary === 'google/gemini-3.1-flash-lite-preview', `Expected google/gemini-3.1-flash-lite-preview, got ${primary}`);
+});
+
+// -------------------------------------------------------------------
+console.log('\nLark integration boundary:');
+
+test('patch-config remains stable when Lark env is absent', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    LARK_APP_ID: '',
+    LARK_APP_SECRET: '',
+    LARK_BASE_TOKEN: '',
+    LARK_TABLE_ID: '',
+  });
+  assert(result.plugins?.entries?.discord?.enabled === true, 'Discord plugin should remain enabled');
 });
 
 test('Grok provider-native AI Gateway uses the grok endpoint and xAI key', () => {
