@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ensureMoltbotGateway, findExistingMoltbotProcess } from './process';
+import { ensureGatewayRuntime } from './process';
+import { findExistingGatewayProcess } from './process-discovery';
 import type { Sandbox, Process } from '@cloudflare/sandbox';
 import { createMockEnv, createMockExecResult, createMockSandbox } from '../test-utils';
 
@@ -26,14 +27,14 @@ function createFullMockProcess(overrides: Partial<Process> = {}): Process {
   } as Process;
 }
 
-describe('findExistingMoltbotProcess', () => {
+describe('findExistingGatewayProcess', () => {
   beforeEach(() => {
     ensureRcloneConfigMock.mockClear();
   });
 
   it('returns null when no processes exist', async () => {
     const { sandbox } = createMockSandbox({ processes: [] });
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBeNull();
   });
 
@@ -45,7 +46,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue(processes);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBeNull();
   });
 
@@ -62,7 +63,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue(processes);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBe(gatewayProcess);
   });
 
@@ -75,7 +76,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue([gatewayProcess]);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBe(gatewayProcess);
   });
 
@@ -88,7 +89,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue([gatewayProcess]);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBe(gatewayProcess);
   });
 
@@ -101,7 +102,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue([gatewayProcess]);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBe(gatewayProcess);
   });
 
@@ -113,7 +114,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue(processes);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBeNull();
   });
 
@@ -122,7 +123,7 @@ describe('findExistingMoltbotProcess', () => {
       listProcesses: vi.fn().mockRejectedValue(new Error('Network error')),
     } as unknown as Sandbox;
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBeNull();
   });
 
@@ -140,7 +141,7 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue([firstGateway, secondGateway]);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result?.id).toBe('gateway-1');
   });
 
@@ -151,12 +152,12 @@ describe('findExistingMoltbotProcess', () => {
     const { sandbox, listProcessesMock } = createMockSandbox();
     listProcessesMock.mockResolvedValue(processes);
 
-    const result = await findExistingMoltbotProcess(sandbox);
+    const result = await findExistingGatewayProcess(sandbox);
     expect(result).toBeNull();
   });
 });
 
-describe('ensureMoltbotGateway', () => {
+describe('ensureGatewayRuntime', () => {
   beforeEach(() => {
     ensureRcloneConfigMock.mockClear();
   });
@@ -177,7 +178,7 @@ describe('ensureMoltbotGateway', () => {
       getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
     });
 
-    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
       processes: [gatewayProcess],
     });
     execMock.mockResolvedValue(
@@ -190,12 +191,13 @@ describe('ensureMoltbotGateway', () => {
       ),
     );
     startProcessMock.mockResolvedValue(freshProcess);
+    containerFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
 
     const env = createMockEnv({
       CF_AI_GATEWAY_MODEL: 'google-ai-studio/gemini-3.1-flash-lite-preview',
     });
 
-    const result = await ensureMoltbotGateway(sandbox, env);
+    const result = await ensureGatewayRuntime(sandbox, env);
 
     expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
     expect(startProcessMock).toHaveBeenCalledTimes(1);
@@ -211,7 +213,7 @@ describe('ensureMoltbotGateway', () => {
       waitForPort: vi.fn().mockResolvedValue(undefined),
     });
 
-    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
       processes: [gatewayProcess],
     });
     execMock.mockResolvedValue(
@@ -223,16 +225,112 @@ describe('ensureMoltbotGateway', () => {
         { success: true },
       ),
     );
+    containerFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
 
     const env = createMockEnv({
       CF_AI_GATEWAY_MODEL: 'google-ai-studio/gemini-3.1-flash-lite-preview',
     });
 
-    const result = await ensureMoltbotGateway(sandbox, env);
+    const result = await ensureGatewayRuntime(sandbox, env);
 
     expect(gatewayProcess.kill).not.toHaveBeenCalled();
     expect(startProcessMock).not.toHaveBeenCalled();
     expect(result).toBe(gatewayProcess);
+  });
+
+  it('waits for an existing starting process when runtime-state says startup is in progress', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'starting',
+      kill: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock
+      .mockResolvedValueOnce(
+        createMockExecResult(
+          JSON.stringify({
+            primaryModel: null,
+            gatewayToken: null,
+          }),
+          { success: true },
+        ),
+      )
+      .mockResolvedValueOnce(
+        createMockExecResult(
+          JSON.stringify({
+            phase: 'gateway-starting',
+            status: 'starting',
+            updatedAt: new Date().toISOString(),
+          }),
+          { success: true },
+        ),
+      );
+    containerFetchMock
+      .mockRejectedValueOnce(new Error('not ready'))
+      .mockResolvedValueOnce(new Response('ok', { status: 200 }));
+
+    const env = createMockEnv({});
+
+    const result = await ensureGatewayRuntime(sandbox, env);
+
+    expect(startProcessMock).not.toHaveBeenCalled();
+    expect(result).toBe(gatewayProcess);
+  });
+
+  it('restarts an unhealthy existing process when runtime-state is degraded and HTTP is down', async () => {
+    const gatewayProcess = createFullMockProcess({
+      id: 'gateway-1',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      kill: vi.fn().mockResolvedValue(undefined),
+      waitForPort: vi.fn(),
+    });
+    const freshProcess = createFullMockProcess({
+      id: 'gateway-2',
+      command: '/usr/local/bin/start-openclaw.sh',
+      status: 'running',
+      waitForPort: vi.fn().mockResolvedValue(undefined),
+      getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+    });
+
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
+      processes: [gatewayProcess],
+    });
+    execMock
+      .mockResolvedValueOnce(
+        createMockExecResult(
+          JSON.stringify({
+            primaryModel: null,
+            gatewayToken: null,
+          }),
+          { success: true },
+        ),
+      )
+      .mockResolvedValueOnce(
+        createMockExecResult(
+          JSON.stringify({
+            phase: 'gateway-exited',
+            status: 'degraded',
+          }),
+          { success: true },
+        ),
+      );
+    containerFetchMock
+      .mockRejectedValueOnce(new Error('down'))
+      .mockResolvedValueOnce(new Response('ok', { status: 200 }));
+    startProcessMock.mockResolvedValue(freshProcess);
+
+    const env = createMockEnv({});
+
+    const result = await ensureGatewayRuntime(sandbox, env);
+
+    expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
+    expect(startProcessMock).toHaveBeenCalledTimes(1);
+    expect(result).toBe(freshProcess);
   });
 
   it('restarts an existing process when the effective gateway token drifts from env', async () => {
@@ -251,7 +349,7 @@ describe('ensureMoltbotGateway', () => {
       getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
     });
 
-    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
       processes: [gatewayProcess],
     });
     execMock.mockResolvedValue(
@@ -264,12 +362,13 @@ describe('ensureMoltbotGateway', () => {
       ),
     );
     startProcessMock.mockResolvedValue(freshProcess);
+    containerFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
 
     const env = createMockEnv({
       MOLTBOT_GATEWAY_TOKEN: 'new-token',
     });
 
-    const result = await ensureMoltbotGateway(sandbox, env);
+    const result = await ensureGatewayRuntime(sandbox, env);
 
     expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
     expect(startProcessMock).toHaveBeenCalledTimes(1);
@@ -292,7 +391,7 @@ describe('ensureMoltbotGateway', () => {
       getLogs: vi.fn().mockResolvedValue({ stdout: '', stderr: '' }),
     });
 
-    const { sandbox, execMock, startProcessMock } = createMockSandbox({
+    const { sandbox, containerFetchMock, execMock, startProcessMock } = createMockSandbox({
       processes: [gatewayProcess],
     });
     execMock.mockResolvedValue(
@@ -305,10 +404,11 @@ describe('ensureMoltbotGateway', () => {
       ),
     );
     startProcessMock.mockResolvedValue(freshProcess);
+    containerFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
 
     const env = createMockEnv({});
 
-    const result = await ensureMoltbotGateway(sandbox, env);
+    const result = await ensureGatewayRuntime(sandbox, env);
 
     expect(gatewayProcess.kill).toHaveBeenCalledTimes(1);
     expect(startProcessMock).toHaveBeenCalledTimes(1);

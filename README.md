@@ -1,10 +1,12 @@
 # OpenClaw on Cloudflare Workers
 
-Run [OpenClaw](https://github.com/openclaw/openclaw) (formerly Moltbot, formerly Clawdbot) personal AI assistant in a [Cloudflare Sandbox](https://developers.cloudflare.com/sandbox/).
+Run [OpenClaw](https://github.com/openclaw/openclaw) (formerly Moltbot, formerly Clawdbot) in a [Cloudflare Sandbox](https://developers.cloudflare.com/sandbox/), with `moltworker` acting as the Cloudflare-side control plane.
 
 ![moltworker architecture](./assets/logo.png)
 
 > **Experimental:** This is a proof of concept demonstrating that OpenClaw can run in Cloudflare Sandbox. It is not officially supported and may break without notice. Use at your own risk.
+
+> **Runtime policy:** This repository targets Cloudflare Workers + Sandbox as the single runtime. `moltworker` owns startup, health, admin, debug, and proxy control on Cloudflare; OpenClaw remains the gateway/agent runtime inside the container. Production operation and validation should happen on Cloudflare, and deployment should go through GitHub Actions rather than local `wrangler deploy`.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/moltworker)
 
@@ -76,8 +78,9 @@ export MOLTBOT_GATEWAY_TOKEN=$(openssl rand -hex 32)
 echo "Your gateway token: $MOLTBOT_GATEWAY_TOKEN"
 echo "$MOLTBOT_GATEWAY_TOKEN" | npx wrangler secret put MOLTBOT_GATEWAY_TOKEN
 
-# Deploy
-npm run deploy
+# Commit and push. Deployment should run from GitHub Actions on amd64.
+# Do not use local production deploy as the primary path.
+git push
 ```
 
 After deploying, open the Control UI with your token:
@@ -107,7 +110,7 @@ To use the admin UI at `/_admin/` for device management, you need to:
 The easiest way to protect your worker is using the built-in Cloudflare Access integration for workers.dev:
 
 1. Go to the [Workers & Pages dashboard](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
-2. Select your Worker (e.g., `moltbot-sandbox`)
+2. Select your Worker (for example the default script name `moltbot-sandbox`)
 3. In **Settings**, under **Domains & Routes**, in the `workers.dev` row, click the meatballs menu (`...`)
 4. Click **Enable Cloudflare Access**
 5. Copy the values shown in the dialog (you'll need the AUD tag later). **Note:** The "Manage Cloudflare Access" link in the dialog may 404 — ignore it.
@@ -133,7 +136,7 @@ You can find your team domain in the [Zero Trust Dashboard](https://one.dash.clo
 ### 3. Redeploy
 
 ```bash
-npm run deploy
+git push
 ```
 
 Now visit `/_admin/` and you'll be prompted to authenticate via Cloudflare Access before accessing the admin UI.
@@ -145,14 +148,16 @@ If you prefer more control, you can manually create an Access application:
 1. Go to [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/)
 2. Navigate to **Access** > **Applications**
 3. Create a new **Self-hosted** application
-4. Set the application domain to your Worker URL (e.g., `moltbot-sandbox.your-subdomain.workers.dev`)
+4. Set the application domain to your Worker URL (for example `moltbot-sandbox.your-subdomain.workers.dev`)
 5. Add paths to protect: `/_admin/*`, `/api/*`, `/debug/*`
 6. Configure your desired identity providers (e.g., email OTP, Google, GitHub)
 7. Copy the **Application Audience (AUD)** tag and set the secrets as shown above
 
 ### Local Development
 
-For local development, create a `.dev.vars` file with:
+Local `wrangler dev` is a fallback for isolated debugging only. It is not the canonical runtime, and it should not be treated as the source of truth for gateway behavior, WebSocket behavior, R2 behavior, or production health.
+
+If you still need a local debug session, create a `.dev.vars` file with:
 
 ```bash
 DEV_MODE=true               # Skip Cloudflare Access auth + bypass device pairing
@@ -161,7 +166,7 @@ DEBUG_ROUTES=true           # Enable /debug/* routes (optional)
 
 ## Authentication
 
-By default, moltbot uses **device pairing** for authentication. When a new device (browser, CLI, etc.) connects, it must be approved via the admin UI at `/_admin/`.
+By default, OpenClaw uses **device pairing** for authentication. When a new device (browser, CLI, etc.) connects, it must be approved via the admin UI at `/_admin/`, which is served by `moltworker`.
 
 ### Device Pairing
 
@@ -183,11 +188,11 @@ wss://your-worker.workers.dev/ws?token=YOUR_TOKEN
 
 **Note:** Even with a valid token, new devices still require approval via the admin UI at `/_admin/` (see Device Pairing above).
 
-For local development only, set `DEV_MODE=true` in `.dev.vars` to skip Cloudflare Access authentication and enable `allowInsecureAuth` (bypasses device pairing entirely).
+For local debugging only, set `DEV_MODE=true` in `.dev.vars` to skip Cloudflare Access authentication and enable `allowInsecureAuth` (bypasses device pairing entirely). Do not use this mode as an operational substitute for the Cloudflare deployment.
 
 ## Persistent Storage (R2)
 
-By default, moltbot data (configs, paired devices, conversation history) is lost when the container restarts. To enable persistent storage across sessions, configure R2:
+By default, OpenClaw runtime data (configs, paired devices, conversation history) is lost when the container restarts. To enable persistent storage across sessions, configure R2:
 
 ### 1. Create R2 API Token
 
@@ -217,7 +222,7 @@ To find your Account ID: Go to the [Cloudflare Dashboard](https://dash.cloudflar
 R2 storage uses a backup/restore approach for simplicity:
 
 **On container startup:**
-- If R2 is mounted and contains backup data, it's restored to the moltbot config directory
+- If R2 is mounted and contains backup data, it's restored into the OpenClaw runtime directories managed by `moltworker`
 - OpenClaw uses its default paths (no special configuration needed)
 
 **During operation:**
@@ -253,15 +258,6 @@ The supported mutation path is:
 3. Sync source / overrides / generated config to R2
 4. Reload the gateway
 
-### Jira MCP
-
-Jira integration should be wired as an MCP server entry under `mcp.servers`, not as new Worker routes. This repo now injects a `jira` MCP server into OpenClaw at startup when Jira MCP env vars are present.
-
-- Remote MCP: set `JIRA_MCP_URL` and optional auth headers/token.
-- Local stdio MCP: set `JIRA_MCP_COMMAND` plus `JIRA_MCP_ARGS_JSON`.
-- Common Jira credentials for stdio servers: `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`.
-
-Setup details and Codex config snippets live in [`docs/jira-mcp.md`](/home/ykoha/moltworker/docs/jira-mcp.md).
 
 ## Deploy Note for ARM Hosts
 
@@ -271,13 +267,14 @@ If you deploy from an ARM machine, local `wrangler deploy` / `docker build` may 
 For reliable production deploys, use an x64 builder such as:
 
 - GitHub Actions on `ubuntu-latest`
-- a local x64 machine or VM
+
+The intended production path for this repository is GitHub Actions, not a local builder.
 
 **In the admin UI:**
 - When R2 is configured, you'll see "Last backup: [timestamp]"
 - Click "Backup Now" to trigger an immediate sync
 
-Without R2 credentials, moltbot still works but uses ephemeral storage (data lost on container restart).
+Without R2 credentials, the runtime still works but uses ephemeral storage (data lost on container restart).
 
 ## Container Lifecycle
 
@@ -298,7 +295,7 @@ When the container sleeps, the next request will trigger a cold start. If you ha
 
 Access the admin UI at `/_admin/` to:
 - **R2 Storage Status** - Shows if R2 is configured, last backup time, and a "Backup Now" button
-- **Restart Gateway** - Kill and restart the moltbot gateway process
+- **Restart Gateway** - Kill and restart the OpenClaw gateway process managed by `moltworker`
 - **Device Pairing** - View pending requests, approve devices individually or all at once, view paired devices
 
 The admin UI requires Cloudflare Access authentication (or `DEV_MODE=true` for local development).
@@ -309,7 +306,7 @@ Debug endpoints are available at `/debug/*` when enabled (requires `DEBUG_ROUTES
 
 - `GET /debug/processes` - List all container processes
 - `GET /debug/logs?id=<process_id>` - Get logs for a specific process
-- `GET /debug/version` - Get container and moltbot version info
+- `GET /debug/version` - Get container and OpenClaw version info
 
 ## Optional: Chat Channels
 
@@ -317,14 +314,14 @@ Debug endpoints are available at `/debug/*` when enabled (requires `DEBUG_ROUTES
 
 ```bash
 npx wrangler secret put TELEGRAM_BOT_TOKEN
-npm run deploy
+git push
 ```
 
 ### Discord
 
 ```bash
 npx wrangler secret put DISCORD_BOT_TOKEN
-npm run deploy
+git push
 ```
 
 ### Slack
@@ -332,7 +329,7 @@ npm run deploy
 ```bash
 npx wrangler secret put SLACK_BOT_TOKEN
 npx wrangler secret put SLACK_APP_TOKEN
-npm run deploy
+git push
 ```
 
 ## Optional: Browser Automation (CDP)
@@ -358,7 +355,7 @@ npx wrangler secret put WORKER_URL
 3. Redeploy:
 
 ```bash
-npm run deploy
+git push
 ```
 
 ### Endpoints
@@ -424,7 +421,7 @@ All three are required. OpenClaw constructs the gateway URL from the account ID 
 3. Redeploy:
 
 ```bash
-npm run deploy
+git push
 ```
 
 When Cloudflare AI Gateway is configured, it takes precedence over direct `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
@@ -485,6 +482,10 @@ The previous `AI_GATEWAY_API_KEY` + `AI_GATEWAY_BASE_URL` approach is still supp
 | `DISCORD_DM_POLICY` | No | Discord DM policy: `pairing` (default) or `open` |
 | `SLACK_BOT_TOKEN` | No | Slack bot token |
 | `SLACK_APP_TOKEN` | No | Slack app token |
+| `LARK_APP_ID` | No | Lark app ID for future OpenClaw-side business integration |
+| `LARK_APP_SECRET` | No | Lark app secret for future OpenClaw-side business integration |
+| `LARK_BASE_TOKEN` | No | Lark Base app token |
+| `LARK_TABLE_ID` | No | Lark Base table ID |
 | `CDP_SECRET` | No | Shared secret for CDP endpoint authentication (see [Browser Automation](#optional-browser-automation-cdp)) |
 | `WORKER_URL` | No | Public URL of the worker (required for CDP) |
 

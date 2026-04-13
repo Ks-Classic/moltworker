@@ -32,25 +32,19 @@ MOLTBOT_GATEWAY_TOKEN=dev-token-change-in-prod
 # Required for admin UI and device pairing API in production
 # CF_ACCESS_TEAM_DOMAIN=myteam.cloudflareaccess.com
 # CF_ACCESS_AUD=your-application-audience-tag
+# ADMIN_ALLOWED_EMAILS=you@example.com,another-owner@example.com
 
 # Optional chat channels
 # TELEGRAM_BOT_TOKEN=optional
 # DISCORD_BOT_TOKEN=optional
 
-# Jira MCP (choose remote OR stdio)
-# Remote MCP example:
-# JIRA_MCP_URL=https://jira-mcp.example.com/sse
-# JIRA_MCP_TRANSPORT=streamable-http
-# JIRA_MCP_AUTH_TOKEN=your-mcp-bearer-token
-#
-# Stdio MCP example:
-# JIRA_MCP_COMMAND=npx
-# JIRA_MCP_ARGS_JSON=["-y","<your-jira-mcp-package>"]
-# JIRA_BASE_URL=https://your-site.atlassian.net
-# JIRA_EMAIL=you@example.com
-# JIRA_API_TOKEN=your-jira-api-token
-# Optional extra env for the stdio child:
-# JIRA_MCP_ENV_JSON={"JIRA_PROJECT_KEY":"OPS"}
+# Optional Lark integration
+# These are passed through to the OpenClaw container but are not wired into
+# production business flows until the Lark integration phase is completed.
+# LARK_APP_ID=cli_xxx
+# LARK_APP_SECRET=xxx
+# LARK_BASE_TOKEN=bascn_xxx
+# LARK_TABLE_ID=tblxxxx
 
 # CDP (Chrome DevTools Protocol) configuration for browser automation
 # CDP_SECRET=shared-secret-for-cdp-auth

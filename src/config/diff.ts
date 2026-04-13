@@ -1,5 +1,5 @@
 import type { Process, Sandbox } from '@cloudflare/sandbox';
-import { findExistingMoltbotProcess } from '../gateway';
+import { findExistingGatewayProcess } from '../gateway/process-discovery';
 
 export interface ConfigFileSnapshot {
   path: string;
@@ -127,7 +127,7 @@ export async function buildConfigDiffSummary(sandbox: Sandbox): Promise<ConfigDi
     readJsonSnapshot(sandbox, '/root/.openclaw/openclaw.source.json'),
     readJsonSnapshot(sandbox, '/root/.openclaw/openclaw.overrides.json'),
     readJsonSnapshot(sandbox, '/root/.openclaw/openclaw.json'),
-    findExistingMoltbotProcess(sandbox),
+    findExistingGatewayProcess(sandbox),
   ]);
 
   return {

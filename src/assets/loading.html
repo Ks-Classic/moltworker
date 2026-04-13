@@ -182,10 +182,20 @@
           // Update status message based on state
           if (data.status === 'not_running') {
             statusEl.textContent = 'Container is starting up...';
-          } else if (data.status === 'not_responding') {
-            statusEl.textContent = 'Container started, waiting for gateway...';
+          } else if (data.status === 'starting') {
+            statusEl.textContent = 'Preparing gateway runtime...';
+          } else if (data.status === 'degraded') {
+            statusEl.textContent = 'Gateway is recovering, waiting for restart...';
+          } else if (data.status === 'error') {
+            errorEl.textContent = data.error || 'Status check failed';
+            errorEl.style.display = 'block';
+            statusEl.textContent = 'Unable to verify gateway status';
           } else {
-            statusEl.textContent = 'Checking status... (poll #' + pollCount + ')';
+            const freshness =
+              typeof data.runtimeAgeMs === 'number'
+                ? 'state updated ' + Math.floor(data.runtimeAgeMs / 1000) + 's ago'
+                : 'runtime state unavailable';
+            statusEl.textContent = freshness + ' (poll #' + pollCount + ')';
           }
 
           // Continue polling

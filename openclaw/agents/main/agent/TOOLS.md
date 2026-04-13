@@ -31,6 +31,5 @@ curl を使用する場合、以下のドメインのみ許可:
 - `open.larksuite.com` / `open.feishu.cn` — Lark Open API
 - `api.chatwork.com` — Chatwork API
 - `api.github.com` — GitHub API
-- `api.atlassian.com` / `*.atlassian.net` — Jira / Atlassian API
 
 それ以外のドメインへの通信は、**オーナーが明示的にURLを指定した場合のみ**許可。

@@ -59,6 +59,7 @@
 }
 
 /* Warning banner (R2 not configured) */
+.info-banner,
 .warning-banner {
   background-color: rgba(251, 191, 36, 0.15);
   border: 1px solid var(--warning-color);
@@ -67,11 +68,19 @@
   color: var(--warning-color);
 }
 
+.info-banner {
+  background-color: rgba(59, 130, 246, 0.12);
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+}
+
+.info-banner .info-content strong,
 .warning-banner .warning-content strong {
   display: block;
   margin-bottom: 0.5rem;
 }
 
+.info-banner .info-content p,
 .warning-banner .warning-content p {
   margin: 0;
   font-size: 0.875rem;
@@ -159,6 +168,10 @@
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.muted-hint {
+  margin-top: 0.75rem;
 }
 
 /* Empty state */

@@ -4,11 +4,14 @@ import {
   approveDevice,
   approveAllDevices,
   restartGateway,
+  getAdminSession,
   getStorageStatus,
   triggerSync,
   AuthError,
+  ForbiddenError,
   type PendingDevice,
   type PairedDevice,
+  type AdminSessionResponse,
   type DeviceListResponse,
   type StorageStatusResponse,
 } from '../api';
@@ -48,6 +51,7 @@ function formatTimeAgo(ts: number) {
 export default function AdminPage() {
   const [pending, setPending] = useState<PendingDevice[]>([]);
   const [paired, setPaired] = useState<PairedDevice[]>([]);
+  const [session, setSession] = useState<AdminSessionResponse | null>(null);
   const [storageStatus, setStorageStatus] = useState<StorageStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +82,19 @@ export default function AdminPage() {
     }
   }, []);
 
+  const fetchSession = useCallback(async () => {
+    try {
+      const currentSession = await getAdminSession();
+      setSession(currentSession);
+    } catch (err) {
+      if (err instanceof AuthError) {
+        setError('Authentication required. Please log in via Cloudflare Access.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to fetch admin session');
+      }
+    }
+  }, []);
+
   const fetchStorageStatus = useCallback(async () => {
     try {
       const status = await getStorageStatus();
@@ -89,11 +106,16 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    fetchSession();
     fetchDevices();
     fetchStorageStatus();
-  }, [fetchDevices, fetchStorageStatus]);
+  }, [fetchDevices, fetchSession, fetchStorageStatus]);
+
+  const canManage = session?.canManage ?? false;
 
   const handleApprove = async (requestId: string) => {
+    if (!canManage) return;
+
     setActionInProgress(requestId);
     try {
       const result = await approveDevice(requestId);
@@ -104,14 +126,18 @@ export default function AdminPage() {
         setError(result.error || 'Approval failed');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to approve device');
+      if (err instanceof ForbiddenError) {
+        setError('Read-only access. Device approvals require an allowlisted admin account.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to approve device');
+      }
     } finally {
       setActionInProgress(null);
     }
   };
 
   const handleApproveAll = async () => {
-    if (pending.length === 0) return;
+    if (pending.length === 0 || !canManage) return;
 
     setActionInProgress('all');
     try {
@@ -122,13 +148,19 @@ export default function AdminPage() {
       // Refresh the list
       await fetchDevices();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to approve devices');
+      if (err instanceof ForbiddenError) {
+        setError('Read-only access. Device approvals require an allowlisted admin account.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to approve devices');
+      }
     } finally {
       setActionInProgress(null);
     }
   };
 
   const handleRestartGateway = async () => {
+    if (!canManage) return;
+
     if (
       !confirm(
         'Are you sure you want to restart the gateway? This will disconnect all clients temporarily.',
@@ -148,13 +180,19 @@ export default function AdminPage() {
         setError(result.error || 'Failed to restart gateway');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restart gateway');
+      if (err instanceof ForbiddenError) {
+        setError('Read-only access. Gateway restart requires an allowlisted admin account.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to restart gateway');
+      }
     } finally {
       setRestartInProgress(false);
     }
   };
 
   const handleSync = async () => {
+    if (!canManage) return;
+
     setSyncInProgress(true);
     try {
       const result = await triggerSync();
@@ -166,7 +204,11 @@ export default function AdminPage() {
         setError(result.error || 'Sync failed');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sync');
+      if (err instanceof ForbiddenError) {
+        setError('Read-only access. Manual backup requires an allowlisted admin account.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to sync');
+      }
     } finally {
       setSyncInProgress(false);
     }
@@ -180,6 +222,18 @@ export default function AdminPage() {
           <button onClick={() => setError(null)} className="dismiss-btn">
             Dismiss
           </button>
+        </div>
+      )}
+
+      {session && !canManage && (
+        <div className="info-banner">
+          <div className="info-content">
+            <strong>Read-only access</strong>
+            <p>
+              You can inspect pairing and storage status, but approvals, backups, and gateway
+              restarts require an allowlisted admin account.
+            </p>
+          </div>
         </div>
       )}
 
@@ -220,7 +274,7 @@ export default function AdminPage() {
             <button
               className="btn btn-secondary btn-sm"
               onClick={handleSync}
-              disabled={syncInProgress}
+              disabled={!canManage || syncInProgress}
             >
               {syncInProgress && <ButtonSpinner />}
               {syncInProgress ? 'Syncing...' : 'Backup Now'}
@@ -235,7 +289,7 @@ export default function AdminPage() {
           <button
             className="btn btn-danger"
             onClick={handleRestartGateway}
-            disabled={restartInProgress}
+            disabled={!canManage || restartInProgress}
           >
             {restartInProgress && <ButtonSpinner />}
             {restartInProgress ? 'Restarting...' : 'Restart Gateway'}
@@ -245,6 +299,9 @@ export default function AdminPage() {
           Restart the gateway to apply configuration changes or recover from errors. All connected
           clients will be temporarily disconnected.
         </p>
+        {!canManage && (
+          <p className="hint muted-hint">Restart is limited to allowlisted admin accounts.</p>
+        )}
       </section>
 
       {loading ? (
@@ -262,7 +319,7 @@ export default function AdminPage() {
                   <button
                     className="btn btn-primary"
                     onClick={handleApproveAll}
-                    disabled={actionInProgress !== null}
+                    disabled={!canManage || actionInProgress !== null}
                   >
                     {actionInProgress === 'all' && <ButtonSpinner />}
                     {actionInProgress === 'all'
@@ -275,6 +332,12 @@ export default function AdminPage() {
                 </button>
               </div>
             </div>
+            {!canManage && (
+              <p className="hint muted-hint">
+                Pending requests are visible here, but only allowlisted admin accounts can approve
+                them.
+              </p>
+            )}
 
             {pending.length === 0 ? (
               <div className="empty-state">
@@ -335,7 +398,7 @@ export default function AdminPage() {
                       <button
                         className="btn btn-success"
                         onClick={() => handleApprove(device.requestId)}
-                        disabled={actionInProgress !== null}
+                        disabled={!canManage || actionInProgress !== null}
                       >
                         {actionInProgress === device.requestId && <ButtonSpinner />}
                         {actionInProgress === device.requestId ? 'Approving...' : 'Approve'}

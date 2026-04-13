@@ -1,5 +1,8 @@
 # OpenClaw Ops Roadmap
 
+> runtime の最上位方針は [RUNTIME_REBUILD_PLAN.md](/home/ykoha/moltworker/docs/RUNTIME_REBUILD_PLAN.md) を正本にする。
+> この文書は runtime rebuild 後に効いてくる運用基盤の roadmap を扱う。
+
 ## 背景
 
 このプロジェクトでは、OpenClaw を Discord 上の会話 bot として使うだけでなく、
@@ -12,7 +15,7 @@
 - 「なぜ反応しないか」を即答できず、ログ調査コストが高かった
 - gateway / Discord / config の状態を一目で把握する仕組みが弱かった
 
-この文書は、その再発防止と運用基盤の進化計画をまとめた正本ドキュメントである。
+この文書は、その再発防止と運用基盤の進化計画をまとめた roadmap である。
 
 ## 目的
 
@@ -22,6 +25,17 @@
 2. Discord から安全に設定変更できること
 3. 障害時に「何が起きているか」を bot 自身が説明できること
 4. 将来的に AI がより自律的に運用できるようにすること
+
+加えて、OpenClaw を安定運用するための基盤責務を Cloudflare 上の MoltWorker に集約する。
+
+- 状態確認
+- 設定変更
+- 復旧判断
+- integration の入口
+
+は MoltWorker の外に分散させない。
+
+一方で、会話の理解、実務上の判断、ツール利用の主語は OpenClaw とする。
 
 ## 正本モデル
 
@@ -72,6 +86,16 @@
 「なぜ反応しなかったか」「なぜこの agent に流れたか」を、
 ログ頼みではなく運用機能として説明できるようにする。
 
+## 前提
+
+この roadmap は、少なくとも以下が済んでから本格着手する。
+
+- `runtime-state` が health の正本になっている
+- Worker が process/port 判定から概ね離れている
+- Discord readiness が明示状態になっている
+
+つまり、runtime rebuild より先にこの roadmap を優先しない。
+
 ## すでに入ったもの
 
 - `config/openclaw.source.json` の導入
@@ -81,7 +105,7 @@
 - `sync-loop` から `openclaw.json` 除外
 - Discord から mention policy を guild / channel 単位で変更する導線
 
-## 今すぐやること
+## runtime rebuild 後の優先 backlog
 
 ### 1. Config diff
 

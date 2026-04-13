@@ -1,16 +1,19 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
-import { createAccessMiddleware } from '../auth';
-import { buildConfigDiffSummary } from '../config/diff';
+import { createAccessMiddleware, createOwnerMiddleware, hasOwnerAccess } from '../auth';
 import {
-  ensureMoltbotGateway,
-  findExistingMoltbotProcess,
-  syncToR2,
-  waitForProcess,
-} from '../gateway';
-
-// CLI commands can take 10-15 seconds to complete due to WebSocket connection overhead
-const CLI_TIMEOUT_MS = 20000;
+  type AdminCommandError,
+  approveAllDevices,
+  approveDevice,
+  getConfigDiffSummary,
+  getStorageStatus,
+  listConfigSnapshots,
+  listDevices,
+  restartGateway,
+  rollbackConfigSnapshot,
+  triggerStorageSync,
+  updateDiscordMentionMode,
+} from '../admin/service';
 
 /**
  * API routes
@@ -25,20 +28,30 @@ const api = new Hono<AppEnv>();
  */
 const adminApi = new Hono<AppEnv>();
 
-// Middleware: Verify Cloudflare Access JWT for all admin routes
-adminApi.use('*', createAccessMiddleware({ type: 'json' }));
-
-async function processFailed(proc: { status: string; getStatus?: () => Promise<string> }) {
-  const status = proc.getStatus ? await proc.getStatus() : proc.status;
-  return status === 'failed';
+function isAdminCommandError(result: AdminCommandError | object): result is AdminCommandError {
+  return 'error' in result;
 }
 
+// Middleware: Verify Cloudflare Access JWT for all admin routes
+adminApi.use('*', createAccessMiddleware({ type: 'json' }));
+const ownerOnlyJson = createOwnerMiddleware({ type: 'json' });
+
+// GET /api/admin/session - Return the current Cloudflare Access user and capabilities
+adminApi.get('/session', (c) => {
+  const accessUser = c.get('accessUser');
+
+  return c.json({
+    accessUser: accessUser || null,
+    canManage: hasOwnerAccess(c.env, accessUser?.email),
+  });
+});
+
 // GET /api/admin/config/diff - Show source/override/generated config drift
-adminApi.get('/config/diff', async (c) => {
+adminApi.get('/config/diff', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    const summary = await buildConfigDiffSummary(sandbox);
+    const summary = await getConfigDiffSummary(sandbox);
     return c.json(summary);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -47,29 +60,13 @@ adminApi.get('/config/diff', async (c) => {
 });
 
 // GET /api/admin/config/snapshots - List stored config snapshots
-adminApi.get('/config/snapshots', async (c) => {
+adminApi.get('/config/snapshots', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    const proc = await sandbox.startProcess(
-      'node "/usr/local/lib/openclaw/config-snapshots.cjs" --list-json',
-    );
-    await waitForProcess(proc, CLI_TIMEOUT_MS);
-    const logs = await proc.getLogs();
-
-    if (await processFailed(proc)) {
-      return c.json(
-        {
-          success: false,
-          error: 'Failed to list config snapshots',
-          stdout: logs.stdout || '',
-          stderr: logs.stderr || '',
-        },
-        500,
-      );
-    }
-
-    return c.json(JSON.parse(logs.stdout || '{"snapshots":[]}'));
+    const result = await listConfigSnapshots(sandbox);
+    const status = isAdminCommandError(result) ? 500 : 200;
+    return c.json(result, status);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -77,7 +74,7 @@ adminApi.get('/config/snapshots', async (c) => {
 });
 
 // POST /api/admin/config/rollback - Restore a saved config snapshot
-adminApi.post('/config/rollback', async (c) => {
+adminApi.post('/config/rollback', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
@@ -86,31 +83,9 @@ adminApi.post('/config/rollback', async (c) => {
       return c.json({ error: 'snapshotId contains invalid characters' }, 400);
     }
 
-    const args = ['node', '/usr/local/lib/openclaw/config-snapshots.cjs', '--restore'];
-    if (body.snapshotId) {
-      args.push(body.snapshotId);
-    }
-
-    const proc = await sandbox.startProcess(args.map((part) => JSON.stringify(part)).join(' '));
-    await waitForProcess(proc, CLI_TIMEOUT_MS);
-    const logs = await proc.getLogs();
-
-    if (await processFailed(proc)) {
-      return c.json(
-        {
-          success: false,
-          error: 'Failed to rollback config snapshot',
-          stdout: logs.stdout || '',
-          stderr: logs.stderr || '',
-        },
-        500,
-      );
-    }
-
-    return c.json({
-      success: true,
-      ...JSON.parse(logs.stdout || '{}'),
-    });
+    const result = await rollbackConfigSnapshot(sandbox, body.snapshotId);
+    const status = isAdminCommandError(result) ? 500 : 200;
+    return c.json(result, status);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -122,47 +97,7 @@ adminApi.get('/devices', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    // Ensure moltbot is running first
-    await ensureMoltbotGateway(sandbox, c.env);
-
-    // Run OpenClaw CLI to list devices
-    // Must specify --url and --token (OpenClaw v2026.2.3 requires explicit credentials with --url)
-    const token = c.env.MOLTBOT_GATEWAY_TOKEN;
-    const tokenArg = token ? ` --token ${token}` : '';
-    const proc = await sandbox.startProcess(
-      `openclaw devices list --json --url ws://localhost:18789${tokenArg}`,
-    );
-    await waitForProcess(proc, CLI_TIMEOUT_MS);
-
-    const logs = await proc.getLogs();
-    const stdout = logs.stdout || '';
-    const stderr = logs.stderr || '';
-
-    // Try to parse JSON output
-    try {
-      // Find JSON in output (may have other log lines)
-      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0]);
-        return c.json(data);
-      }
-
-      // If no JSON found, return raw output for debugging
-      return c.json({
-        pending: [],
-        paired: [],
-        raw: stdout,
-        stderr,
-      });
-    } catch {
-      return c.json({
-        pending: [],
-        paired: [],
-        raw: stdout,
-        stderr,
-        parseError: 'Failed to parse CLI output',
-      });
-    }
+    return c.json(await listDevices(sandbox, c.env));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -170,7 +105,7 @@ adminApi.get('/devices', async (c) => {
 });
 
 // POST /api/admin/devices/:requestId/approve - Approve a pending device
-adminApi.post('/devices/:requestId/approve', async (c) => {
+adminApi.post('/devices/:requestId/approve', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
   const requestId = c.req.param('requestId');
 
@@ -179,31 +114,7 @@ adminApi.post('/devices/:requestId/approve', async (c) => {
   }
 
   try {
-    // Ensure moltbot is running first
-    await ensureMoltbotGateway(sandbox, c.env);
-
-    // Run OpenClaw CLI to approve the device
-    const token = c.env.MOLTBOT_GATEWAY_TOKEN;
-    const tokenArg = token ? ` --token ${token}` : '';
-    const proc = await sandbox.startProcess(
-      `openclaw devices approve ${requestId} --url ws://localhost:18789${tokenArg}`,
-    );
-    await waitForProcess(proc, CLI_TIMEOUT_MS);
-
-    const logs = await proc.getLogs();
-    const stdout = logs.stdout || '';
-    const stderr = logs.stderr || '';
-
-    // Check for success indicators (case-insensitive, CLI outputs "Approved ...")
-    const success = stdout.toLowerCase().includes('approved') || proc.exitCode === 0;
-
-    return c.json({
-      success,
-      requestId,
-      message: success ? 'Device approved' : 'Approval may have failed',
-      stdout,
-      stderr,
-    });
+    return c.json(await approveDevice(sandbox, c.env, requestId));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -211,73 +122,13 @@ adminApi.post('/devices/:requestId/approve', async (c) => {
 });
 
 // POST /api/admin/devices/approve-all - Approve all pending devices
-adminApi.post('/devices/approve-all', async (c) => {
+adminApi.post('/devices/approve-all', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    // Ensure moltbot is running first
-    await ensureMoltbotGateway(sandbox, c.env);
-
-    // First, get the list of pending devices
-    const token = c.env.MOLTBOT_GATEWAY_TOKEN;
-    const tokenArg = token ? ` --token ${token}` : '';
-    const listProc = await sandbox.startProcess(
-      `openclaw devices list --json --url ws://localhost:18789${tokenArg}`,
-    );
-    await waitForProcess(listProc, CLI_TIMEOUT_MS);
-
-    const listLogs = await listProc.getLogs();
-    const stdout = listLogs.stdout || '';
-
-    // Parse pending devices
-    let pending: Array<{ requestId: string }> = [];
-    try {
-      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0]);
-        pending = data.pending || [];
-      }
-    } catch {
-      return c.json({ error: 'Failed to parse device list', raw: stdout }, 500);
-    }
-
-    if (pending.length === 0) {
-      return c.json({ approved: [], message: 'No pending devices to approve' });
-    }
-
-    // Approve each pending device
-    const results: Array<{ requestId: string; success: boolean; error?: string }> = [];
-
-    for (const device of pending) {
-      try {
-        // eslint-disable-next-line no-await-in-loop -- sequential device approval required
-        const approveProc = await sandbox.startProcess(
-          `openclaw devices approve ${device.requestId} --url ws://localhost:18789${tokenArg}`,
-        );
-        // eslint-disable-next-line no-await-in-loop
-        await waitForProcess(approveProc, CLI_TIMEOUT_MS);
-
-        // eslint-disable-next-line no-await-in-loop
-        const approveLogs = await approveProc.getLogs();
-        const success =
-          approveLogs.stdout?.toLowerCase().includes('approved') || approveProc.exitCode === 0;
-
-        results.push({ requestId: device.requestId, success });
-      } catch (err) {
-        results.push({
-          requestId: device.requestId,
-          success: false,
-          error: err instanceof Error ? err.message : 'Unknown error',
-        });
-      }
-    }
-
-    const approvedCount = results.filter((r) => r.success).length;
-    return c.json({
-      approved: results.filter((r) => r.success).map((r) => r.requestId),
-      failed: results.filter((r) => !r.success),
-      message: `Approved ${approvedCount} of ${pending.length} device(s)`,
-    });
+    const result = await approveAllDevices(sandbox, c.env);
+    const status = isAdminCommandError(result) ? 500 : 200;
+    return c.json(result, status);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -287,68 +138,28 @@ adminApi.post('/devices/approve-all', async (c) => {
 // GET /api/admin/storage - Get R2 storage status and last sync time
 adminApi.get('/storage', async (c) => {
   const sandbox = c.get('sandbox');
-  const hasCredentials = !!(
-    c.env.R2_ACCESS_KEY_ID &&
-    c.env.R2_SECRET_ACCESS_KEY &&
-    c.env.CF_ACCOUNT_ID
-  );
-
-  const missing: string[] = [];
-  if (!c.env.R2_ACCESS_KEY_ID) missing.push('R2_ACCESS_KEY_ID');
-  if (!c.env.R2_SECRET_ACCESS_KEY) missing.push('R2_SECRET_ACCESS_KEY');
-  if (!c.env.CF_ACCOUNT_ID) missing.push('CF_ACCOUNT_ID');
-
-  let lastSync: string | null = null;
-
-  if (hasCredentials) {
-    try {
-      const result = await sandbox.exec('cat /tmp/.last-sync 2>/dev/null || echo ""');
-      const timestamp = result.stdout?.trim();
-      if (timestamp && timestamp !== '') {
-        lastSync = timestamp;
-      }
-    } catch {
-      // Ignore errors checking sync status
-    }
-  }
-
-  return c.json({
-    configured: hasCredentials,
-    missing: missing.length > 0 ? missing : undefined,
-    lastSync,
-    message: hasCredentials
-      ? 'R2 storage is configured. Your data will persist across container restarts.'
-      : 'R2 storage is not configured. Paired devices and conversations will be lost when the container restarts.',
-  });
+  return c.json(await getStorageStatus(sandbox, c.env));
 });
 
 // POST /api/admin/storage/sync - Trigger a manual sync to R2
-adminApi.post('/storage/sync', async (c) => {
+adminApi.post('/storage/sync', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
-  const result = await syncToR2(sandbox, c.env);
+  const result = await triggerStorageSync(sandbox, c.env);
 
-  if (result.success) {
-    return c.json({
-      success: true,
-      message: 'Sync completed successfully',
-      lastSync: result.lastSync,
-    });
-  } else {
-    const status = result.error?.includes('not configured') ? 400 : 500;
-    return c.json(
-      {
-        success: false,
-        error: result.error,
-        details: result.details,
-      },
-      status,
-    );
+  if (result && typeof result === 'object' && 'success' in result && result.success === false) {
+    const status =
+      'error' in result && typeof result.error === 'string' && result.error.includes('not configured')
+        ? 400
+        : 500;
+    return c.json(result, status);
   }
+
+  return c.json(result);
 });
 
 // POST /api/admin/config/discord/mention-mode - Persist guild/channel mention policy
-adminApi.post('/config/discord/mention-mode', async (c) => {
+adminApi.post('/config/discord/mention-mode', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
@@ -370,43 +181,13 @@ adminApi.post('/config/discord/mention-mode', async (c) => {
       return c.json({ error: 'channelId must be a Discord snowflake' }, 400);
     }
 
-    const args = [
-      'node',
-      '/usr/local/lib/openclaw/set-discord-mention-mode.cjs',
-      '--guild',
-      body.guildId,
-      '--require-mention',
-      String(body.requireMention),
-    ];
-
-    if (body.channelId) {
-      args.push('--channel', body.channelId);
-    }
-
-    const proc = await sandbox.startProcess(args.map((part) => JSON.stringify(part)).join(' '));
-    await waitForProcess(proc, CLI_TIMEOUT_MS);
-    const logs = await proc.getLogs();
-
-    if (await processFailed(proc)) {
-      return c.json(
-        {
-          success: false,
-          error: 'Failed to update Discord mention policy',
-          stdout: logs.stdout || '',
-          stderr: logs.stderr || '',
-        },
-        500,
-      );
-    }
-
-    return c.json({
-      success: true,
-      guildId: body.guildId,
-      channelId: body.channelId,
-      requireMention: body.requireMention,
-      stdout: logs.stdout || '',
-      stderr: logs.stderr || '',
-    });
+    return c.json(
+      await updateDiscordMentionMode(sandbox, {
+        guildId: body.guildId,
+        channelId: body.channelId,
+        requireMention: body.requireMention,
+      }),
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
@@ -414,37 +195,13 @@ adminApi.post('/config/discord/mention-mode', async (c) => {
 });
 
 // POST /api/admin/gateway/restart - Kill the current gateway and start a new one
-adminApi.post('/gateway/restart', async (c) => {
+adminApi.post('/gateway/restart', ownerOnlyJson, async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
-    // Find and kill the existing gateway process
-    const existingProcess = await findExistingMoltbotProcess(sandbox);
-
-    if (existingProcess) {
-      console.log('Killing existing gateway process:', existingProcess.id);
-      try {
-        await existingProcess.kill();
-      } catch (killErr) {
-        console.error('Error killing process:', killErr);
-      }
-      // Wait a moment for the process to die
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-
-    // Start a new gateway in the background
-    const bootPromise = ensureMoltbotGateway(sandbox, c.env).catch((err) => {
-      console.error('Gateway restart failed:', err);
-    });
-    c.executionCtx.waitUntil(bootPromise);
-
-    return c.json({
-      success: true,
-      message: existingProcess
-        ? 'Gateway process killed, new instance starting...'
-        : 'No existing process found, starting new instance...',
-      previousProcessId: existingProcess?.id,
-    });
+    const restartPromise = restartGateway(sandbox, c.env);
+    c.executionCtx.waitUntil(restartPromise.then(() => undefined));
+    return c.json(await restartPromise);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);

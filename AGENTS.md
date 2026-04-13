@@ -158,6 +158,10 @@ When adding new functionality, add corresponding tests.
 | `MOLTBOT_GATEWAY_TOKEN` | Gateway auth token | ✅ |
 | `DISCORD_BOT_TOKEN` | Discord bot token | ✅ |
 | `DISCORD_DM_POLICY` | `open` or `pairing` | ✅ |
+| `LARK_APP_ID` | Lark app ID for later business integration | Optional |
+| `LARK_APP_SECRET` | Lark app secret for later business integration | Optional |
+| `LARK_BASE_TOKEN` | Lark Base app token | Optional |
+| `LARK_TABLE_ID` | Lark Base table ID | Optional |
 | `CF_ACCOUNT_ID` | Cloudflare account ID | ✅ |
 | `R2_ACCESS_KEY_ID` | R2 access key | ✅ |
 | `R2_SECRET_ACCESS_KEY` | R2 secret key | ✅ |
@@ -171,6 +175,10 @@ When adding new functionality, add corresponding tests.
 | `MOLTBOT_GATEWAY_TOKEN` | `OPENCLAW_GATEWAY_TOKEN` | Gateway `--token` flag |
 | `DEV_MODE` | `OPENCLAW_DEV_MODE` | `controlUi.allowInsecureAuth` |
 | `DISCORD_BOT_TOKEN` | `DISCORD_BOT_TOKEN` | Passed through |
+| `LARK_APP_ID` | `LARK_APP_ID` | Passed through for future OpenClaw-side Lark integration |
+| `LARK_APP_SECRET` | `LARK_APP_SECRET` | Passed through for future OpenClaw-side Lark integration |
+| `LARK_BASE_TOKEN` | `LARK_BASE_TOKEN` | Passed through for future OpenClaw-side Lark integration |
+| `LARK_TABLE_ID` | `LARK_TABLE_ID` | Passed through for future OpenClaw-side Lark integration |
 
 ## OpenClaw Config Gotchas
 

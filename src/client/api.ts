@@ -55,10 +55,25 @@ export interface ApproveAllResponse {
   error?: string;
 }
 
+export interface AdminSessionResponse {
+  accessUser: {
+    email: string;
+    name?: string;
+  } | null;
+  canManage: boolean;
+}
+
 export class AuthError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'AuthError';
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ForbiddenError';
   }
 }
 
@@ -76,13 +91,21 @@ async function apiRequest<T>(path: string, options: globalThis.RequestInit = {})
     throw new AuthError('Unauthorized - please log in via Cloudflare Access');
   }
 
-  const data = (await response.json()) as T & { error?: string };
+  const data = (await response.json()) as T & { error?: string; hint?: string };
+
+  if (response.status === 403) {
+    throw new ForbiddenError(data.hint || data.error || 'Forbidden');
+  }
 
   if (!response.ok) {
-    throw new Error(data.error || `API error: ${response.status}`);
+    throw new Error(data.hint || data.error || `API error: ${response.status}`);
   }
 
   return data;
+}
+
+export async function getAdminSession(): Promise<AdminSessionResponse> {
+  return apiRequest<AdminSessionResponse>('/session');
 }
 
 export async function listDevices(): Promise<DeviceListResponse> {
