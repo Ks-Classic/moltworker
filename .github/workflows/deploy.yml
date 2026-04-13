@@ -1,12 +1,19 @@
 name: Deploy OpenClaw
 
 on:
-  push:
+  # CI ワークフロー (ci.yml) が main branch で成功した場合のみデプロイ
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
 jobs:
   deploy:
+    # CI ワークフローが成功した場合、または手動実行の場合のみデプロイ
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
