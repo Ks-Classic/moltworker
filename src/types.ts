@@ -19,6 +19,7 @@ export interface MoltbotEnv {
   AI_GATEWAY_API_KEY?: string; // API key for the provider configured in AI Gateway
   AI_GATEWAY_BASE_URL?: string; // AI Gateway URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic)
   // Direct provider configuration
+  GEMINI_API_KEY?: string; // Google AI Studio API key (for google-ai-studio via CF AI Gateway)
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;
   OPENAI_API_KEY?: string;

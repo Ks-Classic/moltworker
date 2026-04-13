@@ -161,10 +161,15 @@ function patchAIGatewayModel(config) {
 
   const accountId = process.env.CF_AI_GATEWAY_ACCOUNT_ID;
   const gatewayId = process.env.CF_AI_GATEWAY_GATEWAY_ID;
-  const defaultApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
+  const cfGatewayApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
+  // For google-ai-studio, the upstream key is GEMINI_API_KEY (not the CF gateway key)
+  const geminiApiKey = process.env.GEMINI_API_KEY || cfGatewayApiKey;
+  const defaultApiKey = cfGatewayApiKey;
   const apiKey = gwProvider === 'grok'
     ? (process.env.XAI_API_KEY || defaultApiKey)
-    : defaultApiKey;
+    : gwProvider === 'google-ai-studio'
+      ? geminiApiKey
+      : defaultApiKey;
 
   let baseUrl;
   let api;
@@ -177,7 +182,14 @@ function patchAIGatewayModel(config) {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = 'google-generative-ai';
       providerName = 'google';
-      providerHeaders = undefined;
+      // Google AI Studio via CF AI Gateway:
+      //   apiKey (→ Authorization header) = GEMINI_API_KEY
+      //   cf-aig-authorization header     = CLOUDFLARE_AI_GATEWAY_API_KEY
+      if (cfGatewayApiKey) {
+        providerHeaders = { 'cf-aig-authorization': 'Bearer ' + cfGatewayApiKey };
+      } else {
+        providerHeaders = undefined;
+      }
     } else if (gwProvider === 'grok') {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/grok`;
       api = 'openai-completions';
