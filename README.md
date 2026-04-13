@@ -437,14 +437,15 @@ npx wrangler secret put CF_AI_GATEWAY_MODEL
 
 This works with any [AI Gateway provider](https://developers.cloudflare.com/ai-gateway/usage/providers/):
 
-| Provider | Example `CF_AI_GATEWAY_MODEL` value | API key is... |
-|----------|-------------------------------------|---------------|
-| Workers AI | `workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Cloudflare API token |
+| Provider | Example `CF_AI_GATEWAY_MODEL` value | App-side auth input |
+|----------|-------------------------------------|---------------------|
+| Workers AI | `workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Cloudflare API token / AI Gateway token |
 | OpenAI | `openai/gpt-4o` | OpenAI API key |
 | Anthropic | `anthropic/claude-sonnet-4-5` | Anthropic API key |
 | Groq | `groq/llama-3.3-70b` | Groq API key |
+| Google AI Studio | `google-ai-studio/gemini-3.1-flash-lite-preview` | Prefer Cloudflare BYOK; otherwise `GEMINI_API_KEY` |
 
-**Note:** `CLOUDFLARE_AI_GATEWAY_API_KEY` must match the provider you're using — it's your provider's API key, forwarded through the gateway. You can only use one provider at a time through the gateway. For multiple providers, use direct keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) alongside the gateway config.
+**Note:** `CLOUDFLARE_AI_GATEWAY_API_KEY` is not always the upstream provider key. With authenticated gateways it is the AI Gateway token (`cf-aig-authorization`). For `google-ai-studio`, this project prefers Cloudflare BYOK: store the Gemini key in AI Gateway and send only `CLOUDFLARE_AI_GATEWAY_API_KEY` from the app. If you do not use BYOK, set `GEMINI_API_KEY` separately so the upstream Google credential stays distinct from the AI Gateway token.
 
 #### Workers AI with Unified Billing
 
@@ -458,10 +459,11 @@ The previous `AI_GATEWAY_API_KEY` + `AI_GATEWAY_BASE_URL` approach is still supp
 
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `CLOUDFLARE_AI_GATEWAY_API_KEY` | Yes* | Your AI provider's API key, passed through the gateway (e.g., your Anthropic API key). Requires `CF_AI_GATEWAY_ACCOUNT_ID` and `CF_AI_GATEWAY_GATEWAY_ID` |
+| `CLOUDFLARE_AI_GATEWAY_API_KEY` | Yes* | AI Gateway token for authenticated gateways. For `google-ai-studio`, this also serves as the SDK `apiKey` when Cloudflare BYOK is enabled. Requires `CF_AI_GATEWAY_ACCOUNT_ID` and `CF_AI_GATEWAY_GATEWAY_ID` |
 | `CF_AI_GATEWAY_ACCOUNT_ID` | Yes* | Your Cloudflare account ID (used to construct the gateway URL) |
 | `CF_AI_GATEWAY_GATEWAY_ID` | Yes* | Your AI Gateway ID (used to construct the gateway URL) |
 | `CF_AI_GATEWAY_MODEL` | No | Override default model: `provider/model-id` (e.g. `workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast`). See [Choosing a Model](#choosing-a-model) |
+| `GEMINI_API_KEY` | No | Only needed for `google-ai-studio/...` when not using Cloudflare BYOK |
 | `ANTHROPIC_API_KEY` | Yes* | Direct Anthropic API key (alternative to AI Gateway) |
 | `ANTHROPIC_BASE_URL` | No | Direct Anthropic API base URL |
 | `OPENAI_API_KEY` | No | OpenAI API key (alternative provider) |

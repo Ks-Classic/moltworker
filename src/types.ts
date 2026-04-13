@@ -13,13 +13,13 @@ export interface MoltbotEnv {
   // Cloudflare AI Gateway configuration (preferred)
   CF_AI_GATEWAY_ACCOUNT_ID?: string; // Cloudflare account ID for AI Gateway
   CF_AI_GATEWAY_GATEWAY_ID?: string; // AI Gateway ID
-  CLOUDFLARE_AI_GATEWAY_API_KEY?: string; // API key for requests through the gateway
+  CLOUDFLARE_AI_GATEWAY_API_KEY?: string; // AI Gateway token, or Google BYOK token when using google-ai-studio via AI Gateway
   CF_AI_GATEWAY_MODEL?: string; // Override model: "provider/model-id" e.g. "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"
   // Legacy AI Gateway configuration (still supported for backward compat)
   AI_GATEWAY_API_KEY?: string; // API key for the provider configured in AI Gateway
   AI_GATEWAY_BASE_URL?: string; // AI Gateway URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic)
   // Direct provider configuration
-  GEMINI_API_KEY?: string; // Google AI Studio API key (for google-ai-studio via CF AI Gateway)
+  GEMINI_API_KEY?: string; // Optional Google AI Studio API key for request-header auth; omit when Cloudflare BYOK is enabled
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;
   OPENAI_API_KEY?: string;
