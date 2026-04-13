@@ -171,38 +171,40 @@ function patchAIGatewayModel(config) {
   // For google-ai-studio, the upstream key is GEMINI_API_KEY (not the CF gateway key)
   const geminiApiKey = process.env.GEMINI_API_KEY || cfGatewayApiKey;
   const defaultApiKey = cfGatewayApiKey;
-  const apiKey =
-    gwProvider === "grok"
-      ? process.env.XAI_API_KEY || defaultApiKey
-      : gwProvider === "google-ai-studio"
-        ? geminiApiKey
-        : defaultApiKey;
+  
+  let apiKey;
+  if (gwProvider === "grok") {
+    apiKey = process.env.XAI_API_KEY || defaultApiKey;
+  } else if (gwProvider === "google-ai-studio") {
+    apiKey = geminiApiKey;
+  } else if (gwProvider === "anthropic") {
+    apiKey = process.env.ANTHROPIC_API_KEY || defaultApiKey;
+  } else if (gwProvider === "openai") {
+    apiKey = process.env.OPENAI_API_KEY || defaultApiKey;
+  } else if (gwProvider === "openrouter") {
+    apiKey = process.env.OPENROUTER_API_KEY || defaultApiKey;
+  } else {
+    apiKey = defaultApiKey;
+  }
 
   let baseUrl;
   let api;
   const gatewayModelId = modelId;
   let providerName = "cf-ai-gw-" + gwProvider;
-  let providerHeaders = { "cf-aig-authorization": "Bearer " + apiKey };
+  
+  let providerHeaders = undefined;
+  if (cfGatewayApiKey) {
+    providerHeaders = { "cf-aig-authorization": "Bearer " + cfGatewayApiKey };
+  }
 
   if (accountId && gatewayId) {
     if (gwProvider === "google-ai-studio") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = "google-generative-ai";
       providerName = "google";
-      // Google AI Studio via CF AI Gateway:
-      //   apiKey (→ Authorization header) = GEMINI_API_KEY
-      //   cf-aig-authorization header     = CLOUDFLARE_AI_GATEWAY_API_KEY
-      if (cfGatewayApiKey) {
-        providerHeaders = {
-          "cf-aig-authorization": "Bearer " + cfGatewayApiKey,
-        };
-      } else {
-        providerHeaders = undefined;
-      }
     } else if (gwProvider === "grok") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/grok`;
       api = "openai-completions";
-      providerHeaders = undefined;
     } else {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/${gwProvider}`;
       if (gwProvider === "workers-ai") baseUrl += "/v1";
