@@ -149,7 +149,9 @@ adminApi.post('/storage/sync', ownerOnlyJson, async (c) => {
 
   if (result && typeof result === 'object' && 'success' in result && result.success === false) {
     const status =
-      'error' in result && typeof result.error === 'string' && result.error.includes('not configured')
+      'error' in result &&
+      typeof result.error === 'string' &&
+      result.error.includes('not configured')
         ? 400
         : 500;
     return c.json(result, status);

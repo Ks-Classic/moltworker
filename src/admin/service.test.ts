@@ -6,7 +6,13 @@ import {
   listDevices,
   restartGateway,
 } from './service';
-import { createMockEnv, createMockEnvWithR2, createMockProcess, createMockSandbox, suppressConsole } from '../test-utils';
+import {
+  createMockEnv,
+  createMockEnvWithR2,
+  createMockProcess,
+  createMockSandbox,
+  suppressConsole,
+} from '../test-utils';
 import * as gatewayModule from '../gateway';
 
 vi.mock('../gateway', () => ({
@@ -63,7 +69,9 @@ describe('admin service', () => {
     const { sandbox, startProcessMock } = createMockSandbox();
     startProcessMock
       .mockResolvedValueOnce(
-        createMockProcess('{"pending":[{"requestId":"req-1"},{"requestId":"req-2"}],"paired":[]}\n'),
+        createMockProcess(
+          '{"pending":[{"requestId":"req-1"},{"requestId":"req-2"}],"paired":[]}\n',
+        ),
       )
       .mockResolvedValueOnce(createMockProcess('Approved req-1\n'))
       .mockResolvedValueOnce(createMockProcess('Approved req-2\n'));

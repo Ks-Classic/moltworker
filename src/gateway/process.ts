@@ -13,7 +13,9 @@ interface EffectiveGatewayConfig {
   gatewayToken: string | null;
 }
 
-async function readEffectiveGatewayConfig(sandbox: Sandbox): Promise<EffectiveGatewayConfig | null> {
+async function readEffectiveGatewayConfig(
+  sandbox: Sandbox,
+): Promise<EffectiveGatewayConfig | null> {
   const result = await sandbox.exec(
     `node -e "const fs=require('fs'); const config=JSON.parse(fs.readFileSync('/root/.openclaw/openclaw.json','utf8')); process.stdout.write(JSON.stringify({primaryModel: config?.agents?.defaults?.model?.primary || null, gatewayToken: config?.gateway?.auth?.token || null}))"`,
     { timeout: 10000 },
@@ -67,7 +69,11 @@ async function waitForGatewayHealthy(sandbox: Sandbox, timeoutMs: number): Promi
       return true;
     }
 
-    if (runtime?.status === 'degraded' || runtime?.phase === 'gateway-exited' || runtime?.phase === 'gateway-timeout') {
+    if (
+      runtime?.status === 'degraded' ||
+      runtime?.phase === 'gateway-exited' ||
+      runtime?.phase === 'gateway-timeout'
+    ) {
       return false;
     }
 
@@ -163,8 +169,7 @@ export async function ensureGatewayRuntime(sandbox: Sandbox, env: MoltbotEnv): P
 
       const runtime = await readRuntimeState(sandbox);
       const shouldWaitForExisting =
-        isRuntimeStateStarting(runtime) ||
-        (!runtime && existingProcess.status === 'starting');
+        isRuntimeStateStarting(runtime) || (!runtime && existingProcess.status === 'starting');
 
       if (shouldWaitForExisting) {
         console.log('Waiting for existing gateway to finish startup');
@@ -208,7 +213,9 @@ export async function ensureGatewayRuntime(sandbox: Sandbox, env: MoltbotEnv): P
 
   // Wait for the gateway to be ready
   try {
-    console.log('[Gateway] Waiting for OpenClaw gateway to become healthy via runtime-state and HTTP');
+    console.log(
+      '[Gateway] Waiting for OpenClaw gateway to become healthy via runtime-state and HTTP',
+    );
     const becameHealthy = await waitForGatewayHealthy(sandbox, STARTUP_TIMEOUT_MS);
     if (!becameHealthy) {
       const gatewayHttp = await waitForGatewayHttpReady(sandbox, 10_000);

@@ -140,7 +140,10 @@ function parseJsonObjectFromOutputAs<T>(stdout: string): T | null {
   return parseJsonObjectFromOutput(stdout) as T | null;
 }
 
-async function runProcessWithLogs(sandbox: Sandbox, command: string): Promise<ProcessLogs & { failed: boolean }> {
+async function runProcessWithLogs(
+  sandbox: Sandbox,
+  command: string,
+): Promise<ProcessLogs & { failed: boolean }> {
   const proc = await sandbox.startProcess(command);
   await waitForProcess(proc, CLI_TIMEOUT_MS);
   const logs = await proc.getLogs();
@@ -152,7 +155,10 @@ async function runProcessWithLogs(sandbox: Sandbox, command: string): Promise<Pr
   };
 }
 
-export async function getAdminSessionSummary(env: MoltbotEnv, accessUser?: { email: string; name?: string } | null): Promise<{
+export async function getAdminSessionSummary(
+  env: MoltbotEnv,
+  accessUser?: { email: string; name?: string } | null,
+): Promise<{
   accessUser: { email: string; name?: string } | null;
   canManage: boolean;
 }> {
@@ -170,10 +176,7 @@ export async function getConfigDiffSummary(sandbox: Sandbox): Promise<ConfigDiff
 export async function listConfigSnapshots(
   sandbox: Sandbox,
 ): Promise<ConfigSnapshotListResponse | AdminCommandError> {
-  const result = await runProcessWithLogs(
-    sandbox,
-    `node "${SNAPSHOT_SCRIPT_PATH}" --list-json`,
-  );
+  const result = await runProcessWithLogs(sandbox, `node "${SNAPSHOT_SCRIPT_PATH}" --list-json`);
 
   if (result.failed) {
     return {
@@ -314,7 +317,10 @@ export async function approveAllDevices(
   };
 }
 
-export async function getStorageStatus(sandbox: Sandbox, env: MoltbotEnv): Promise<{
+export async function getStorageStatus(
+  sandbox: Sandbox,
+  env: MoltbotEnv,
+): Promise<{
   configured: boolean;
   missing?: string[];
   lastSync: string | null;

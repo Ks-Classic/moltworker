@@ -46,7 +46,9 @@ export interface GatewayRuntimeStatus {
 
 export type GatewayLifecycleState = 'running' | 'starting' | 'degraded' | 'not_running';
 
-export function isGatewayReady(status: Pick<GatewayRuntimeStatus, 'gatewayHttpOk' | 'runtime'>): boolean {
+export function isGatewayReady(
+  status: Pick<GatewayRuntimeStatus, 'gatewayHttpOk' | 'runtime'>,
+): boolean {
   if (status.gatewayHttpOk) {
     return true;
   }
@@ -149,7 +151,9 @@ function extractLatestDiscordSignal(logText: string): DiscordRuntimeSignal {
   return latestMetrics;
 }
 
-function extractDiscordReadiness(logText: string): Pick<
+function extractDiscordReadiness(
+  logText: string,
+): Pick<
   RuntimeState,
   'discordReady' | 'lastDiscordReadyAt' | 'lastDiscordHeartbeatAt' | 'lastDiscordError'
 > {
@@ -164,12 +168,16 @@ function extractDiscordReadiness(logText: string): Pick<
       lastDiscordReadyAt = readyMatch[1];
     }
 
-    const metricsMatch = line.match(/^(\d{4}-\d{2}-\d{2}T[^ ]+) discord gateway metrics: (\{.*\})$/);
+    const metricsMatch = line.match(
+      /^(\d{4}-\d{2}-\d{2}T[^ ]+) discord gateway metrics: (\{.*\})$/,
+    );
     if (metricsMatch) {
       lastDiscordHeartbeatAt = metricsMatch[1];
     }
 
-    const errorMatch = line.match(/^(\d{4}-\d{2}-\d{2}T[^ ]+) (.*(?:discord|gateway websocket).*(?:error|closed|unauthorized).*)$/i);
+    const errorMatch = line.match(
+      /^(\d{4}-\d{2}-\d{2}T[^ ]+) (.*(?:discord|gateway websocket).*(?:error|closed|unauthorized).*)$/i,
+    );
     if (errorMatch) {
       lastDiscordError = errorMatch[2];
     }
@@ -231,7 +239,10 @@ export async function probeGatewayHttp(sandbox: Sandbox): Promise<{
   status: number | null;
 }> {
   try {
-    const response = await sandbox.containerFetch(new Request(`http://localhost:${MOLTBOT_PORT}/`), MOLTBOT_PORT);
+    const response = await sandbox.containerFetch(
+      new Request(`http://localhost:${MOLTBOT_PORT}/`),
+      MOLTBOT_PORT,
+    );
     return { ok: response.ok, status: response.status };
   } catch {
     return { ok: false, status: null };
@@ -271,8 +282,4 @@ export async function getGatewayRuntimeStatus(sandbox: Sandbox): Promise<Gateway
   };
 }
 
-export {
-  extractDiscordReadiness,
-  extractLatestDiscordSignal,
-  hasExplicitDiscordRuntimeState,
-};
+export { extractDiscordReadiness, extractLatestDiscordSignal, hasExplicitDiscordRuntimeState };

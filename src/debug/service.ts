@@ -296,9 +296,7 @@ export async function getSecurityStatus(
   };
 }
 
-export async function getRuntimeStateDebug(
-  sandbox: Sandbox,
-): Promise<RuntimeStateDebugResponse> {
+export async function getRuntimeStateDebug(sandbox: Sandbox): Promise<RuntimeStateDebugResponse> {
   const [rawRuntime, status] = await Promise.all([
     readRuntimeState(sandbox),
     getGatewayRuntimeStatus(sandbox),
@@ -317,9 +315,7 @@ export async function getRuntimeStateDebug(
   };
 }
 
-export async function getContainerConfig(
-  sandbox: Sandbox,
-): Promise<ContainerConfigResponse> {
+export async function getContainerConfig(sandbox: Sandbox): Promise<ContainerConfigResponse> {
   const proc = await sandbox.startProcess('cat /root/.openclaw/openclaw.json');
   await waitForProcess(proc, 5_000);
 
