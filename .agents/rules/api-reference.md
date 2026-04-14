@@ -55,6 +55,7 @@ Base: `https://moltbot-sandbox.yasuhiko-kohata.workers.dev`
 | `channels.discord.groupPolicy` | `open` | ギルドメッセージ許可 |
 | `channels.discord.dmPolicy` | env | DM ポリシー |
 | `channels.discord.guilds` | record 形式 | `{ "guildId": { channels: { "*": {} } } }` |
+| `channels.discord.execApprovals` | `false` | **2009 Unauthorized 回避**（OpenClaw issue #4944）。`commands.native=true` で代替済みのため無効化 |
 | `agents.defaults.model.primary` | env | AI モデル（`google/gemini-3.1-flash-lite-preview`） |
 | `models.providers.google` | env | AI Gateway 経由のプロバイダ設定 |
 

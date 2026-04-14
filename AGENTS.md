@@ -188,6 +188,42 @@ When adding new functionality, add corresponding tests.
 - No `webchat` channel — the Control UI is served automatically
 - `gateway.bind` is not a config option — use `--bind` CLI flag
 
+## OpenClaw 既知バグと回避策
+
+### Discord 2009 Unauthorized — 2つの根本原因
+
+Discordで `{"success":false,"error":[{"code":2009,"message":"Unauthorized"}]}` が出る場合、以下の2つの原因が重なることがある。
+
+#### 原因1: `channels.discord.presence` キー（レガシー残留）
+
+- OpenClaw 2026.4.x は `channels.discord.presence` を未知キーとして拒否する
+- GitHub issue #3464 で提案されたが **"closed as not planned"** — 実装されなかった
+- 古い R2 バックアップや手動編集で config に残留することがある
+- **対処**: `scripts/patch-config.cjs` の `sanitizeDiscordChannelConfig()` が起動時に自動削除する
+
+#### 原因2: `execApprovals` handler の gateway token 欠落（OpenClaw Issue #4944）
+
+- `DiscordExecApprovalHandler` が `GatewayClient` を生成する際に gateway token を渡さない
+- exec approval イベントが発生するたびに gateway への WebSocket 接続が 2009 で失敗する
+- OpenClaw 側は **"closed as not planned"** — 上流修正なし
+- **対処**: `channels.discord.execApprovals: false` を設定して handler を無効化
+  - `commands.native: true` が既に設定されているため exec 承認は自動通過し機能損失なし
+  - `scripts/patch-config.cjs` の `patchChannels()` で常に設定される
+
+#### 診断コマンド
+
+```bash
+# コンテナ内ログで原因を切り分ける
+# stderr を最初に読む（stdout ではなく）
+GET /debug/logs → stderr セクションを確認
+
+# "presence" エラーの有無を確認
+stderr: "channels.discord: Unrecognized key: \"presence\""
+
+# execApprovals エラーの有無を確認
+stderr: "discord exec approvals: connect error: unauthorized: gateway token missing"
+```
+
 ## Key Patterns
 
 ### CLI Commands

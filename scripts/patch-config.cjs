@@ -312,6 +312,11 @@ function patchChannels(config) {
       enabled: true,
       dmPolicy,
       groupPolicy: "open",
+      // Workaround for OpenClaw issue #4944: DiscordExecApprovalHandler
+      // creates GatewayClient without passing the gateway token, causing
+      // 2009 Unauthorized on every exec-approval event. commands.native=true
+      // already auto-approves all exec commands, so this handler is not needed.
+      execApprovals: false,
     };
     if (process.env.DISCORD_DM_ALLOW_FROM) {
       config.channels.discord.allowFrom =
