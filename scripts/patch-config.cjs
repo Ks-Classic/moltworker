@@ -167,20 +167,18 @@ function patchAIGatewayModel(config) {
 
   const accountId = process.env.CF_AI_GATEWAY_ACCOUNT_ID;
   const gatewayId = process.env.CF_AI_GATEWAY_GATEWAY_ID;
-  const cfGatewayApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
   const geminiApiKey = process.env.GEMINI_API_KEY;
+  const cfGatewayApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
   const defaultApiKey = cfGatewayApiKey;
-  const googleUsesByok = gwProvider === "google-ai-studio" && !geminiApiKey && !!cfGatewayApiKey;
-  
+
   let apiKey;
   if (gwProvider === "grok") {
     apiKey = process.env.XAI_API_KEY || defaultApiKey;
   } else if (gwProvider === "google-ai-studio") {
-    // Google AI Studio supports two secure modes through Cloudflare AI Gateway:
-    // 1. BYOK at Cloudflare: send the AI Gateway token as the SDK apiKey.
-    // 2. Request-header auth: send the Gemini key as apiKey and the AI Gateway
-    //    token in cf-aig-authorization when gateway auth is enabled.
-    apiKey = googleUsesByok ? cfGatewayApiKey : geminiApiKey;
+    // CF AI Gateway authenticated-gateway feature is intentionally disabled.
+    // GEMINI_API_KEY is sent directly as the provider apiKey.
+    // No cf-aig-authorization header — CF Gateway logs requests without auth.
+    apiKey = geminiApiKey;
   } else if (gwProvider === "anthropic") {
     apiKey = process.env.ANTHROPIC_API_KEY || defaultApiKey;
   } else if (gwProvider === "openai") {
@@ -195,11 +193,6 @@ function patchAIGatewayModel(config) {
   let api;
   const gatewayModelId = modelId;
   let providerName = "cf-ai-gw-" + gwProvider;
-  
-  let providerHeaders = undefined;
-  if (gwProvider === "google-ai-studio" && cfGatewayApiKey && !googleUsesByok) {
-    providerHeaders = { "cf-aig-authorization": "Bearer " + cfGatewayApiKey };
-  }
 
   if (accountId && gatewayId) {
     if (gwProvider === "google-ai-studio") {
@@ -208,12 +201,10 @@ function patchAIGatewayModel(config) {
       providerName = "google";
       if (!apiKey) {
         console.warn(
-          "google-ai-studio model selected without GEMINI_API_KEY or CLOUDFLARE_AI_GATEWAY_API_KEY; requests will fail authentication",
+          "google-ai-studio model selected without GEMINI_API_KEY; requests will fail authentication",
         );
-      } else if (googleUsesByok) {
-        console.log("AI Gateway auth mode: google-ai-studio via Cloudflare BYOK");
       } else {
-        console.log("AI Gateway auth mode: google-ai-studio via request headers");
+        console.log("AI Gateway auth mode: google-ai-studio via GEMINI_API_KEY (no CF gateway auth)");
       }
     } else if (gwProvider === "grok") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/grok`;
@@ -261,7 +252,6 @@ function patchAIGatewayModel(config) {
       },
     ],
   };
-  if (providerHeaders) providerConfig.headers = providerHeaders;
 
   config.models.providers[providerName] = providerConfig;
   config.agents = config.agents || {};

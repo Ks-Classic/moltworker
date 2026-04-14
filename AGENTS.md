@@ -151,7 +151,7 @@ When adding new functionality, add corresponding tests.
 | Variable | Purpose | Required |
 |---|---|---|
 | `GEMINI_API_KEY` | Gemini API key | ✅ |
-| `CLOUDFLARE_AI_GATEWAY_API_KEY` | AI Gateway API key | ✅ |
+| `CLOUDFLARE_AI_GATEWAY_API_KEY` | AI Gateway API key（CF Gateway認証無効化済み。google-ai-studioでは未使用） | Optional |
 | `CF_AI_GATEWAY_ACCOUNT_ID` | AI Gateway account ID | ✅ |
 | `CF_AI_GATEWAY_GATEWAY_ID` | AI Gateway gateway ID | ✅ |
 | `CF_AI_GATEWAY_MODEL` | Model spec (e.g. `google-ai-studio/gemini-3.1-flash-lite-preview`) | ✅ |
