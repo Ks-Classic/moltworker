@@ -436,11 +436,10 @@ function patchAgentSecurity(config) {
       console.log(`Cleaned unsupported 'network' key from agent: ${agent.id}`);
     }
 
-    // If system-wide AI Gateway model is set, override per-agent models too
-    if (process.env.CF_AI_GATEWAY_MODEL && agent.model) {
-      delete agent.model;
-      console.log(`Overriding per-agent model for: ${agent.id}`);
-    }
+    // CF_AI_GATEWAY_MODEL sets agents.defaults.model.primary (the fallback).
+    // Per-agent model settings in openclaw.source.json are intentionally
+    // preserved here — OpenClaw's defaults inheritance means the per-agent
+    // model overrides the default when explicitly set.
   }
   console.log(
     "Security: agents cleaned, sandbox.mode=off (CF Container is sandbox)",

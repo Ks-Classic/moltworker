@@ -224,6 +224,34 @@ stderr: "channels.discord: Unrecognized key: \"presence\""
 stderr: "discord exec approvals: connect error: unauthorized: gateway token missing"
 ```
 
+## Per-Agent Model Configuration
+
+`CF_AI_GATEWAY_MODEL` は `agents.defaults.model.primary`（全エージェントのフォールバック）として設定される。
+エージェントごとに別モデルを使いたい場合は `config/openclaw.source.json` の `agents.list` に `model` を追加するだけでよい。
+
+```json
+{
+  "agents": {
+    "list": [
+      {
+        "id": "koh",
+        "name": "Koh",
+        "workspace": "/root/clawd",
+        "model": { "primary": "google/gemini-2.5-pro" }
+      },
+      {
+        "id": "e-spiral",
+        "name": "E-SPIRAL",
+        "model": { "primary": "google/gemini-2.5-flash-lite" }
+      }
+    ]
+  }
+}
+```
+
+**注意**: per-agent で指定するモデルは `models.providers` に設定済みのプロバイダーを参照すること。
+CF AI Gateway 経由のプロバイダー名は `patch-config.cjs` の `patchAIGatewayModel()` で確認できる（例: `google`, `anthropic`）。
+
 ## Key Patterns
 
 ### CLI Commands
