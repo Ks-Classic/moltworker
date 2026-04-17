@@ -269,25 +269,10 @@ test('Default model is set correctly', () => {
   assert(primary === 'google/gemini-3.1-flash-lite-preview', `Expected google/gemini-3.1-flash-lite-preview, got ${primary}`);
 });
 
-test('Google AI Studio bypasses CF AI Gateway by default and calls Google directly', () => {
+test('Google AI Studio routes through CF AI Gateway with cf-aig-authorization when CF key present', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
     GEMINI_API_KEY: 'gemini-provider-key',
-  });
-
-  const provider = result.models?.providers?.google;
-  assert(provider, 'Google AI provider should be configured');
-  assert(
-    provider.baseUrl === 'https://generativelanguage.googleapis.com/v1beta',
-    `Expected direct Google endpoint, got ${provider?.baseUrl}`
-  );
-  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key as provider apiKey');
-  assert(!provider.headers, 'Direct mode should not inject CF headers');
-});
-
-test('Google AI Studio routes through CF AI Gateway when bypass is disabled', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
-    GEMINI_API_KEY: 'gemini-provider-key',
-    CF_AI_GATEWAY_BYPASS_GOOGLE: 'false',
+    CLOUDFLARE_AI_GATEWAY_API_KEY: 'cf-gw-auth-token',
   });
 
   const provider = result.models?.providers?.google;
@@ -295,9 +280,24 @@ test('Google AI Studio routes through CF AI Gateway when bypass is disabled', ()
   assert(
     provider.baseUrl ===
       'https://gateway.ai.cloudflare.com/v1/test-account/test-gateway/google-ai-studio/v1beta',
-    `Expected CF gateway URL when bypass disabled, got ${provider?.baseUrl}`
+    `Expected CF gateway URL, got ${provider?.baseUrl}`
   );
-  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key upstream');
+  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key upstream (not CF key)');
+  assert(
+    provider.headers?.['cf-aig-authorization'] === 'Bearer cf-gw-auth-token',
+    'Expected cf-aig-authorization header with CF gateway key'
+  );
+});
+
+test('Google AI Studio omits cf-aig-authorization when CF key absent', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    GEMINI_API_KEY: 'gemini-provider-key',
+    CLOUDFLARE_AI_GATEWAY_API_KEY: '',
+  });
+
+  const provider = result.models?.providers?.google;
+  assert(provider, 'Google AI provider should be configured');
+  assert(!provider.headers, 'Should not inject cf-aig-authorization without CF key');
 });
 
 // -------------------------------------------------------------------

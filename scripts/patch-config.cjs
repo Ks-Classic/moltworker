@@ -194,31 +194,17 @@ function patchAIGatewayModel(config) {
   const gatewayModelId = modelId;
   let providerName = "cf-ai-gw-" + gwProvider;
 
-  // For google-ai-studio we bypass CF AI Gateway entirely and call Google's
-  // API directly. Rationale: CF AI Gateway "Authenticated Gateway" returns
-  // error code 2009 Unauthorized when requests lack cf-aig-authorization,
-  // and we cannot reliably toggle that setting from code. Direct-to-Google
-  // eliminates the CF auth surface entirely. We lose CF logging/caching but
-  // gain reliability. Set CF_AI_GATEWAY_BYPASS_GOOGLE=false to re-enable
-  // routing through CF gateway (requires valid CLOUDFLARE_AI_GATEWAY_API_KEY).
-  const bypassGoogleViaCf =
-    gwProvider === "google-ai-studio" &&
-    process.env.CF_AI_GATEWAY_BYPASS_GOOGLE !== "false";
+  // Direct-to-Google is NOT an option: CF Containers run in a region Google
+  // blocks for the Gemini Free API ("User location is not supported").
+  // So google-ai-studio MUST route through CF AI Gateway. When CF's
+  // "Authenticated Gateway" is enabled (dashboard-side setting we cannot
+  // detect from here), we must send the cf-aig-authorization header with
+  // CLOUDFLARE_AI_GATEWAY_API_KEY, kept separate from the upstream Gemini
+  // API key. If CLOUDFLARE_AI_GATEWAY_API_KEY is absent, we fall back to
+  // no header and rely on Authenticated Gateway being disabled.
+  let cfAigHeader = null;
 
-  if (bypassGoogleViaCf) {
-    baseUrl = "https://generativelanguage.googleapis.com/v1beta";
-    api = "google-generative-ai";
-    providerName = "google";
-    if (!apiKey) {
-      console.warn(
-        "google-ai-studio selected without GEMINI_API_KEY; requests will fail authentication",
-      );
-    } else {
-      console.log(
-        "Google AI Studio: bypassing CF AI Gateway, calling generativelanguage.googleapis.com directly",
-      );
-    }
-  } else if (accountId && gatewayId) {
+  if (accountId && gatewayId) {
     if (gwProvider === "google-ai-studio") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = "google-generative-ai";
@@ -227,8 +213,14 @@ function patchAIGatewayModel(config) {
         console.warn(
           "google-ai-studio model selected without GEMINI_API_KEY; requests will fail authentication",
         );
+      }
+      if (cfGatewayApiKey) {
+        cfAigHeader = `Bearer ${cfGatewayApiKey}`;
+        console.log("Google AI Studio via CF AI Gateway with cf-aig-authorization");
       } else {
-        console.log("AI Gateway auth mode: google-ai-studio via GEMINI_API_KEY (no CF gateway auth)");
+        console.log(
+          "Google AI Studio via CF AI Gateway without cf-aig-authorization (Authenticated Gateway must be OFF)",
+        );
       }
     } else if (gwProvider === "grok") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/grok`;
@@ -276,6 +268,10 @@ function patchAIGatewayModel(config) {
       },
     ],
   };
+
+  if (cfAigHeader) {
+    providerConfig.headers = { "cf-aig-authorization": cfAigHeader };
+  }
 
   config.models.providers[providerName] = providerConfig;
   config.agents = config.agents || {};
