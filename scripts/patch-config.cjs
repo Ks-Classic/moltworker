@@ -194,7 +194,31 @@ function patchAIGatewayModel(config) {
   const gatewayModelId = modelId;
   let providerName = "cf-ai-gw-" + gwProvider;
 
-  if (accountId && gatewayId) {
+  // For google-ai-studio we bypass CF AI Gateway entirely and call Google's
+  // API directly. Rationale: CF AI Gateway "Authenticated Gateway" returns
+  // error code 2009 Unauthorized when requests lack cf-aig-authorization,
+  // and we cannot reliably toggle that setting from code. Direct-to-Google
+  // eliminates the CF auth surface entirely. We lose CF logging/caching but
+  // gain reliability. Set CF_AI_GATEWAY_BYPASS_GOOGLE=false to re-enable
+  // routing through CF gateway (requires valid CLOUDFLARE_AI_GATEWAY_API_KEY).
+  const bypassGoogleViaCf =
+    gwProvider === "google-ai-studio" &&
+    process.env.CF_AI_GATEWAY_BYPASS_GOOGLE !== "false";
+
+  if (bypassGoogleViaCf) {
+    baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+    api = "google-generative-ai";
+    providerName = "google";
+    if (!apiKey) {
+      console.warn(
+        "google-ai-studio selected without GEMINI_API_KEY; requests will fail authentication",
+      );
+    } else {
+      console.log(
+        "Google AI Studio: bypassing CF AI Gateway, calling generativelanguage.googleapis.com directly",
+      );
+    }
+  } else if (accountId && gatewayId) {
     if (gwProvider === "google-ai-studio") {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = "google-generative-ai";

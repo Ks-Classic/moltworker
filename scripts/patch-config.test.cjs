@@ -255,20 +255,39 @@ test('Gateway token is set from env', () => {
 console.log('\nAI model config:');
 
 test('AI model provider is configured', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    GEMINI_API_KEY: 'gemini-provider-key',
+  });
   assert(result.models?.providers?.google, 'Google AI provider should be configured');
 });
 
 test('Default model is set correctly', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)));
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    GEMINI_API_KEY: 'gemini-provider-key',
+  });
   const primary = result.agents?.defaults?.model?.primary;
   assert(primary === 'google/gemini-3.1-flash-lite-preview', `Expected google/gemini-3.1-flash-lite-preview, got ${primary}`);
 });
 
-test('Google AI Studio BYOK uses the AI Gateway token as apiKey without cf-aig-authorization', () => {
+test('Google AI Studio bypasses CF AI Gateway by default and calls Google directly', () => {
   const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
-    GEMINI_API_KEY: '',
-    CLOUDFLARE_AI_GATEWAY_API_KEY: 'cf-gw-byok-token',
+    GEMINI_API_KEY: 'gemini-provider-key',
+  });
+
+  const provider = result.models?.providers?.google;
+  assert(provider, 'Google AI provider should be configured');
+  assert(
+    provider.baseUrl === 'https://generativelanguage.googleapis.com/v1beta',
+    `Expected direct Google endpoint, got ${provider?.baseUrl}`
+  );
+  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key as provider apiKey');
+  assert(!provider.headers, 'Direct mode should not inject CF headers');
+});
+
+test('Google AI Studio routes through CF AI Gateway when bypass is disabled', () => {
+  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
+    GEMINI_API_KEY: 'gemini-provider-key',
+    CF_AI_GATEWAY_BYPASS_GOOGLE: 'false',
   });
 
   const provider = result.models?.providers?.google;
@@ -276,28 +295,9 @@ test('Google AI Studio BYOK uses the AI Gateway token as apiKey without cf-aig-a
   assert(
     provider.baseUrl ===
       'https://gateway.ai.cloudflare.com/v1/test-account/test-gateway/google-ai-studio/v1beta',
-    `Expected google-ai-studio AI Gateway URL, got ${provider?.baseUrl}`
+    `Expected CF gateway URL when bypass disabled, got ${provider?.baseUrl}`
   );
-  assert(
-    provider.apiKey === 'cf-gw-byok-token',
-    'Expected BYOK mode to use the AI Gateway token as the Google SDK apiKey'
-  );
-  assert(!provider.headers, 'BYOK mode should not inject cf-aig-authorization headers');
-});
-
-test('Google AI Studio request-header auth keeps Gemini apiKey and cf-aig-authorization header separate', () => {
-  const result = runPatchConfig(JSON.parse(JSON.stringify(BASE_CONFIG)), {
-    GEMINI_API_KEY: 'gemini-provider-key',
-    CLOUDFLARE_AI_GATEWAY_API_KEY: 'cf-gw-auth-token',
-  });
-
-  const provider = result.models?.providers?.google;
-  assert(provider, 'Google AI provider should be configured');
-  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key to be used upstream');
-  assert(
-    provider.headers?.['cf-aig-authorization'] === 'Bearer cf-gw-auth-token',
-    'Expected AI Gateway auth header to remain separate from the Gemini API key'
-  );
+  assert(provider.apiKey === 'gemini-provider-key', 'Expected Gemini API key upstream');
 });
 
 // -------------------------------------------------------------------
