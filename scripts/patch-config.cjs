@@ -170,15 +170,18 @@ function patchAIGatewayModel(config) {
   const geminiApiKey = process.env.GEMINI_API_KEY;
   const cfGatewayApiKey = process.env.CLOUDFLARE_AI_GATEWAY_API_KEY;
   const defaultApiKey = cfGatewayApiKey;
+  // BYOK mode: Gemini key is stored in CF AI Gateway dashboard (Stored Keys).
+  // Client sends only cf-aig-authorization; CF injects the provider key.
+  const byokMode =
+    String(process.env.CF_AI_GATEWAY_BYOK || "").toLowerCase() === "true";
 
   let apiKey;
   if (gwProvider === "grok") {
     apiKey = process.env.XAI_API_KEY || defaultApiKey;
   } else if (gwProvider === "google-ai-studio") {
-    // CF AI Gateway authenticated-gateway feature is intentionally disabled.
-    // GEMINI_API_KEY is sent directly as the provider apiKey.
-    // No cf-aig-authorization header — CF Gateway logs requests without auth.
-    apiKey = geminiApiKey;
+    // In BYOK mode CF supplies the provider key. Client apiKey is irrelevant
+    // but openclaw's config schema requires a non-empty string.
+    apiKey = byokMode ? "byok-cf-stored" : geminiApiKey;
   } else if (gwProvider === "anthropic") {
     apiKey = process.env.ANTHROPIC_API_KEY || defaultApiKey;
   } else if (gwProvider === "openai") {
@@ -209,14 +212,23 @@ function patchAIGatewayModel(config) {
       baseUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta`;
       api = "google-generative-ai";
       providerName = "google";
-      if (!apiKey) {
+      if (!byokMode && !geminiApiKey) {
         console.warn(
-          "google-ai-studio model selected without GEMINI_API_KEY; requests will fail authentication",
+          "google-ai-studio model selected without GEMINI_API_KEY and BYOK disabled; requests will fail",
+        );
+      }
+      if (byokMode && !cfGatewayApiKey) {
+        console.warn(
+          "CF_AI_GATEWAY_BYOK=true requires CLOUDFLARE_AI_GATEWAY_API_KEY (cf-aig-authorization token)",
         );
       }
       if (cfGatewayApiKey) {
         cfAigHeader = `Bearer ${cfGatewayApiKey}`;
-        console.log("Google AI Studio via CF AI Gateway with cf-aig-authorization");
+        console.log(
+          byokMode
+            ? "Google AI Studio via CF AI Gateway BYOK (stored key, cf-aig-authorization only)"
+            : "Google AI Studio via CF AI Gateway with cf-aig-authorization + x-goog-api-key",
+        );
       } else {
         console.log(
           "Google AI Studio via CF AI Gateway without cf-aig-authorization (Authenticated Gateway must be OFF)",
