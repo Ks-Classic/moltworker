@@ -173,7 +173,7 @@ function patchAIGatewayModel(config) {
   // BYOK mode: Gemini key is stored in CF AI Gateway dashboard (Stored Keys).
   // Client sends only cf-aig-authorization; CF injects the provider key.
   const byokMode =
-    String(process.env.CF_AI_GATEWAY_BYOK || "").toLowerCase() === "true";
+    String(process.env.CF_AI_GATEWAY_BYOK || "").trim().toLowerCase() === "true";
 
   let apiKey;
   if (gwProvider === "grok") {
